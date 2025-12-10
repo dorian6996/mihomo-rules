@@ -11,5 +11,5 @@ This repository automatically converts **ZKeen .dat files** into **binary MSR fo
 
 ---
 
-This repository uses GitHub Actions to download the `.dat` files every **3 days** and convert them to MSR using the [`geodat2srs`](https://github.com/runetfreedom/geodat2srs) tool. Each rule or category from the `.dat` files is generated as a separate `.msr` file and automatically committed back to the repository.
+This repository uses GitHub Actions to download the `.dat` files every **day** and convert them to MSR using the [`geodat2srs`](https://github.com/runetfreedom/geodat2srs) tool. Each rule or category from the `.dat` files is generated as a separate `.msr` file and automatically committed back to the repository.
 
