@@ -1,343 +1,70 @@
-name: Generate All Rules
+name: Update YAML Rules
 
 on:
   schedule:
-    - cron: "0 4 */3 * *"
+    - cron: "0 0 */3 * *"     # раз в 3 дня
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  generate:
+  build:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          ref: main
-      
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
-      
-      - name: Create directories
+
+      - name: Install tools
         run: |
-          mkdir -p temp lists/geosite lists/geoip
-          
-      - name: Download DAT files
+          sudo apt-get update
+          sudo apt-get install -y unzip curl
+          curl -L -o geodata.zip https://github.com/Loyalsoldier/geoip/releases/download/latest/geoip.dat.zip
+          unzip geodata.zip -d tools
+
+      - name: Download ZKeen DAT files
         run: |
-          echo "📥 Downloading zkeen.dat..."
-          curl -fsSL --retry 5 --retry-delay 10 -o temp/zkeen.dat \
+          mkdir -p dat
+
+          echo "Downloading ZKeen geosite.dat..."
+          curl -L --fail --retry 5 --retry-delay 5 \
+            -o dat/geosite.dat \
             https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
-          
-          echo "📥 Downloading zkeenip.dat..."
-          curl -fsSL --retry 5 --retry-delay 10 -o temp/zkeenip.dat \
+
+          echo "Downloading ZKeen geoip.dat..."
+          curl -L --fail --retry 5 --retry-delay 5 \
+            -o dat/geoip.dat \
             https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
-          
-          echo "✅ Downloaded:"
-          ls -lh temp/
-      
-      - name: Install Mihomo
+
+      - name: Validate downloads
         run: |
-          echo "📦 Installing Mihomo..."
-          curl -fsSL -o mihomo.gz \
-            https://github.com/MetaCubeX/mihomo/releases/download/v1.18.10/mihomo-linux-amd64-v1.18.10.gz
-          
-          gunzip mihomo.gz
-          chmod +x mihomo
-          ./mihomo -v
-      
-      - name: Install sing-box
-        run: |
-          echo "📦 Installing sing-box..."
-          export GOBIN="$(pwd)/bin"
-          mkdir -p "$GOBIN"
-          go install -v github.com/sagernet/sing-box/cmd/sing-box@latest
-          mv ~/go/bin/sing-box "$GOBIN/"
-          "$GOBIN/sing-box" version
-      
-      - name: Extract all GeoSite categories
-        run: |
-          echo "🔍 Extracting GeoSite categories..."
-          ./bin/sing-box geosite list -f temp/zkeen.dat > temp/geosite_categories.txt
-          
-          cat_count=$(wc -l < temp/geosite_categories.txt)
-          echo "✅ Found ${cat_count} GeoSite categories"
-          echo ""
-          echo "First 20 categories:"
-          head -20 temp/geosite_categories.txt
-      
-      - name: Extract all GeoIP categories
-        run: |
-          echo "🔍 Extracting GeoIP categories..."
-          ./bin/sing-box geoip list -f temp/zkeenip.dat > temp/geoip_categories.txt
-          
-          cat_count=$(wc -l < temp/geoip_categories.txt)
-          echo "✅ Found ${cat_count} GeoIP categories"
-          echo ""
-          echo "First 20 categories:"
-          head -20 temp/geoip_categories.txt
-      
-      - name: Convert GeoSite to MRS
-        run: |
-          echo "🔄 Converting GeoSite to MRS..."
-          
-          success=0
-          failed=0
-          
-          while IFS= read -r category; do
-            if [ -n "$category" ]; then
-              if ./mihomo convert-ruleset domain mrs temp/zkeen.dat "lists/geosite/${category}.mrs" "$category" 2>/dev/null; then
-                ((success++))
-              else
-                ((failed++))
-              fi
+          for f in dat/*.dat; do
+            echo "Checking $f ..."
+            if [ ! -s "$f" ]; then
+              echo "❌ ERROR: $f is EMPTY"
+              exit 1
             fi
-          done < temp/geosite_categories.txt
-          
-          echo "✅ Success: ${success} MRS files"
-          [ $failed -gt 0 ] && echo "⚠️  Failed: ${failed} files"
-      
-      - name: Convert GeoSite to YAML
-        run: |
-          echo "🔄 Converting GeoSite to YAML..."
-          
-          success=0
-          failed=0
-          
-          while IFS= read -r category; do
-            if [ -n "$category" ]; then
-              # Конвертируем в text формат
-              if ./mihomo convert-ruleset domain text temp/zkeen.dat "temp/${category}.txt" "$category" 2>/dev/null; then
-                # Создаём YAML с payload структурой
-                {
-                  echo "payload:"
-                  sed 's/^/  - /' "temp/${category}.txt"
-                } > "lists/geosite/${category}.yaml"
-                rm -f "temp/${category}.txt"
-                ((success++))
-              else
-                ((failed++))
-              fi
+
+            if grep -q "<html" "$f"; then
+              echo "❌ ERROR: $f contains HTML (503 page)"
+              exit 1
             fi
-          done < temp/geosite_categories.txt
-          
-          echo "✅ Success: ${success} YAML files"
-          [ $failed -gt 0 ] && echo "⚠️  Failed: ${failed} files"
-      
-      - name: Convert GeoIP to MRS
-        run: |
-          echo "🔄 Converting GeoIP to MRS..."
-          
-          success=0
-          failed=0
-          
-          while IFS= read -r category; do
-            if [ -n "$category" ]; then
-              if ./mihomo convert-ruleset ipcidr mrs temp/zkeenip.dat "lists/geoip/${category}.mrs" "$category" 2>/dev/null; then
-                ((success++))
-              else
-                ((failed++))
-              fi
-            fi
-          done < temp/geoip_categories.txt
-          
-          echo "✅ Success: ${success} MRS files"
-          [ $failed -gt 0 ] && echo "⚠️  Failed: ${failed} files"
-      
-      - name: Convert GeoIP to YAML
-        run: |
-          echo "🔄 Converting GeoIP to YAML..."
-          
-          success=0
-          failed=0
-          
-          while IFS= read -r category; do
-            if [ -n "$category" ]; then
-              # Конвертируем в text формат
-              if ./mihomo convert-ruleset ipcidr text temp/zkeenip.dat "temp/${category}.txt" "$category" 2>/dev/null; then
-                # Создаём YAML с payload структурой
-                {
-                  echo "payload:"
-                  sed 's/^/  - /' "temp/${category}.txt"
-                } > "lists/geoip/${category}.yaml"
-                rm -f "temp/${category}.txt"
-                ((success++))
-              else
-                ((failed++))
-              fi
-            fi
-          done < temp/geoip_categories.txt
-          
-          echo "✅ Success: ${success} YAML files"
-          [ $failed -gt 0 ] && echo "⚠️  Failed: ${failed} files"
-      
-      - name: Verify generated files
-        run: |
-          echo ""
-          echo "📊 Generation Summary:"
-          echo "════════════════════════════════"
-          
-          geosite_mrs=$(ls lists/geosite/*.mrs 2>/dev/null | wc -l)
-          geosite_yaml=$(ls lists/geosite/*.yaml 2>/dev/null | wc -l)
-          geoip_mrs=$(ls lists/geoip/*.mrs 2>/dev/null | wc -l)
-          geoip_yaml=$(ls lists/geoip/*.yaml 2>/dev/null | wc -l)
-          
-          echo "GeoSite MRS:  ${geosite_mrs} files"
-          echo "GeoSite YAML: ${geosite_yaml} files"
-          echo "GeoIP MRS:    ${geoip_mrs} files"
-          echo "GeoIP YAML:   ${geoip_yaml} files"
-          echo "════════════════════════════════"
-          echo "Total: $((geosite_mrs + geosite_yaml + geoip_mrs + geoip_yaml)) files"
-          echo ""
-          
-          # Показываем пример YAML формата
-          if [ -f lists/geosite/openai.yaml ]; then
-            echo "📄 Sample YAML format (openai.yaml):"
-            echo "────────────────────────────────"
-            head -10 lists/geosite/openai.yaml
-            echo "..."
-            echo ""
-          fi
-      
-      - name: Create README files
-        run: |
-          # README for geosite
-          cat > lists/geosite/README.md << 'EOF'
-# GeoSite Rules
-
-Domain-based routing rules for Mihomo.
-
-## Usage Examples
-
-### MRS Format (Binary - Recommended)
-
-```yaml
-rule-providers:
-  openai:
-    type: http
-    behavior: domain
-    format: mrs
-    interval: 86400
-    url: https://raw.githubusercontent.com/dorian6996/mihomo-rules/main/lists/geosite/openai.mrs
-    path: ./rules/openai.mrs
-
-rules:
-  - RULE-SET,openai,PROXY
-```
-
-### YAML Format (Text)
-
-```yaml
-rule-providers:
-  openai:
-    type: http
-    behavior: domain
-    format: yaml
-    interval: 86400
-    url: https://raw.githubusercontent.com/dorian6996/mihomo-rules/main/lists/geosite/openai.yaml
-    path: ./rules/openai.yaml
-
-rules:
-  - RULE-SET,openai,PROXY
-```
-
-## Available Categories
-
-EOF
-          
-          for file in lists/geosite/*.mrs; do
-            [ -e "$file" ] || continue
-            name=$(basename "$file" .mrs)
-            size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo "?")
-            echo "- \`${name}\` (${size} bytes)" >> lists/geosite/README.md
           done
-          
-          # README for geoip
-          cat > lists/geoip/README.md << 'EOF'
-# GeoIP Rules
+          echo "All DAT files OK."
 
-IP-based routing rules for Mihomo.
-
-## Usage Examples
-
-### MRS Format (Binary - Recommended)
-
-```yaml
-rule-providers:
-  telegram:
-    type: http
-    behavior: ipcidr
-    format: mrs
-    interval: 86400
-    url: https://raw.githubusercontent.com/dorian6996/mihomo-rules/main/lists/geoip/telegram.mrs
-    path: ./rules/telegram.mrs
-
-rules:
-  - RULE-SET,telegram,PROXY
-```
-
-### YAML Format (Text)
-
-```yaml
-rule-providers:
-  telegram:
-    type: http
-    behavior: ipcidr
-    format: yaml
-    interval: 86400
-    url: https://raw.githubusercontent.com/dorian6996/mihomo-rules/main/lists/geoip/telegram.yaml
-    path: ./rules/telegram.yaml
-
-rules:
-  - RULE-SET,telegram,PROXY
-```
-
-## Available Categories
-
-EOF
-          
-          for file in lists/geoip/*.mrs; do
-            [ -e "$file" ] || continue
-            name=$(basename "$file" .mrs)
-            size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo "?")
-            echo "- \`${name}\` (${size} bytes)" >> lists/geoip/README.md
-          done
-          
-          echo "✅ README files created"
-      
-      - name: Cleanup temporary files
+      - name: Convert DAT → YAML
         run: |
-          rm -rf temp bin mihomo mihomo.gz
-          echo "🧹 Cleanup completed"
-      
-      - name: Commit and push changes
+          mkdir -p lists/geosite
+          mkdir -p lists/geoip
+
+          echo "Converting dat → YAML ..."
+
+          tools/dat2yaml dat/geosite.dat lists/geosite
+          tools/dat2yaml dat/geoip.dat lists/geoip
+
+      - name: Commit & Push changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
           git add lists/
-          
-          if git diff --staged --quiet; then
-            echo "ℹ️  No changes to commit"
-          else
-            geosite_mrs=$(ls lists/geosite/*.mrs 2>/dev/null | wc -l)
-            geosite_yaml=$(ls lists/geosite/*.yaml 2>/dev/null | wc -l)
-            geoip_mrs=$(ls lists/geoip/*.mrs 2>/dev/null | wc -l)
-            geoip_yaml=$(ls lists/geoip/*.yaml 2>/dev/null | wc -l)
-            total=$((geosite_mrs + geosite_yaml + geoip_mrs + geoip_yaml))
-            
-            git commit -m "🤖 Auto-update rules (${total} files)
-
-📦 GeoSite: ${geosite_mrs} MRS, ${geosite_yaml} YAML
-📦 GeoIP: ${geoip_mrs} MRS, ${geoip_yaml} YAML
-
-Generated: $(date -u +'%Y-%m-%d %H:%M UTC')"
-            
-            git push origin main
-            echo ""
-            echo "✅ Successfully pushed ${total} files to main branch"
-          fi
+          git diff --cached --quiet || git commit -m "Auto-update YAML rules"
+          git push
