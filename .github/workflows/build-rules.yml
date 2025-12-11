@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '0 3 * * *' 
+    - cron: '0 3 * * *'
 
 jobs:
   build:
@@ -17,10 +17,10 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y zstd
+          sudo apt-get install -y zstd wget
           go install github.com/runetfreedom/geodat2srs@latest
 
-      - name: Build clean-named MRS files
+      - name: Download mihomo binary and build MRS
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
@@ -33,89 +33,104 @@ jobs:
 
           mkdir -p "$TMPDIR" "$GEOSITE_OUTDIR" "$GEOIP_OUTDIR"
 
-          GEOIP_URL="https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
-          GEOSITE_URL="https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
+          # Скачиваем .dat
+          echo "[1] Download .dat files"
+          curl -L --fail -o "$TMPDIR/zkeenip.dat" "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
+          curl -L --fail -o "$TMPDIR/zkeen.dat" "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
 
-          echo "[1] Скачиваем .dat файлы"
-          curl -L --fail -o "$TMPDIR/zkeenip.dat"   "$GEOIP_URL"
-          curl -L --fail -o "$TMPDIR/zkeen.dat"     "$GEOSITE_URL"
+          # Конвертируем в текстовые списки
+          echo "[2] Convert .dat to lists"
+          ~/go/bin/geodat2srs geoip -i "$TMPDIR/zkeenip.dat" -o "$TMPDIR" --prefix "zkeen-ip-"
+          ~/go/bin/geodat2srs geosite -i "$TMPDIR/zkeen.dat" -o "$TMPDIR" --prefix "zkeen-site-"
 
-          echo "[2] Конвертируем .dat → списки"
-          ~/go/bin/geodat2srs geoip   -i "$TMPDIR/zkeenip.dat" -o "$TMPDIR" --prefix "zkeen-ip-"
-          ~/go/bin/geodat2srs geosite -i "$TMPDIR/zkeen.dat"   -o "$TMPDIR" --prefix "zkeen-site-"
+          # Скачиваем mihomo binary
+          echo "[3] Download mihomo CLI binary"
+          MIHOMO_VERSION="v1.19.17"
+          wget -q "https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-v1.19.17.gz"
+          gunzip mihomo-linux-amd64-v1.19.17.gz
+          chmod +x mihomo-linux-amd64-v1.19.17
+          MIHOMO="./mihomo-linux-amd64-v1.19.17"
 
-          echo "[3] Создаём бинарные .mrs с чистыми именами (youtube.mrs, oracle.mrs и т.д.)"
+          # Фикс-тест: проверяем наличие команды в help
+          if ! "$MIHOMO" help 2>&1 | grep -q "convert-ruleset"; then
+            echo "Error: mihomo does not support convert-ruleset (check version)"
+            exit 1
+          fi
+          echo "✓ mihomo CLI ready with convert-ruleset"
 
-          create_mrs() {
-            local yaml_file="$1"
-            local mrs_file="${yaml_file%.yaml}.mrs"
-            local type="$2"  # domain или ipcidr
+          # Функция для генерации .mrs из текста
+          generate_mrs() {
+            local text_file="$1"
+            local mrs_file="$2"
+            local behavior="$3"  # domain or ipcidr
 
-            [[ "$type" == "domain" ]] && type_code=1 || type_code=2
+            # mihomo convert-ruleset создаст yaml временно, затем mrs
+            tmp_yaml="${text_file}.yaml"
+            echo "payload:" > "$tmp_yaml"
+            sed 's/^/  - /' "$text_file" >> "$tmp_yaml"
 
-            zstd -19 --no-check -f "$yaml_file" -o "$mrs_file.zst"
-            payload_size=$(wc -c < "$mrs_file.zst")
+            "$MIHOMO" convert-ruleset "$behavior" yaml "$tmp_yaml" "$mrs_file"
+            rm "$tmp_yaml"
 
-            # 16-байт заголовок MRS v1
-            printf 'MRS\x01' > "$mrs_file"
-            printf '%b' "$(printf '\\x%02x\\x00\\x00\\x00' $type_code)" >> "$mrs_file"
-            printf '%08x' $payload_size \
-              | sed -E 's/(..)(..)(..)(..)(..)(..)(..)(..)/\\x\8\\x\7\\x\6\\x\5\\x\4\\x\3\\x\2\\x\1/' \
-              | xargs printf >> "$mrs_file"
-            cat "$mrs_file.zst" >> "$mrs_file"
-            rm -f "$mrs_file.zst" "$yaml_file"
-
-            echo "  $mrs_file  ($(wc -c < "$mrs_file") байт)"
+            if [ -f "$mrs_file" ]; then
+              echo "✓ Generated $mrs_file ($(wc -c < "$mrs_file") bytes)"
+              # Проверяем magic (dолжен начинаться с fd 2b)
+              hexdump -C "$mrs_file" | head -1 | grep "fd 2b 10"
+            else
+              echo "Failed to generate $mrs_file"
+              exit 1
+            fi
           }
 
-          # === geosite (domain) — чистые имена ===
+          # === geosite (domain) ===
+          echo "[4] Generate geosite .mrs"
           for entry in "$TMPDIR"/zkeen-site-*; do
             [[ -e "$entry" ]] || continue
-            # Убираем префикс и всё после первой точки (например akamai.srs → akamai)
             category="${entry##*/zkeen-site-}"
-            category="${category%%.*}"           # отрезаем .srs и другие расширения
-            category="${category// /_}"           # пробелы → _
-            category="${category,,}"              # в нижний регистр
+            category="${category%%.*}"
+            category="${category// /_}"
+            category="${category,,}"
+            text_file="$GEOSITE_OUTDIR/${category}.txt"
+            mrs_file="$GEOSITE_OUTDIR/${category}.mrs"
 
-            yaml="$GEOSITE_OUTDIR/${category}.yaml"
-
-            echo "payload:" > "$yaml"
+            # Собираем текст
             if [[ -d "$entry" ]]; then
-              find "$entry" -type f -print0 | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u | sed 's/^/  - /' >> "$yaml"
+              find "$entry" -type f -print0 | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u > "$text_file"
             else
-              grep -v '^$' "$entry" | sort -u | sed 's/^/  - /' >> "$yaml"
+              grep -v '^$' "$entry" | sort -u > "$text_file"
             fi
 
-            [[ -s "$yaml" ]] && create_mrs "$yaml" domain || rm -f "$yaml"
+            [[ -s "$text_file" ]] && generate_mrs "$text_file" "$mrs_file" domain || rm -f "$text_file"
           done
 
-          # === geoip (ipcidr) — чистые имена ===
+          # === geoip (ipcidr) ===
+          echo "[5] Generate geoip .mrs"
           for entry in "$TMPDIR"/zkeen-ip-*; do
             [[ -e "$entry" ]] || continue
             category="${entry##*/zkeen-ip-}"
             category="${category%%.*}"
             category="${category// /_}"
             category="${category,,}"
+            text_file="$GEOIP_OUTDIR/${category}.txt"
+            mrs_file="$GEOIP_OUTDIR/${category}.mrs"
 
-            yaml="$GEOIP_OUTDIR/${category}.yaml"
-
-            echo "payload:" > "$yaml"
             if [[ -d "$entry" ]]; then
-              find "$entry" -type f -print0 | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u | sed 's/^/  - /' >> "$yaml"
+              find "$entry" -type f -print0 | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u > "$text_file"
             else
-              grep -v '^$' "$entry" | sort -u | sed 's/^/  - /' >> "$yaml"
+              grep -v '^$' "$entry" | sort -u > "$text_file"
             fi
 
-            [[ -s "$yaml" ]] && create_mrs "$yaml" ipcidr || rm -f "$yaml"
+            [[ -s "$text_file" ]] && generate_mrs "$text_file" "$mrs_file" ipcidr || rm -f "$text_file"
           done
 
-          echo "[4] Готово!"
+          echo "[6] Cleanup"
           rm -rf "$TMPDIR"
+          echo "Done! Binary .mrs in lists/ (with zstd magic fd 2b 10)"
 
       - name: Commit & Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lists/
-          git commit -m "auto: update mrs rules $(date -u +%F)" || echo "Нечего коммитить"
+          git commit -m "auto: update proper mrs rules $(date -u +%F)" || echo "Nothing to commit"
           git push
