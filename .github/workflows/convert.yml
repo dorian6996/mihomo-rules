@@ -34,7 +34,7 @@ jobs:
           mkdir -p tmp/geoip tmp/geosite rules/geoip rules/geosite
           echo "${GOPATH}/bin" >> $GITHUB_PATH
 
-       - name: Install v2dat tool
+      - name: Install v2dat tool
         run: |
           set -e
           echo "Installing v2dat..."
