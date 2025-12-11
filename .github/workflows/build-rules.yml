@@ -1,4 +1,4 @@
-name: Build YAML Rulesets from ZKEEN DAT (with checks)
+name: Build YAML from ZKEEN DAT (v2dat unpack)
 
 on:
   workflow_dispatch:
@@ -14,10 +14,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install geodat2srs
-        run: go install github.com/runetfreedom/geodat2srs@latest
+      - name: Install v2dat (v2ray .dat unpacker)
+        run: go install github.com/urlesistiana/v2dat@latest
 
-      - name: Download and check ZKEEN DAT, build YAML
+      - name: Unpack ZKEEN DAT and build YAML
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
@@ -30,46 +30,31 @@ jobs:
 
           mkdir -p "$TMPDIR" "$GEOSITE_OUTDIR" "$GEOIP_OUTDIR"
 
-          # Функция для скачивания с retry
-          download_with_retry() {
-            local url="$1"
-            local output="$2"
-            local max_attempts=3
-            local attempt=1
-            while [ $attempt -le $max_attempts ]; do
-              echo "Downloading $output (attempt $attempt/$max_attempts)..."
-              if curl -L --fail --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -o "$output" "$url"; then
-                size=$(wc -c < "$output")
-                if [ "$size" -eq 0 ]; then
-                  echo "ERROR: $output is empty (0 bytes) — download failed"
-                  rm -f "$output"
-                  return 1
-                fi
-                echo "OK: $output downloaded ($size bytes)"
-                return 0
-              else
-                echo "Failed attempt $attempt — waiting 10s..."
-                sleep 10
-              fi
-              attempt=$((attempt + 1))
-            done
-            echo "ERROR: Failed to download $output after $max_attempts attempts"
-            return 1
-          }
+          # Скачиваем .dat с проверкой
+          echo "[1] Downloading ZKEEN .dat..."
+          curl -L --fail -o "${TMPDIR}/zkeenip.dat" "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
+          curl -L --fail -o "${TMPDIR}/zkeen.dat" "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
+          echo "zkeenip.dat size: $(wc -c < "${TMPDIR}/zkeenip.dat") bytes"
+          echo "zkeen.dat size: $(wc -c < "${TMPDIR}/zkeen.dat") bytes"
 
-          # [1] Скачиваем твои ZKEEN .dat с проверкой
-          echo "[1] Downloading ZKEEN .dat files with retry and size check..."
-          download_with_retry "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat" "${TMPDIR}/zkeenip.dat" || exit 1
-          download_with_retry "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat" "${TMPDIR}/zkeen.dat" || exit 1
+          # Unpack с v2dat (извлекает категории в txt)
+          echo "[2] Unpacking .dat to text categories..."
+          "${HOME}/go/bin/v2dat" unpack geoip "${TMPDIR}/zkeenip.dat" -o "${TMPDIR}/geoip_out"
+          "${HOME}/go/bin/v2dat" unpack geosite "${TMPDIR}/zkeen.dat" -o "${TMPDIR}/geosite_out"
 
-          # [2] Конвертируем в текст
-          echo "[2] Converting .dat to text lists..."
-          "${HOME}/go/bin/geodat2srs" geoip -i "${TMPDIR}/zkeenip.dat" -o "${TMPDIR}" --prefix "zkeen-ip-"
-          "${HOME}/go/bin/geodat2srs" geosite -i "${TMPDIR}/zkeen.dat" -o "${TMPDIR}" --prefix "zkeen-site-"
+          # Проверяем sample (первые 5 строк youtube, если есть)
+          echo "[2.5] Sample extraction..."
+          if [ -f "${TMPDIR}/geosite_out/youtube" ]; then
+            echo "Sample youtube (first 5):"
+            head -5 "${TMPDIR}/geosite_out/youtube"
+          else
+            echo "No youtube.txt — check categories in .dat"
+          fi
+          ls -la "${TMPDIR}/geosite_out/" "${TMPDIR}/geoip_out/" 2>/dev/null || echo "No categories extracted"
 
-          echo "[3] Generating clean .yaml files for mihomo..."
+          echo "[3] Generating YAML for mihomo..."
 
-          # Функция для создания YAML
+          # Функция YAML
           create_yaml() {
             local text_file="$1"
             local yaml_file="$2"
@@ -79,58 +64,36 @@ jobs:
             fi
             echo "payload:" > "$yaml_file"
             sed 's/^/  - /' "$text_file" >> "$yaml_file"
-            lines=$(tail -n +2 "$yaml_file" | wc -l)  # lines без заголовка
-            echo "  Generated $yaml_file ($lines items)"
+            items=$(tail -n +2 "$yaml_file" | wc -l)
+            echo "  Generated $yaml_file ($items items)"
           }
 
-          # === Geosite (domain) ===
-          count_generated=0
-          for entry in "${TMPDIR}"/zkeen-site-*; do
-            [[ -e "$entry" ]] || continue
-            category="${entry##*/zkeen-site-}"
-            category="${category%%.*}"
+          generated=0
+
+          # Geosite (domain)
+          for txt in "${TMPDIR}/geosite_out/"*.txt; do
+            [[ -f "$txt" ]] || continue
+            category=$(basename "$txt" .txt)
             category="${category// /_}"
             category="${category,,}"
-
-            text_file="${GEOSITE_OUTDIR}/${category}.txt"
             yaml_file="${GEOSITE_OUTDIR}/${category}.yaml"
-
-            if [[ -d "$entry" ]]; then
-              find "$entry" -type f -print0 2>/dev/null | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u > "$text_file"
-            else
-              grep -v '^$' "$entry" 2>/dev/null | sort -u > "$text_file"
-            fi
-
-            create_yaml "$text_file" "$yaml_file"
-            rm -f "$text_file"
-            ((count_generated++))
+            create_yaml "$txt" "$yaml_file"
+            ((generated++))
           done
 
-          # === GeoIP (ipcidr) ===
-          for entry in "${TMPDIR}"/zkeen-ip-*; do
-            [[ -e "$entry" ]] || continue
-            category="${entry##*/zkeen-ip-}"
-            category="${category%%.*}"
+          # GeoIP (ipcidr)
+          for txt in "${TMPDIR}/geoip_out/"*.txt; do
+            [[ -f "$txt" ]] || continue
+            category=$(basename "$txt" .txt)
             category="${category// /_}"
             category="${category,,}"
-
-            text_file="${GEOIP_OUTDIR}/${category}.txt"
             yaml_file="${GEOIP_OUTDIR}/${category}.yaml"
-
-            if [[ -d "$entry" ]]; then
-              find "$entry" -type f -print0 2>/dev/null | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u > "$text_file"
-            else
-              grep -v '^$' "$entry" 2>/dev/null | sort -u > "$text_file"
-            fi
-
-            create_yaml "$text_file" "$yaml_file"
-            rm -f "$text_file"
-            ((count_generated++))
+            create_yaml "$txt" "$yaml_file"
+            ((generated++))
           done
 
-          # Cleanup
           rm -rf "$TMPDIR"
-          echo "Done! Generated $count_generated YAML files in lists/geosite/ and lists/geoip/"
+          echo "Done! Generated $generated YAML files."
 
       - name: Commit and Push
         run: |
@@ -138,8 +101,8 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lists/
           if git diff --staged --quiet; then
-            echo "No changes to commit"
+            echo "No changes"
           else
-            git commit -m "auto: update yaml rules from zkeen dat $(date -u +%Y-%m-%d)"
+            git commit -m "auto: unpack zkeen dat to yaml $(date -u +%Y-%m-%d)"
             git push
           fi
