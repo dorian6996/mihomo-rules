@@ -1,4 +1,4 @@
-name: ZKEEN dat → MRS (manual v2dat build + mihomo)
+name: ZKEEN dat → MRS (via v2dat + mihomo)
 
 on:
   workflow_dispatch:
@@ -13,10 +13,15 @@ jobs:
       PATH: /usr/local/go/bin:$HOME/go/bin:${PATH}
 
     steps:
+      - name: Install system tools BEFORE checkout (tar fix)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y tar gzip
+
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install build dependencies
         run: |
           sudo apt-get update -y
           sudo apt-get install -y build-essential wget git ca-certificates unzip
@@ -28,43 +33,42 @@ jobs:
           sudo tar -C /usr/local -xzf /tmp/go.tgz
           go version
 
-      - name: Build v2dat from source
+      - name: Build v2dat manually (repo has no releases)
         run: |
           git clone https://github.com/urlesistiana/v2dat.git
           cd v2dat/cmd/v2dat
-          go build -o $GOPATH/bin/v2dat .
+          go build -o $HOME/go/bin/v2dat .
           cd ../../..
-          ls -l $GOPATH/bin/v2dat
-          $GOPATH/bin/v2dat --help | head -n 10
+          v2dat --help | head -n 10
 
-      - name: Build mihomo from source
+      - name: Build mihomo manually
         run: |
           git clone https://github.com/metacubex/mihomo.git
           cd mihomo
-          go build -o $GOPATH/bin/mihomo .
+          go build -o $HOME/go/bin/mihomo .
           cd ..
-          $GOPATH/bin/mihomo version || true
+          mihomo version || true
 
-      - name: Download ZKEEN dat files
+      - name: Download ZKEEN dat files (your links)
         run: |
           mkdir -p tmp
           wget -q https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat -O tmp/zkeenip.dat
           wget -q https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat -O tmp/zkeen.dat
           ls -l tmp
 
-      - name: Unpack GeoIP (v2dat)
+      - name: Unpack GeoIP via v2dat
         run: |
           mkdir -p tmp/geoip
           v2dat unpack geoip -d tmp/geoip tmp/zkeenip.dat
           ls -l tmp/geoip | head -n 100
 
-      - name: Unpack GeoSite (v2dat)
+      - name: Unpack GeoSite via v2dat
         run: |
           mkdir -p tmp/geosite
           v2dat unpack geosite -d tmp/geosite tmp/zkeen.dat
           ls -l tmp/geosite | head -n 100
 
-      - name: Convert TXT → MRS (mihomo)
+      - name: Convert TXT → MRS (via mihomo)
         run: |
           mkdir -p rules/geoip rules/geosite
 
@@ -87,5 +91,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add rules || true
-          git commit -m "Auto update MRS (v2dat manual build)" || true
+          git commit -m "Auto update MRS" || true
           git push || true
