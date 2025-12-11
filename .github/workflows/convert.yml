@@ -8,14 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      GOPATH: ${{ github.workspace }}/.gopath
-      GOBIN: ${{ github.workspace }}/.gopath/bin
-      PATH: ${{ github.workspace }}/.gopath/bin:/usr/local/go/bin:${PATH}
-
     steps:
-      - name: Checkout repo (force git, no REST API)
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -23,7 +17,7 @@ jobs:
           clean: true
           submodules: false
           lfs: false
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -32,78 +26,86 @@ jobs:
 
       - name: Prepare Go path
         run: |
-          mkdir -p "${GOPATH}/bin"
+          mkdir -p "${{ github.workspace }}/.gopath/bin"
 
-      - name: Build v2dat from source (urlesistiana)
+      - name: Build v2dat from source (fixed path)
         run: |
           set -euo pipefail
           git clone --depth 1 https://github.com/urlesistiana/v2dat.git v2dat-src
-          cd v2dat-src/cmd/v2dat
-          go build -o "${GOBIN}/v2dat" .
-          "${GOBIN}/v2dat" --help | head -n 5
+          cd v2dat-src/cmd  # Fixed: no /v2dat subfolder
+          ls -la  # Debug: show main.go
+          go mod download
+          go build -o "${{ github.workspace }}/.gopath/bin/v2dat" .
+          "${{ github.workspace }}/.gopath/bin/v2dat" --help | head -n 5
 
-      - name: Install mihomo
+      - name: Install mihomo CLI (fixed path)
         run: |
           set -euo pipefail
-          go install github.com/metacubex/mihomo@latest
-          mihomo version || true
+          go install github.com/MetaCubeX/mihomo/cmd/mihomo@latest  # Fixed: correct repo/path
+          mihomo version
 
-      - name: Download ZKEEN dat files (ONLY releases)
+      - name: Download ZKEEN dat files
         run: |
           set -euo pipefail
           mkdir -p tmp
-
           curl -fsS -L \
             -o tmp/zkeenip.dat \
             https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
-
           curl -fsS -L \
             -o tmp/zkeen.dat \
             https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
-
           ls -lh tmp
 
       - name: Unpack GeoIP
         run: |
           mkdir -p tmp/geoip
-          "${GOBIN}/v2dat" unpack -d tmp/geoip tmp/zkeenip.dat
+          "${{ github.workspace }}/.gopath/bin/v2dat" unpack tmp/zkeenip.dat -o tmp/geoip  # Fixed: -o, order
           ls -lh tmp/geoip | head
 
       - name: Unpack GeoSite
         run: |
           mkdir -p tmp/geosite
-          "${GOBIN}/v2dat" unpack -d tmp/geosite tmp/zkeen.dat
+          "${{ github.workspace }}/.gopath/bin/v2dat" unpack tmp/zkeen.dat -o tmp/geosite  # Fixed: -o
           ls -lh tmp/geosite | head
 
       - name: Convert GeoIP TXT → MRS
         run: |
           mkdir -p rules/geoip
-          shopt -s nullglob || true
+          shopt -s nullglob
           for f in tmp/geoip/*.txt; do
-            name=$(basename "$f" .txt)
+            name=$(basename "$f" .txt | tr '[:upper:]' '[:lower:]' | tr ' ' '_')  # Fixed: lowercase + spaces to _
             mihomo convert-ruleset ipcidr text "$f" "rules/geoip/$name.mrs" \
             || cp "$f" "rules/geoip/$name.txt"
+            echo "Created rules/geoip/$name.mrs"
           done
 
       - name: Convert GeoSite TXT → MRS
         run: |
           mkdir -p rules/geosite
-          shopt -s nullglob || true
+          shopt -s nullglob
           for f in tmp/geosite/*.txt; do
-            name=$(basename "$f" .txt)
+            name=$(basename "$f" .txt | tr '[:upper:]' '[:lower:]' | tr ' ' '_')  # Fixed: lowercase
             mihomo convert-ruleset domain text "$f" "rules/geosite/$name.mrs" \
             || cp "$f" "rules/geosite/$name.txt"
+            echo "Created rules/geosite/$name.mrs"
+          done
+
+      - name: Verify MRS (magic number)
+        run: |
+          echo "Sample MRS headers (should start with fd 2b 10):"
+          find rules -name "*.mrs" | head -3 | while read f; do
+            echo -n "$f: "
+            hexdump -C "$f" | head -1
           done
 
       - name: Commit & Push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-
           git add rules || true
           if git diff --staged --quiet; then
             echo "No changes"
           else
             git commit -m "Auto-update ZKEEN → MRS"
-            git push || true
+            git push
           fi
