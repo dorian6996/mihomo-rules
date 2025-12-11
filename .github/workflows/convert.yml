@@ -1,4 +1,4 @@
-name: ZKEEN dat → MRS (via v2dat + mihomo)
+name: ZKEEN dat → MRS (v2dat build + mihomo)
 
 on:
   workflow_dispatch:
@@ -9,87 +9,142 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      GOPATH: $HOME/go
-      PATH: /usr/local/go/bin:$HOME/go/bin:${PATH}
+      GOPATH: ${{ github.workspace }}/.gopath
+      GOBIN: ${{ github.workspace }}/.gopath/bin
+      PATH: ${{ github.workspace }}/.gopath/bin:/usr/local/go/bin:${PATH}
 
     steps:
-      - name: Install system tools BEFORE checkout (tar fix)
-        run: |
-          apt-get update -y
-          apt-get install -y tar gzip
-
-      - name: Checkout repo
+      - name: Checkout repo (for push)
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y build-essential wget git ca-certificates unzip
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
 
-      - name: Install Go
+      - name: Create GOPATH bin
         run: |
-          wget -q https://go.dev/dl/go1.22.5.linux-amd64.tar.gz -O /tmp/go.tgz
-          sudo rm -rf /usr/local/go
-          sudo tar -C /usr/local -xzf /tmp/go.tgz
-          go version
+          mkdir -p "${GOPATH}/bin"
 
-      - name: Build v2dat manually (repo has no releases)
+      - name: Build v2dat from urlesistiana source
         run: |
-          git clone https://github.com/urlesistiana/v2dat.git
-          cd v2dat/cmd/v2dat
-          go build -o $HOME/go/bin/v2dat .
-          cd ../../..
-          v2dat --help | head -n 10
+          set -euo pipefail
+          # clone only once, keep shallow
+          if [ ! -d v2dat-src ]; then
+            git clone --depth 1 https://github.com/urlesistiana/v2dat.git v2dat-src
+          fi
+          cd v2dat-src/cmd/v2dat
+          go build -o "${GOBIN}/v2dat" .
+          "${GOBIN}/v2dat" --help | head -n 5
 
-      - name: Build mihomo manually
+      - name: Install mihomo (go install)
         run: |
-          git clone https://github.com/metacubex/mihomo.git
-          cd mihomo
-          go build -o $HOME/go/bin/mihomo .
-          cd ..
+          set -euo pipefail
+          # install mihomo binary to GOBIN
+          go install github.com/metacubex/mihomo@latest
+          # ensure installed
+          ls -l "${GOBIN}" || true
+          if command -v mihomo >/dev/null 2>&1; then echo "mihomo in PATH"; else echo "mihomo not in PATH yet"; fi
           mihomo version || true
 
-      - name: Download ZKEEN dat files (your links)
+      - name: Download ZKEEN dat files (try releases, fallback to raw/main)
         run: |
+          set -euo pipefail
           mkdir -p tmp
-          wget -q https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat -O tmp/zkeenip.dat
-          wget -q https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat -O tmp/zkeen.dat
-          ls -l tmp
+          GEOIP_RELEASE="https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
+          GEOIP_RAW="https://raw.githubusercontent.com/jameszeroX/zkeen-ip/main/zkeenip.dat"
+          GEOSITE_RELEASE="https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
+          GEOSITE_RAW="https://raw.githubusercontent.com/jameszeroX/zkeen-domains/main/zkeen.dat"
 
-      - name: Unpack GeoIP via v2dat
+          echo "Downloading geoip: try release URL first..."
+          if ! curl -fsS --retry 3 --retry-delay 3 -o tmp/zkeenip.dat "$GEOIP_RELEASE"; then
+            echo "release not available, trying raw/main..."
+            curl -fsS --retry 3 --retry-delay 3 -o tmp/zkeenip.dat "$GEOIP_RAW"
+          fi
+
+          echo "Downloading geosite: try release URL first..."
+          if ! curl -fsS --retry 3 --retry-delay 3 -o tmp/zkeen.dat "$GEOSITE_RELEASE"; then
+            echo "release not available, trying raw/main..."
+            curl -fsS --retry 3 --retry-delay 3 -o tmp/zkeen.dat "$GEOSITE_RAW"
+          fi
+
+          ls -lh tmp
+          file tmp/zkeenip.dat || true
+          file tmp/zkeen.dat || true
+
+      - name: Validate DAT files
         run: |
+          set -euo pipefail
+          for f in tmp/*.dat; do
+            echo "Checking $f"
+            if [ ! -s "$f" ]; then
+              echo "ERROR: $f is empty" >&2; exit 1
+            fi
+            # quick check to avoid HTML error pages
+            if head -c 256 "$f" | grep -iq "<html\|<!DOCTYPE"; then
+              echo "ERROR: $f appears to contain HTML (download failed)" >&2; exit 1
+            fi
+          done
+
+      - name: Unpack GeoIP dat → TXT (v2dat)
+        run: |
+          set -euo pipefail
           mkdir -p tmp/geoip
-          v2dat unpack geoip -d tmp/geoip tmp/zkeenip.dat
-          ls -l tmp/geoip | head -n 100
+          "${GOBIN}/v2dat" unpack -d tmp/geoip tmp/zkeenip.dat
+          echo "GeoIP files:"
+          ls -lh tmp/geoip | sed -n '1,200p'
 
-      - name: Unpack GeoSite via v2dat
+      - name: Unpack GeoSite dat → TXT (v2dat)
         run: |
+          set -euo pipefail
           mkdir -p tmp/geosite
-          v2dat unpack geosite -d tmp/geosite tmp/zkeen.dat
-          ls -l tmp/geosite | head -n 100
+          "${GOBIN}/v2dat" unpack -d tmp/geosite tmp/zkeen.dat
+          echo "GeoSite files:"
+          ls -lh tmp/geosite | sed -n '1,200p'
 
-      - name: Convert TXT → MRS (via mihomo)
+      - name: Convert TXT → MRS (geoip)
         run: |
-          mkdir -p rules/geoip rules/geosite
-
+          set -euo pipefail
+          mkdir -p rules/geoip
+          shopt -s nullglob || true
           for f in tmp/geoip/*.txt; do
-            base=$(basename "$f" .txt)
-            echo "Converting geoip: $base"
-            mihomo convert-ruleset ipcidr text "$f" "rules/geoip/$base.mrs" \
-              || cp "$f" "rules/geoip/$base.txt"
+            name=$(basename "$f" .txt)
+            echo "Converting geoip: $name"
+            if mihomo convert-ruleset ipcidr text "$f" "rules/geoip/$name.mrs"; then
+              echo "Converted rules/geoip/$name.mrs"
+            else
+              echo "mihomo conversion failed for $f — saving raw txt as fallback"
+              cp -f "$f" "rules/geoip/$name.txt"
+            fi
           done
 
-          for f in tmp/geosite/*.txt; do
-            base=$(basename "$f" .txt)
-            echo "Converting geosite: $base"
-            mihomo convert-ruleset domain text "$f" "rules/geosite/$base.mrs" \
-              || cp "$f" "rules/geosite/$base.txt"
-          done
-
-      - name: Commit & Push
+      - name: Convert TXT → MRS (geosite)
         run: |
+          set -euo pipefail
+          mkdir -p rules/geosite
+          shopt -s nullglob || true
+          for f in tmp/geosite/*.txt; do
+            name=$(basename "$f" .txt)
+            echo "Converting geosite: $name"
+            if mihomo convert-ruleset domain text "$f" "rules/geosite/$name.mrs"; then
+              echo "Converted rules/geosite/$name.mrs"
+            else
+              echo "mihomo conversion failed for $f — saving raw txt as fallback"
+              cp -f "$f" "rules/geosite/$name.txt"
+            fi
+          done
+
+      - name: Commit & Push generated rules
+        run: |
+          set -euo pipefail
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add rules || true
-          git commit -m "Auto update MRS" || true
-          git push || true
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto-update ZKEEN -> MRS" || true
+            git push || echo "Push failed (check permissions)"
+          fi
