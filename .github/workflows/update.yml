@@ -1,14 +1,13 @@
-name: Update ZKeen → Per-category MSR
+name: Update ZKeen → Per-category MRS
 
 on:
   schedule:
-    - cron: "0 0 */1 * *"
+    - cron: "0 0 */3 * *"
   workflow_dispatch: {}
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -24,7 +23,7 @@ jobs:
       - name: Prepare folders
         run: |
           mkdir -p scripts lists lists/geosite lists/geoip
-          chmod +x scripts/convert.sh || true
+          chmod +x scripts/convert.sh
 
       - name: Run converter
         env:
@@ -32,13 +31,13 @@ jobs:
         run: |
           ./scripts/convert.sh
 
-      - name: Commit per-category lists
+      - name: Commit per-category MRS
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lists
           if ! git diff --staged --quiet; then
-            git commit -m "Auto-update per-category MSR lists"
+            git commit -m "Auto-update per-category MRS lists"
             git push
           else
             echo "No changes"
