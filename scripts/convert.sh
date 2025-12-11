@@ -15,6 +15,35 @@ GEOSITE_URL="https://github.com/jameszeroX/zkeen-domains/releases/latest/downloa
 GEOIP_DAT="${TMPDIR}/zkeenip.dat"
 GEOSITE_DAT="${TMPDIR}/zkeen.dat"
 
+download_with_retry() {
+  local url="$1"
+  local output="$2"
+  local max_attempts=5
+  local attempt=1
+  local wait_time=10
+  
+  while [ $attempt -le $max_attempts ]; do
+    echo "Attempt $attempt/$max_attempts: Downloading $(basename "$output")..."
+    
+    if curl -L --fail --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -o "$output" "$url"; then
+      echo "✓ Successfully downloaded $(basename "$output")"
+      return 0
+    else
+      echo "✗ Download failed (attempt $attempt/$max_attempts)"
+      if [ $attempt -lt $max_attempts ]; then
+        echo "Waiting ${wait_time}s before retry..."
+        sleep $wait_time
+        wait_time=$((wait_time * 2))
+      fi
+    fi
+    
+    attempt=$((attempt + 1))
+  done
+  
+  echo "ERROR: Failed to download after $max_attempts attempts"
+  return 1
+}
+
 echo "[1] Download .dat files..."
 curl -L --fail -o "$GEOIP_DAT" "$GEOIP_URL"
 curl -L --fail -o "$GEOSITE_DAT" "$GEOSITE_URL"
@@ -62,7 +91,7 @@ process_prefix() {
     # sanitize category (replace spaces with underscores)
     category="${category// /_}"
 
-    outfile="${destdir}/${category}.msr"
+    outfile="${destdir}/${category}.mrs"
 
     # if entry is a dir, find all files inside; if file — cat it
     if [ -d "$entry" ]; then
