@@ -13,24 +13,19 @@ jobs:
 
       - name: Build yaml from zkeen.dat
         run: |
-          #!/usr/bin/env bash
           set -euo pipefail
 
           mkdir -p lists/geosite lists/geoip
 
-          # Скачиваем твои файлы
-          curl -L --fail -o zkeenip.dat   https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
-          curl -L --fail -o zkeen.dat     https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
+          curl -L --fail -L -o zkeenip.dat   https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
+          curl -L --fail -L -o zkeen.dat     https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
 
-          # Самый лёгкий рабочий unpacker (3.8 МБ, проверено на твоих файлах)
           curl -L -o unpack https://github.com/mkcert/v2ray-geo/releases/download/2024.12.10/v2ray-geo-unpack-linux-amd64
           chmod +x unpack
 
-          # Распаковываем
           ./unpack zkeen.dat   lists/geosite
           ./unpack zkeenip.dat lists/geoip
 
-          # Делаем mihomo yaml
           for txt in lists/geosite/*.txt lists/geoip/*.txt; do
             [[ -f "$txt" ]] || continue
             name=$(basename "$txt" .txt | tr '[:upper:]' '[:lower:]')
@@ -42,10 +37,10 @@ jobs:
             rm "$txt"
           done
 
-      - name: Commit & Push
+      - name: Commit and push
         run: |
-          git config user.name "bot"
-          git config user.email "bot@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lists/
-          git commit -m "zkeen → yaml $(date +%F)" || exit 0
+          git commit -m "zkeen to yaml $(date +%F)" || echo "nothing to commit"
           git push
