@@ -34,21 +34,21 @@ jobs:
           mkdir -p tmp/geoip tmp/geosite rules/geoip rules/geosite
           echo "${GOPATH}/bin" >> $GITHUB_PATH
 
-      - name: Install v2dat tool
+       - name: Install v2dat tool
         run: |
           set -e
           echo "Installing v2dat..."
           go install github.com/urlesistiana/v2dat@latest
-          echo "v2dat version:"
-          v2dat --version || echo "v2dat installed"
+          echo "v2dat installed at:"
+          which v2dat
 
       - name: Install mihomo tool
         run: |
           set -e
           echo "Installing mihomo..."
           go install github.com/metacubex/mihomo@latest
-          echo "mihomo version:"
-          mihomo version || echo "mihomo installed"
+          echo "mihomo installed at:"
+          which mihomo
 
       - name: Download ZKEEN dat files
         run: |
