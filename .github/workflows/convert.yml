@@ -41,8 +41,6 @@ jobs:
           go install github.com/urlesistiana/v2dat@latest
           echo "v2dat installed at:"
           which v2dat
-          echo "Checking v2dat commands:"
-          v2dat --help
 
       - name: Install mihomo tool
         run: |
@@ -51,6 +49,32 @@ jobs:
           go install github.com/metacubex/mihomo@latest
           echo "mihomo installed at:"
           which mihomo
+          echo "Checking mihomo convert-ruleset help..."
+          mihomo convert-ruleset --help 2>&1 | head -20 || echo "Help not available in standard format"
+
+      - name: Test mihomo convert-ruleset syntax
+        run: |
+          set -e
+          echo "Testing mihomo convert-ruleset with different syntax..."
+          
+          # Создаем тестовые файлы
+          echo "8.8.8.8" > test_ip.txt
+          echo "domain.com" > test_domain.txt
+          
+          echo "Test 1: Domain conversion (стандартный синтаксис)"
+          mihomo convert-ruleset domain text test_domain.txt test_domain.mrs 2>&1 && echo "✓ Success" || echo "✗ Failed"
+          
+          echo "Test 2: IPCIDR conversion (стандартный синтаксис)"  
+          mihomo convert-ruleset ipcidr text test_ip.txt test_ip.mrs 2>&1 && echo "✓ Success" || echo "✗ Failed"
+          
+          echo "Test 3: With flags (альтернативный синтаксис)"
+          mihomo convert-ruleset --type domain --input-format text --input test_domain.txt --output test_domain2.mrs 2>&1 && echo "✓ Success" || echo "✗ Failed"
+          
+          # Проверяем что создалось
+          ls -la test_*.mrs 2>/dev/null || echo "No .mrs files created"
+          
+          # Очистка
+          rm -f test_*.txt test_*.mrs
 
       - name: Download ZKEEN dat files
         run: |
@@ -64,21 +88,14 @@ jobs:
           echo "File sizes:"
           ls -lh tmp/*.dat
 
-      - name: Check v2dat unpack commands
-        run: |
-          echo "Checking v2dat unpack commands..."
-          v2dat unpack geoip --help
-          v2dat unpack geosite --help
-
       - name: Unpack GeoIP dat file
         run: |
           set -e
           echo "Unpacking geoip.dat..."
           if [ -f tmp/zkeenip.dat ]; then
-            # Новый синтаксис v2dat
             v2dat unpack geoip -o tmp/geoip tmp/zkeenip.dat
             echo "Unpacked geoip files:"
-            ls -lh tmp/geoip/*.txt 2>/dev/null | head -10 || echo "No files found"
+            ls -lh tmp/geoip/*.txt 2>/dev/null | head -5 || echo "No .txt files found"
           else
             echo "Error: zkeenip.dat not found!"
             exit 1
@@ -89,139 +106,59 @@ jobs:
           set -e
           echo "Unpacking geosite.dat..."
           if [ -f tmp/zkeen.dat ]; then
-            # Новый синтаксис v2dat
             v2dat unpack geosite -o tmp/geosite tmp/zkeen.dat
             echo "Unpacked geosite files:"
-            ls -lh tmp/geosite/*.txt 2>/dev/null | head -10 || echo "No files found"
+            ls -lh tmp/geosite/*.txt 2>/dev/null | head -5 || echo "No .txt files found"
           else
             echo "Error: zkeen.dat not found!"
             exit 1
           fi
 
-      - name: List unpacked files
-        run: |
-          echo "=== All unpacked files ==="
-          echo "GeoIP files:"
-          find tmp/geoip -name "*.txt" -type f 2>/dev/null | wc -l
-          find tmp/geoip -name "*.txt" -type f 2>/dev/null | head -20
-          echo ""
-          echo "GeoSite files:"
-          find tmp/geosite -name "*.txt" -type f 2>/dev/null | wc -l
-          find tmp/geosite -name "*.txt" -type f 2>/dev/null | head -20
-
-      - name: Convert GeoIP TXT to MRS
+      - name: Rename files (remove zkeen_ prefix)
         run: |
           set -e
-          echo "Converting GeoIP files to MRS format..."
+          echo "Renaming files to remove 'zkeen' prefix..."
           
-          # Проверяем есть ли файлы для конвертации
-          count=$(find tmp/geoip -name "*.txt" -type f 2>/dev/null | wc -l)
-          echo "Found $count GeoIP files to convert"
+          # Переименовываем GeoIP файлы
+          for f in tmp/geoip/zkeenip_*.txt; do
+            if [ -f "$f" ]; then
+              new_name=$(basename "$f" | sed 's/zkeenip_//')
+              echo "Renaming: $(basename "$f") → $new_name"
+              mv "$f" "tmp/geoip/$new_name"
+            fi
+          done
           
-          if [ $count -eq 0 ]; then
-            echo "No GeoIP files found! Checking tmp directory..."
-            ls -la tmp/geoip/
-            exit 1
-          fi
+          # Переименовываем GeoSite файлы  
+          for f in tmp/geosite/zkeen_*.txt; do
+            if [ -f "$f" ]; then
+              new_name=$(basename "$f" | sed 's/zkeen_//')
+              echo "Renaming: $(basename "$f") → $new_name"
+              mv "$f" "tmp/geosite/$new_name"
+            fi
+          done
           
+          echo "Files after renaming:"
+          echo "GeoIP:"
+          ls -1 tmp/geoip/*.txt 2>/dev/null || echo "No files"
+          echo ""
+          echo "GeoSite:"
+          ls -1 tmp/geosite/*.txt 2>/dev/null || echo "No files"
+
+      - name: Clean TXT files (remove comments and empty lines)
+        run: |
+          set -e
+          echo "Cleaning TXT files (removing comments and empty lines)..."
+          
+          # Очищаем GeoIP файлы
           for f in tmp/geoip/*.txt; do
             if [ -f "$f" ]; then
-              name=$(basename "$f" .txt)
-              echo "Converting $name..."
-              
-              # Очищаем файл от комментариев и пустых строк
-              grep -v '^#' "$f" | grep -v '^$' > "tmp/geoip/${name}_clean.txt"
-              
-              if [ -s "tmp/geoip/${name}_clean.txt" ]; then
-                echo "  Processing $(wc -l < "tmp/geoip/${name}_clean.txt") rules..."
-                mihomo convert-ruleset \
-                  --input "tmp/geoip/${name}_clean.txt" \
-                  --output "rules/geoip/${name}.mrs" \
-                  --type ipcidr \
-                  --input-format text
-                echo "  ✓ $name.mrs created ($(stat -c%s "rules/geoip/${name}.mrs") bytes)"
-              else
-                echo "  ⚠ $name is empty, skipping"
-              fi
+              name=$(basename "$f")
+              echo "Cleaning $name..."
+              grep -v '^#' "$f" | grep -v '^$' > "tmp/geoip/${name}.clean"
+              mv "tmp/geoip/${name}.clean" "$f"
             fi
           done
           
-          echo "GeoIP conversion complete. Files:"
-          ls -lh rules/geoip/ 2>/dev/null || echo "No MRS files created"
-
-      - name: Convert GeoSite TXT to MRS
-        run: |
-          set -e
-          echo "Converting GeoSite files to MRS format..."
-          
-          # Проверяем есть ли файлы для конвертации
-          count=$(find tmp/geosite -name "*.txt" -type f 2>/dev/null | wc -l)
-          echo "Found $count GeoSite files to convert"
-          
-          if [ $count -eq 0 ]; then
-            echo "No GeoSite files found! Checking tmp directory..."
-            ls -la tmp/geosite/
-            exit 1
-          fi
-          
+          # Очищаем GeoSite файлы
           for f in tmp/geosite/*.txt; do
-            if [ -f "$f" ]; then
-              name=$(basename "$f" .txt)
-              echo "Converting $name..."
-              
-              # Очищаем файл от комментариев и пустых строк
-              grep -v '^#' "$f" | grep -v '^$' > "tmp/geosite/${name}_clean.txt"
-              
-              if [ -s "tmp/geosite/${name}_clean.txt" ]; then
-                echo "  Processing $(wc -l < "tmp/geosite/${name}_clean.txt") rules..."
-                mihomo convert-ruleset \
-                  --input "tmp/geosite/${name}_clean.txt" \
-                  --output "rules/geosite/${name}.mrs" \
-                  --type domain \
-                  --input-format text
-                echo "  ✓ $name.mrs created ($(stat -c%s "rules/geosite/${name}.mrs") bytes)"
-              else
-                echo "  ⚠ $name is empty, skipping"
-              fi
-            fi
-          done
-          
-          echo "GeoSite conversion complete. Files:"
-          ls -lh rules/geosite/ 2>/dev/null || echo "No MRS files created"
-
-      - name: Create README for converted files
-        run: |
-          cat > rules/README.md << 'EOF'
-          # MRS Rules from ZKEEN Dat Files
-          
-          These files are automatically converted from ZKEEN dat files to MRS format.
-          
-          ## Sources
-          - GeoIP: https://github.com/jameszeroX/zkeen-ip
-          - GeoSite: https://github.com/jameszeroX/zkeen-domains
-          
-          ## Format
-          Files in .mrs format are compatible with:
-          - [mihomo (Clash Meta)](https://github.com/metacubex/mihomo)
-          - Other proxy clients supporting MRS format
-          
-          ## Automatic Updates
-          Conversion runs automatically every 6 hours via GitHub Actions.
-          
-          Last update: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          EOF
-
-      - name: Commit and push changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git add rules/
-          
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: update MRS rules from ZKEEN dat files [$(date +'%Y-%m-%d %H:%M')]"
-            git push
-            echo "Changes pushed successfully"
-          fi
+            if
