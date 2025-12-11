@@ -20,7 +20,7 @@ jobs:
       - name: Install v2dat (unpacker) from source
         run: |
           git clone --depth 1 https://github.com/urlesistiana/v2dat.git
-          cd v2dat/cmd/v2dat
+          cd v2dat/cmd
           go build -ldflags="-s -w" -o $GITHUB_WORKSPACE/v2dat .
           echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
           v2dat --help | head -n 3
