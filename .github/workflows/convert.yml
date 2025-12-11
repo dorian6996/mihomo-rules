@@ -1,50 +1,49 @@
-name: ZKEEN dat → MRS (via v2dat + mihomo)
+name: ZKEEN dat → MRS (manual v2dat build + mihomo)
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"   # каждые 6 часов — поменяй если нужно
+    - cron: "0 */6 * * *"
 
 jobs:
-  build-and-convert:
+  build:
     runs-on: ubuntu-latest
     env:
       GOPATH: ${{ runner.home }}/go
+      PATH: /usr/local/go/bin:${{ runner.home }}/go/bin:${PATH}
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install system deps
+      - name: Install dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y build-essential wget unzip ca-certificates git
+          sudo apt-get install -y build-essential wget git ca-certificates unzip
 
-      - name: Install Go (1.20+)
+      - name: Install Go
         run: |
-          if ! command -v go >/dev/null 2>&1; then
-            wget -q https://go.dev/dl/go1.20.9.linux-amd64.tar.gz -O /tmp/go.tgz
-            sudo rm -rf /usr/local/go
-            sudo tar -C /usr/local -xzf /tmp/go.tgz
-          fi
-          export PATH=/usr/local/go/bin:$PATH
+          wget -q https://go.dev/dl/go1.22.5.linux-amd64.tar.gz -O /tmp/go.tgz
+          sudo rm -rf /usr/local/go
+          sudo tar -C /usr/local -xzf /tmp/go.tgz
           go version
 
-      - name: Install v2dat (build via go install)
+      - name: Build v2dat from source
         run: |
-          export PATH=/usr/local/go/bin:${GOPATH}/bin:$PATH
-          go install github.com/urlesistiana/v2dat@latest
-          # sanity
-          command -v v2dat
-          v2dat --help | head -n 5
+          git clone https://github.com/urlesistiana/v2dat.git
+          cd v2dat/cmd/v2dat
+          go build -o $GOPATH/bin/v2dat .
+          cd ../../..
+          ls -l $GOPATH/bin/v2dat
+          $GOPATH/bin/v2dat --help | head -n 10
 
-      - name: Install mihomo (build via go install)
+      - name: Build mihomo from source
         run: |
-          export PATH=/usr/local/go/bin:${GOPATH}/bin:$PATH
-          go install github.com/metacubex/mihomo@latest
-          # sanity
-          command -v mihomo || true
-          mihomo version || true
+          git clone https://github.com/metacubex/mihomo.git
+          cd mihomo
+          go build -o $GOPATH/bin/mihomo .
+          cd ..
+          $GOPATH/bin/mihomo version || true
 
       - name: Download ZKEEN dat files
         run: |
@@ -53,55 +52,40 @@ jobs:
           wget -q https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat -O tmp/zkeen.dat
           ls -l tmp
 
-      - name: Unpack GeoIP dat → TXT (v2dat)
+      - name: Unpack GeoIP (v2dat)
         run: |
           mkdir -p tmp/geoip
-          # unpack all tags/categories
           v2dat unpack geoip -d tmp/geoip tmp/zkeenip.dat
-          echo "Created geoip files:"
-          ls -l tmp/geoip | sed -n '1,200p'
+          ls -l tmp/geoip | head -n 100
 
-      - name: Unpack GeoSite dat → TXT (v2dat)
+      - name: Unpack GeoSite (v2dat)
         run: |
           mkdir -p tmp/geosite
           v2dat unpack geosite -d tmp/geosite tmp/zkeen.dat
-          echo "Created geosite files:"
-          ls -l tmp/geosite | sed -n '1,200p'
+          ls -l tmp/geosite | head -n 100
 
-      - name: Convert GeoIP TXT → MRS (mihomo)
+      - name: Convert TXT → MRS (mihomo)
         run: |
-          mkdir -p rules/geoip
-          export PATH=/usr/local/go/bin:${GOPATH}/bin:$PATH
-          shopt -s nullglob || true
+          mkdir -p rules/geoip rules/geosite
+
           for f in tmp/geoip/*.txt; do
-            name=$(basename "$f" .txt)
-            echo "Converting geoip category: $name"
-            # convert ipcidr text -> mrs
-            mihomo convert-ruleset ipcidr text "$f" "rules/geoip/$name.mrs" || {
-              echo "FAILED to convert $f — saving as text fallback"
-              cp -f "$f" "rules/geoip/$name.txt"
-            }
+            base=$(basename "$f" .txt)
+            echo "Converting geoip: $base"
+            mihomo convert-ruleset ipcidr text "$f" "rules/geoip/$base.mrs" \
+              || cp "$f" "rules/geoip/$base.txt"
           done
 
-      - name: Convert GeoSite TXT → MRS (mihomo)
-        run: |
-          mkdir -p rules/geosite
-          export PATH=/usr/local/go/bin:${GOPATH}/bin:$PATH
-          shopt -s nullglob || true
           for f in tmp/geosite/*.txt; do
-            name=$(basename "$f" .txt)
-            echo "Converting geosite category: $name"
-            # convert domain text -> mrs
-            mihomo convert-ruleset domain text "$f" "rules/geosite/$name.mrs" || {
-              echo "FAILED to convert $f — saving as text fallback"
-              cp -f "$f" "rules/geosite/$name.txt"
-            }
+            base=$(basename "$f" .txt)
+            echo "Converting geosite: $base"
+            mihomo convert-ruleset domain text "$f" "rules/geosite/$base.mrs" \
+              || cp "$f" "rules/geosite/$base.txt"
           done
 
-      - name: Commit & push generated rules
+      - name: Commit & Push
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
           git add rules || true
-          git commit -m "Auto-update ZKEEN -> MRS (v2dat + mihomo)" || echo "No changes to commit"
-          git push || echo "Push failed (probably no permission)"
+          git commit -m "Auto update MRS (v2dat manual build)" || true
+          git push || true
