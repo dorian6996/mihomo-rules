@@ -1,4 +1,4 @@
-name: ZKEEN dat → MRS
+name: ZKEEN dat MRS
 
 on:
   workflow_dispatch:
