@@ -1,63 +1,184 @@
-name: ZKEEN → MRS (100 % работает, проверено 11.12.2025)
+name: ZKEEN dat → MRS
 
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 */6 * * *"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      GOPATH: ${{ github.workspace }}/.gopath
+      GOBIN: ${{ github.workspace }}/.gopath/bin
+      PATH: ${{ github.workspace }}/.gopath/bin:/usr/local/go/bin:${{ env.GOPATH }}/bin:${{ github.workspace }}/go/bin:$PATH
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
-      - name: Скачать готовый рабочий unpacker + mihomo
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+          cache-dependency-path: |
+            .gopath/pkg/mod
+
+      - name: Prepare directories
         run: |
-          # 8 МБ, точно распаковывает твои zkeen.dat
-          curl -L -o unpack https://github.com/1715173329/v2ray-dat-unpack/releases/download/v1.4/unpack-linux-amd64
-          chmod +x unpack
-          ./unpack --help | head -2
+          mkdir -p "${GOPATH}/bin"
+          mkdir -p tmp/geoip tmp/geosite rules/geoip rules/geosite
 
-          # mihomo CLI (уже умеет convert-ruleset)
-          go install github.com/MetaCubeX/mihomo/cmd/mihomo@latest
-
-      - name: Скачать твои ZKEEN файлы
+      - name: Install v2dat tool
         run: |
-          curl -L -o zkeenip.dat   https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
-          curl -L -o zkeen.dat     https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
-          ls -lh zkeen*.dat
+          set -e
+          # Устанавливаем напрямую через go install
+          go install github.com/urlesistiana/v2dat@latest
+          v2dat --version || v2dat --help | head -2
 
-      - name: Распаковать и сразу сделать MRS
+      - name: Install mihomo tool
         run: |
-          mkdir -p lists/geosite lists/geoip
+          set -e
+          go install github.com/metacubex/mihomo@latest
+          mihomo version || echo "mihomo installed"
 
-          # geosite
-          ./unpack zkeen.dat   lists/geosite
-          # geoip
-          ./unpack zkeenip.dat lists/geoip
+      - name: Download ZKEEN dat files
+        run: |
+          set -e
+          echo "Downloading geoip.dat..."
+          curl -fsSL -o tmp/zkeenip.dat \
+            "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
+          
+          echo "Downloading geosite.dat..."
+          curl -fsSL -o tmp/zkeen.dat \
+            "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
+          
+          echo "File sizes:"
+          ls -lh tmp/*.dat
 
-          # Делаем MRS (правильный magic fd 2b 10)
-          for txt in lists/geo*/*.txt; do
-            [[ -f "$txt" ]] || continue
-            name=$(basename "$txt" .txt | tr '[:upper:]' '[:lower:]')
-            dir=$(dirname "$txt")
-            mihomo convert-ruleset $( [[ $dir == *"geosite"* ]] && echo domain || echo ipcidr ) \
-                                 text "$txt" "$dir/${name}.mrs"
-            rm "$txt"
-            echo "MRS $dir/${name}.mrs ($(du -h "$dir/${name}.mrs" | cut -f1))"
+      - name: Unpack GeoIP dat file
+        run: |
+          set -e
+          echo "Unpacking geoip.dat..."
+          if [ -f tmp/zkeenip.dat ]; then
+            v2dat unpack -d tmp/geoip tmp/zkeenip.dat
+            echo "Unpacked geoip files:"
+            ls -lh tmp/geoip/*.txt | head -10
+          else
+            echo "Error: zkeenip.dat not found!"
+            exit 1
+          fi
+
+      - name: Unpack GeoSite dat file
+        run: |
+          set -e
+          echo "Unpacking geosite.dat..."
+          if [ -f tmp/zkeen.dat ]; then
+            v2dat unpack -d tmp/geosite tmp/zkeen.dat
+            echo "Unpacked geosite files:"
+            ls -lh tmp/geosite/*.txt | head -10
+          else
+            echo "Error: zkeen.dat not found!"
+            exit 1
+          fi
+
+      - name: Convert GeoIP TXT to MRS
+        run: |
+          set -e
+          echo "Converting GeoIP files to MRS format..."
+          cd "${{ github.workspace }}"
+          
+          for f in tmp/geoip/*.txt; do
+            if [ -f "$f" ]; then
+              name=$(basename "$f" .txt)
+              echo "Converting $name..."
+              
+              # Очищаем файл от комментариев и пустых строк перед конвертацией
+              grep -v '^#' "$f" | grep -v '^$' > "tmp/geoip/${name}_clean.txt"
+              
+              if [ -s "tmp/geoip/${name}_clean.txt" ]; then
+                mihomo convert-ruleset --type ipcidr --input-format text \
+                  --input "tmp/geoip/${name}_clean.txt" \
+                  --output "rules/geoip/${name}.mrs"
+                echo "  ✓ $name.mrs created"
+              else
+                echo "  ⚠ $name is empty, skipping"
+              fi
+            fi
           done
+          
+          echo "GeoIP conversion complete. Files:"
+          ls -lh rules/geoip/
 
-      - name: Проверка magic (должно быть fd 2b 10)
+      - name: Convert GeoSite TXT to MRS
         run: |
-          find lists -name "*.mrs" | head -5 | while read f; do
-            echo -n "$f: "
-            hexdump -C "$f" | head -1 | cut -c11-40
+          set -e
+          echo "Converting GeoSite files to MRS format..."
+          cd "${{ github.workspace }}"
+          
+          for f in tmp/geosite/*.txt; do
+            if [ -f "$f" ]; then
+              name=$(basename "$f" .txt)
+              echo "Converting $name..."
+              
+              # Очищаем файл от комментариев и пустых строк перед конвертацией
+              grep -v '^#' "$f" | grep -v '^$' > "tmp/geosite/${name}_clean.txt"
+              
+              if [ -s "tmp/geosite/${name}_clean.txt" ]; then
+                mihomo convert-ruleset --type domain --input-format text \
+                  --input "tmp/geosite/${name}_clean.txt" \
+                  --output "rules/geosite/${name}.mrs"
+                echo "  ✓ $name.mrs created"
+              else
+                echo "  ⚠ $name is empty, skipping"
+              fi
+            fi
           done
+          
+          echo "GeoSite conversion complete. Files:"
+          ls -lh rules/geosite/
 
-      - name: Commit & Push
+      - name: Create README for converted files
+        run: |
+          cat > rules/README.md << 'EOF'
+          # MRS Rules from ZKEEN Dat Files
+          
+          Эти файлы автоматически сконвертированы из ZKEEN dat файлов в формат MRS.
+          
+          ## Источники
+          - GeoIP: https://github.com/jameszeroX/zkeen-ip
+          - GeoSite: https://github.com/jameszeroX/zkeen-domains
+          
+          ## Формат
+          Файлы в формате `.mrs` совместимы с:
+          - [mihomo (Clash Meta)](https://github.com/metacubex/mihomo)
+          - Другими прокси-клиентами, поддерживающими формат MRS
+          
+          ## Автоматическое обновление
+          Конвертация выполняется автоматически каждые 6 часов через GitHub Actions.
+          
+          Последнее обновление: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          EOF
+
+      - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lists/
-          git commit -m "zkeen → mrs $(date -u +%F_%H-%M)" || echo "no changes"
-          git push
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Добавляем все файлы в папке rules
+          git add rules/
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update MRS rules from ZKEEN dat files [$(date +'%Y-%m-%d %H:%M')]"
+            git push
+            echo "Changes pushed successfully"
+          fi
