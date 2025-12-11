@@ -11,7 +11,7 @@ os.makedirs(f"{OUTPUT_DIR}/geosite", exist_ok=True)
 
 def convert(dat_file, output_subdir):
     with open(dat_file, "r", encoding="utf-8", errors="ignore") as f:
-        data = json.load(f)  # ZKEEN dat можно читать как JSON
+        data = json.load(f)
     for category, payload in data.items():
         filename = os.path.join(OUTPUT_DIR, output_subdir, f"{category}.yaml")
         with open(filename, "w", encoding="utf-8") as out:
@@ -20,4 +20,3 @@ def convert(dat_file, output_subdir):
 
 convert(os.path.join(DAT_DIR, "geosite.dat"), "geosite")
 convert(os.path.join(DAT_DIR, "geoip.dat"), "geoip")
-
