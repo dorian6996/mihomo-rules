@@ -1,8 +1,8 @@
-name: Update YAML Rules
+name: Update ZKeen YAML Rules
 
 on:
   schedule:
-    - cron: "0 0 */3 * *"   # каждые 3 дня
+    - cron: "0 0 */3 * *"  # каждые 3 дня
   workflow_dispatch:
 
 jobs:
@@ -13,57 +13,26 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install dat2yaml
-  run: |
-    mkdir -p tools
-    curl -L --fail --retry 5 --retry-delay 5 \
-      -o tools/dat2yaml \
-      https://raw.githubusercontent.com/MetaCubeX/meta-parser/main/tools/dat2yaml-linux-amd64
-    chmod +x tools/dat2yaml
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
 
+      - name: Create dat folder
+        run: mkdir -p dat
 
-      - name: Download ZKEEN DAT files
+      - name: Download ZKEEN dat files
         run: |
-          mkdir -p dat
+          curl -L --fail --retry 5 --retry-delay 5 -o dat/geosite.dat https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
+          curl -L --fail --retry 5 --retry-delay 5 -o dat/geoip.dat https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
 
-          echo "Downloading ZKEEN geosite.dat..."
-          curl -L --fail --retry 5 --retry-delay 5 \
-            -o dat/geosite.dat \
-            https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
+      - name: Convert dat → YAML
+        run: python3 scripts/convert_dat_to_yaml.py
 
-          echo "Downloading ZKEEN geoip.dat..."
-          curl -L --fail --retry 5 --retry-delay 5 \
-            -o dat/geoip.dat \
-            https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
-
-      - name: Validate downloads
-        run: |
-          for f in dat/*.dat; do
-            echo "Checking $f ..."
-            if [ ! -s "$f" ]; then
-              echo "❌ ERROR: $f is EMPTY"; exit 1
-            fi
-            if grep -q "<html" "$f"; then
-              echo "❌ ERROR: $f contains HTML (503 page)"; exit 1
-            fi
-          done
-
-      - name: Convert DAT → YAML
-        run: |
-          mkdir -p lists/geosite
-          mkdir -p lists/geoip
-
-          echo "Converting geosite..."
-          tools/dat2yaml dat/geosite.dat lists/geosite
-
-          echo "Converting geoip..."
-          tools/dat2yaml dat/geoip.dat lists/geoip
-
-      - name: Commit & Push changes
+      - name: Commit and push
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-
           git add lists/
-          git diff --cached --quiet || git commit -m "Update YAML rules"
+          git diff --cached --quiet || git commit -m "Auto-update YAML rules"
           git push
