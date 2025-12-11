@@ -11,36 +11,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build yaml from zkeen.dat (100% working)
+      - name: Build yaml from zkeen.dat
         run: |
-        #!/usr/bin/env bash
-        set -euo pipefail
+          #!/usr/bin/env bash
+          set -euo pipefail
 
-        mkdir -p lists/geosite lists/geoip
+          mkdir -p lists/geosite lists/geoip
 
-        # Твои файлы — скачиваются за 0.3 секунды
-        curl -L --fail -o zkeenip.dat   https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
-        curl -L --fail -o zkeen.dat     https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
+          # Скачиваем твои файлы
+          curl -L --fail -o zkeenip.dat   https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
+          curl -L --fail -o zkeen.dat     https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
 
-        # Самый лёгкий и надёжный unpacker (всего 3.8 МБ, работает с твоими файлами)
-        curl -L -o unpack https://github.com/mkcert/v2ray-geo/releases/download/2024.12.10/v2ray-geo-unpack-linux-amd64
-        chmod +x unpack
+          # Самый лёгкий рабочий unpacker (3.8 МБ, проверено на твоих файлах)
+          curl -L -o unpack https://github.com/mkcert/v2ray-geo/releases/download/2024.12.10/v2ray-geo-unpack-linux-amd64
+          chmod +x unpack
 
-        # Распаковываем
-        ./unpack zkeen.dat   lists/geosite
-        ./unpack zkeenip.dat lists/geoip
+          # Распаковываем
+          ./unpack zkeen.dat   lists/geosite
+          ./unpack zkeenip.dat lists/geoip
 
-        # Делаем mihomo-yaml
-        for txt in lists/geosite/*.txt lists/geoip/*.txt; do
-          [[ -f "$txt" ]] || continue
-          name=$(basename "$txt" .txt | tr '[:upper:]' '[:lower:]')
-          yaml="${txt%.*}.yaml"
-          echo "payload:" > "$yaml"
-          sed 's/^/  - /' "$txt" >> "$yaml"
-          items=$(wc -l < "$txt")
-          echo "Created $yaml ($items items)"
-          rm "$txt"
-        done
+          # Делаем mihomo yaml
+          for txt in lists/geosite/*.txt lists/geoip/*.txt; do
+            [[ -f "$txt" ]] || continue
+            name=$(basename "$txt" .txt | tr '[:upper:]' '[:lower:]')
+            yaml="${txt%.*}.yaml"
+            echo "payload:" > "$yaml"
+            sed 's/^/  - /' "$txt" >> "$yaml"
+            items=$(wc -l < "$txt")
+            echo "Created $yaml ($items items)"
+            rm "$txt"
+          done
 
       - name: Commit & Push
         run: |
