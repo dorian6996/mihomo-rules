@@ -1,4 +1,4 @@
-name: ZKEEN dat MRS
+name: ZKEEN dat  MRS
 
 on:
   workflow_dispatch:
@@ -15,7 +15,6 @@ jobs:
     env:
       GOPATH: ${{ github.workspace }}/.gopath
       GOBIN: ${{ github.workspace }}/.gopath/bin
-      PATH: ${{ github.workspace }}/.gopath/bin:/usr/local/go/bin:${{ env.GOPATH }}/bin:${{ github.workspace }}/go/bin:$PATH
 
     steps:
       - name: Checkout repository
@@ -31,23 +30,29 @@ jobs:
           cache-dependency-path: |
             .gopath/pkg/mod
 
-      - name: Prepare directories
+      - name: Prepare directories and PATH
         run: |
           mkdir -p "${GOPATH}/bin"
           mkdir -p tmp/geoip tmp/geosite rules/geoip rules/geosite
+          echo "GOPATH=${GOPATH}" >> $GITHUB_ENV
+          echo "GOBIN=${GOBIN}" >> $GITHUB_ENV
+          echo "${GOPATH}/bin" >> $GITHUB_PATH
 
       - name: Install v2dat tool
         run: |
           set -e
-          # Устанавливаем напрямую через go install
+          echo "Installing v2dat..."
           go install github.com/urlesistiana/v2dat@latest
-          v2dat --version || v2dat --help | head -2
+          echo "v2dat installed at:"
+          which v2dat
 
       - name: Install mihomo tool
         run: |
           set -e
+          echo "Installing mihomo..."
           go install github.com/metacubex/mihomo@latest
-          mihomo version || echo "mihomo installed"
+          echo "mihomo installed at:"
+          which mihomo
 
       - name: Download ZKEEN dat files
         run: |
@@ -93,20 +98,21 @@ jobs:
         run: |
           set -e
           echo "Converting GeoIP files to MRS format..."
-          cd "${{ github.workspace }}"
           
           for f in tmp/geoip/*.txt; do
             if [ -f "$f" ]; then
               name=$(basename "$f" .txt)
               echo "Converting $name..."
               
-              # Очищаем файл от комментариев и пустых строк перед конвертацией
+              # Очищаем файл от комментариев и пустых строк
               grep -v '^#' "$f" | grep -v '^$' > "tmp/geoip/${name}_clean.txt"
               
               if [ -s "tmp/geoip/${name}_clean.txt" ]; then
-                mihomo convert-ruleset --type ipcidr --input-format text \
+                mihomo convert-ruleset \
                   --input "tmp/geoip/${name}_clean.txt" \
-                  --output "rules/geoip/${name}.mrs"
+                  --output "rules/geoip/${name}.mrs" \
+                  --type ipcidr \
+                  --input-format text
                 echo "  ✓ $name.mrs created"
               else
                 echo "  ⚠ $name is empty, skipping"
@@ -121,64 +127,21 @@ jobs:
         run: |
           set -e
           echo "Converting GeoSite files to MRS format..."
-          cd "${{ github.workspace }}"
           
           for f in tmp/geosite/*.txt; do
             if [ -f "$f" ]; then
               name=$(basename "$f" .txt)
               echo "Converting $name..."
               
-              # Очищаем файл от комментариев и пустых строк перед конвертацией
+              # Очищаем файл от комментариев и пустых строк
               grep -v '^#' "$f" | grep -v '^$' > "tmp/geosite/${name}_clean.txt"
               
               if [ -s "tmp/geosite/${name}_clean.txt" ]; then
-                mihomo convert-ruleset --type domain --input-format text \
+                mihomo convert-ruleset \
                   --input "tmp/geosite/${name}_clean.txt" \
-                  --output "rules/geosite/${name}.mrs"
+                  --output "rules/geosite/${name}.mrs" \
+                  --type domain \
+                  --input-format text
                 echo "  ✓ $name.mrs created"
               else
-                echo "  ⚠ $name is empty, skipping"
-              fi
-            fi
-          done
-          
-          echo "GeoSite conversion complete. Files:"
-          ls -lh rules/geosite/
-
-      - name: Create README for converted files
-        run: |
-          cat > rules/README.md << 'EOF'
-          # MRS Rules from ZKEEN Dat Files
-          
-          Эти файлы автоматически сконвертированы из ZKEEN dat файлов в формат MRS.
-          
-          ## Источники
-          - GeoIP: https://github.com/jameszeroX/zkeen-ip
-          - GeoSite: https://github.com/jameszeroX/zkeen-domains
-          
-          ## Формат
-          Файлы в формате `.mrs` совместимы с:
-          - [mihomo (Clash Meta)](https://github.com/metacubex/mihomo)
-          - Другими прокси-клиентами, поддерживающими формат MRS
-          
-          ## Автоматическое обновление
-          Конвертация выполняется автоматически каждые 6 часов через GitHub Actions.
-          
-          Последнее обновление: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          EOF
-
-      - name: Commit and push changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Добавляем все файлы в папке rules
-          git add rules/
-          
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: update MRS rules from ZKEEN dat files [$(date +'%Y-%m-%d %H:%M')]"
-            git push
-            echo "Changes pushed successfully"
-          fi
+                echo "  ⚠ $name is empty
