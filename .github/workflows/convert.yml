@@ -1,0 +1,70 @@
+name: Convert ZKEEN dat → MRS (Mihomo)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"   # запускается каждый час
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Xray-core
+        run: |
+          XRAY_VER=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | grep tag_name | cut -d '"' -f 4)
+          wget -q https://github.com/XTLS/Xray-core/releases/download/${XRAY_VER}/Xray-linux-64.zip
+          unzip Xray-linux-64.zip xray
+          chmod +x xray
+          sudo mv xray /usr/local/bin/xray
+
+      - name: Install Mihomo
+        run: |
+          MIHOMO_VER=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | grep tag_name | cut -d '"' -f 4)
+          wget -q https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VER}/mihomo-linux-amd64-${MIHOMO_VER}.deb
+          sudo dpkg -i mihomo-linux-amd64-${MIHOMO_VER}.deb
+
+      - name: Download ZKEEN GeoIP / GeoSite dat
+        run: |
+          mkdir -p tmp
+          wget -q https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat -O tmp/zkeenip.dat
+          wget -q https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat -O tmp/zkeen.dat
+
+      - name: Extract GeoIP TXT
+        run: |
+          mkdir -p tmp/geoip
+          xray geoip -i tmp/zkeenip.dat -o tmp/geoip
+
+      - name: Extract GeoSite TXT
+        run: |
+          mkdir -p tmp/geosite
+          xray geosite -i tmp/zkeen.dat -o tmp/geosite
+
+      - name: Convert GeoIP TXT → MRS
+        run: |
+          mkdir -p rules/geoip
+          for f in tmp/geoip/*.txt; do
+            name=$(basename "$f" .txt)
+            echo "Converting GeoIP $name"
+            mihomo convert-ruleset ipcidr text "$f" "rules/geoip/$name.mrs"
+          done
+
+      - name: Convert GeoSite TXT → MRS
+        run: |
+          mkdir -p rules/geosite
+          for f in tmp/geosite/*.txt; do
+            name=$(basename "$f" .txt)
+            echo "Converting GeoSite $name"
+            mihomo convert-ruleset domain text "$f" "rules/geosite/$name.mrs"
+          done
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add rules
+          git commit -m "Auto-update ZKEEN → MRS" || echo "No changes"
+          git push
