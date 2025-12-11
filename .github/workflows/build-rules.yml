@@ -1,11 +1,11 @@
-name: Build YAML Rulesets from DAT (mihomo compatible)
+name: Build YAML Rulesets from ZKEEN DAT (with checks)
 
 on:
-  workflow_dispatch:  # Ручной запуск
+  workflow_dispatch:
   push:
     branches: [ main ]
   schedule:
-    - cron: '0 4 * * *'  # Каждый день в 04:00 UTC
+    - cron: '0 4 * * *'
 
 jobs:
   build:
@@ -15,10 +15,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install geodat2srs
-        run: |
-          go install github.com/runetfreedom/geodat2srs@latest
+        run: go install github.com/runetfreedom/geodat2srs@latest
 
-      - name: Download DAT and build YAML
+      - name: Download and check ZKEEN DAT, build YAML
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
@@ -31,21 +30,55 @@ jobs:
 
           mkdir -p "$TMPDIR" "$GEOSITE_OUTDIR" "$GEOIP_OUTDIR"
 
-          # Скачиваем .dat файлы
-          echo "[1] Downloading .dat files..."
-          curl -L --fail --connect-timeout 30 --max-time 300 -o "${TMPDIR}/zkeenip.dat" \
-            "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
-          curl -L --fail --connect-timeout 30 --max-time 300 -o "${TMPDIR}/zkeen.dat" \
-            "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
+          # Функция для скачивания с retry
+          download_with_retry() {
+            local url="$1"
+            local output="$2"
+            local max_attempts=3
+            local attempt=1
+            while [ $attempt -le $max_attempts ]; do
+              echo "Downloading $output (attempt $attempt/$max_attempts)..."
+              if curl -L --fail --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 5 -o "$output" "$url"; then
+                size=$(wc -c < "$output")
+                if [ "$size" -eq 0 ]; then
+                  echo "ERROR: $output is empty (0 bytes) — download failed"
+                  rm -f "$output"
+                  return 1
+                fi
+                echo "OK: $output downloaded ($size bytes)"
+                return 0
+              else
+                echo "Failed attempt $attempt — waiting 10s..."
+                sleep 10
+              fi
+              attempt=$((attempt + 1))
+            done
+            echo "ERROR: Failed to download $output after $max_attempts attempts"
+            return 1
+          }
 
-          # Конвертируем .dat в текстовые списки (geodat2srs извлекает категории)
+          # [1] Скачиваем твои ZKEEN .dat с проверкой
+          echo "[1] Downloading ZKEEN .dat files with retry and size check..."
+          download_with_retry "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat" "${TMPDIR}/zkeenip.dat" || exit 1
+          download_with_retry "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat" "${TMPDIR}/zkeen.dat" || exit 1
+
+          # [2] Конвертируем в текст
           echo "[2] Converting .dat to text lists..."
           "${HOME}/go/bin/geodat2srs" geoip -i "${TMPDIR}/zkeenip.dat" -o "${TMPDIR}" --prefix "zkeen-ip-"
           "${HOME}/go/bin/geodat2srs" geosite -i "${TMPDIR}/zkeen.dat" -o "${TMPDIR}" --prefix "zkeen-site-"
 
-          echo "[3] Generating clean .yaml files for mihomo (payload format)..."
+          # Проверяем, создались ли категории (лог первых 5 строк одной из них)
+          echo "[2.5] Checking extracted categories (sample)..."
+          if [ -d "${TMPDIR}/zkeen-site-youtube" ] || [ -f "${TMPDIR}/zkeen-site-youtube" ]; then
+            echo "Sample youtube category (first 5 lines):"
+            head -5 "${TMPDIR}/zkeen-site-youtube"/* 2>/dev/null | head -5 || echo "No content in youtube"
+          else
+            echo "No youtube category found — check if .dat has it"
+          fi
 
-          # Функция для создания YAML из текста
+          echo "[3] Generating clean .yaml files for mihomo..."
+
+          # Функция для создания YAML
           create_yaml() {
             local text_file="$1"
             local yaml_file="$2"
@@ -55,23 +88,22 @@ jobs:
             fi
             echo "payload:" > "$yaml_file"
             sed 's/^/  - /' "$text_file" >> "$yaml_file"
-            lines=$(wc -l < "$yaml_file")
-            echo "  Generated $yaml_file ($lines lines)"
+            lines=$(tail -n +2 "$yaml_file" | wc -l)  # lines без заголовка
+            echo "  Generated $yaml_file ($lines items)"
           }
 
           # === Geosite (domain) ===
+          count_generated=0
           for entry in "${TMPDIR}"/zkeen-site-*; do
             [[ -e "$entry" ]] || continue
-            # Чистое имя: zkeen-site-youtube.srs → youtube
             category="${entry##*/zkeen-site-}"
-            category="${category%%.*}"  # Убираем .srs и после
-            category="${category// /_}"  # Пробелы в _
-            category="${category,,}"     # Нижний регистр
+            category="${category%%.*}"
+            category="${category// /_}"
+            category="${category,,}"
 
             text_file="${GEOSITE_OUTDIR}/${category}.txt"
             yaml_file="${GEOSITE_OUTDIR}/${category}.yaml"
 
-            # Собираем уникальный текст
             if [[ -d "$entry" ]]; then
               find "$entry" -type f -print0 2>/dev/null | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u > "$text_file"
             else
@@ -80,6 +112,7 @@ jobs:
 
             create_yaml "$text_file" "$yaml_file"
             rm -f "$text_file"
+            ((count_generated++))
           done
 
           # === GeoIP (ipcidr) ===
@@ -101,11 +134,12 @@ jobs:
 
             create_yaml "$text_file" "$yaml_file"
             rm -f "$text_file"
+            ((count_generated++))
           done
 
           # Cleanup
           rm -rf "$TMPDIR"
-          echo "Done! YAML files in lists/geosite/ and lists/geoip/"
+          echo "Done! Generated $count_generated YAML files in lists/geosite/ and lists/geoip/"
 
       - name: Commit and Push
         run: |
@@ -115,6 +149,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "auto: update yaml rules from dat $(date -u +%Y-%m-%d)"
+            git commit -m "auto: update yaml rules from zkeen dat $(date -u +%Y-%m-%d)"
             git push
           fi
