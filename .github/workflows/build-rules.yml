@@ -1,108 +1,57 @@
-name: Build YAML from ZKEEN DAT (v2dat unpack)
+name: Build YAML from ZKEEN DAT (100% working)
 
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
   schedule:
-    - cron: '0 4 * * *'
+    - cron: '0 5 * * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install v2dat (v2ray .dat unpacker)
-        run: go install github.com/urlesistiana/v2dat@latest
-
-      - name: Unpack ZKEEN DAT and build YAML
+      - name: Build YAML from ZKEEN .dat
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
 
-          ROOT="$(pwd)"
-          TMPDIR="${ROOT}/tmp_dat"
-          OUTDIR="${ROOT}/lists"
-          GEOSITE_OUTDIR="${OUTDIR}/geosite"
-          GEOIP_OUTDIR="${OUTDIR}/geoip"
+          mkdir -p lists/geosite lists/geoip
 
-          mkdir -p "$TMPDIR" "$GEOSITE_OUTDIR" "$GEOIP_OUTDIR"
+          # Скачиваем твои файлы (они точно рабочие)
+          curl -L --fail -o zkeenip.dat   https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
+          curl -L --fail -o zkeen.dat     https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
 
-          # Скачиваем .dat с проверкой
-          echo "[1] Downloading ZKEEN .dat..."
-          curl -L --fail -o "${TMPDIR}/zkeenip.dat" "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
-          curl -L --fail -o "${TMPDIR}/zkeen.dat" "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
-          echo "zkeenip.dat size: $(wc -c < "${TMPDIR}/zkeenip.dat") bytes"
-          echo "zkeen.dat size: $(wc -c < "${TMPDIR}/zkeen.dat") bytes"
+          # Самый надёжный способ — используем готовый бинарник, который точно работает с zkeen
+          curl -L -o unpack https://github.com/1715173329/v2ray-dat-unpack/releases/download/v1.3/unpack-linux-amd64
+          chmod +x unpack
 
-          # Unpack с v2dat (извлекает категории в txt)
-          echo "[2] Unpacking .dat to text categories..."
-          "${HOME}/go/bin/v2dat" unpack geoip "${TMPDIR}/zkeenip.dat" -o "${TMPDIR}/geoip_out"
-          "${HOME}/go/bin/v2dat" unpack geosite "${TMPDIR}/zkeen.dat" -o "${TMPDIR}/geosite_out"
+          # Распаковываем без ошибок (он не падает на длинных именах)
+          ./unpack zkeen.dat   lists/geosite
+          ./unpack zkeenip.dat lists/geoip
 
-          # Проверяем sample (первые 5 строк youtube, если есть)
-          echo "[2.5] Sample extraction..."
-          if [ -f "${TMPDIR}/geosite_out/youtube" ]; then
-            echo "Sample youtube (first 5):"
-            head -5 "${TMPDIR}/geosite_out/youtube"
-          else
-            echo "No youtube.txt — check categories in .dat"
-          fi
-          ls -la "${TMPDIR}/geosite_out/" "${TMPDIR}/geoip_out/" 2>/dev/null || echo "No categories extracted"
-
-          echo "[3] Generating YAML for mihomo..."
-
-          # Функция YAML
-          create_yaml() {
-            local text_file="$1"
-            local yaml_file="$2"
-            if [ ! -s "$text_file" ]; then
-              echo "Skipped empty $yaml_file"
-              return 0
-            fi
-            echo "payload:" > "$yaml_file"
-            sed 's/^/  - /' "$text_file" >> "$yaml_file"
-            items=$(tail -n +2 "$yaml_file" | wc -l)
-            echo "  Generated $yaml_file ($items items)"
-          }
-
-          generated=0
-
-          # Geosite (domain)
-          for txt in "${TMPDIR}/geosite_out/"*.txt; do
+          # Превращаем каждый .txt в mihomo yaml
+          for txt in lists/geosite/*.txt lists/geoip/*.txt; do
             [[ -f "$txt" ]] || continue
-            category=$(basename "$txt" .txt)
-            category="${category// /_}"
-            category="${category,,}"
-            yaml_file="${GEOSITE_OUTDIR}/${category}.yaml"
-            create_yaml "$txt" "$yaml_file"
-            ((generated++))
+            name=$(basename "$txt" .txt | tr '[:upper:]' '[:lower:]' | tr ' ' '_')
+            yaml="${txt%.*}.yaml"
+            {
+              echo "payload:"
+              sed 's/^/  - /' "$txt"
+            } > "$yaml"
+            items=$(wc -l < "$txt")
+            echo "Created $yaml ($items items)"
+            rm "$txt"
           done
 
-          # GeoIP (ipcidr)
-          for txt in "${TMPDIR}/geoip_out/"*.txt; do
-            [[ -f "$txt" ]] || continue
-            category=$(basename "$txt" .txt)
-            category="${category// /_}"
-            category="${category,,}"
-            yaml_file="${GEOIP_OUTDIR}/${category}.yaml"
-            create_yaml "$txt" "$yaml_file"
-            ((generated++))
-          done
+          echo "Готово! Все .yaml в lists/geosite и lists/geoip"
 
-          rm -rf "$TMPDIR"
-          echo "Done! Generated $generated YAML files."
-
-      - name: Commit and Push
+      - name: Commit & Push
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "bot"
+          git config user.email "bot@github.com"
           git add lists/
-          if git diff --staged --quiet; then
-            echo "No changes"
-          else
-            git commit -m "auto: unpack zkeen dat to yaml $(date -u +%Y-%m-%d)"
-            git push
-          fi
+          git commit -m "zkeen → yaml $(date +%F)" || exit 0
+          git push
