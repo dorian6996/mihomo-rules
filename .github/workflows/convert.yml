@@ -17,13 +17,13 @@ jobs:
         with:
           go-version: '1.22'
 
-      - name: Install v2dat (unpacker) from source
+       - name: Build v2dat from source (urlesistiana)
         run: |
-          git clone --depth 1 https://github.com/urlesistiana/v2dat.git
-          cd v2dat/cmd
-          go build -ldflags="-s -w" -o $GITHUB_WORKSPACE/v2dat .
-          echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
-          v2dat --help | head -n 3
+          set -euo pipefail
+          git clone --depth 1 https://github.com/urlesistiana/v2dat.git v2dat-src
+          cd v2dat-src/cmd/v2dat
+          go build -o "${GOBIN}/v2dat" .
+          "${GOBIN}/v2dat" --help | head -n 5
 
       - name: Install mihomo CLI (for convert-ruleset)
         run: |
