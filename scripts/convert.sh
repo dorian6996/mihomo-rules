@@ -53,7 +53,7 @@ if [ ! -x "$GEOCONV" ]; then
 fi
 # Добавляем установку mihomo CLI для convert-ruleset
 echo "[2.5] Install mihomo CLI for ruleset compilation..."
-GO111MODULE=on go install github.com/MetaCubeX/mihomo/cmd/mihomo@latest
+GO111MODULE=on go install github.com/MetaCubeX/mihomo/cmd/mihomo@main
 MIHOMO="${GOBIN}/mihomo"
 if [ ! -x "$MIHOMO" ]; then
   echo "Error: mihomo not found at $MIHOMO"
