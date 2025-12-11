@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '0 3 * * *'  # каждый день в 03:00 UTC
+    - cron: '0 3 * * *'
 
 jobs:
   build:
@@ -14,9 +14,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up environment
+      - name: Install dependencies
         run: |
-          sudo apt-get update
+          sudo apt-get update -qq
           sudo apt-get install -y zstd
           go install github.com/runetfreedom/geodat2srs@latest
 
@@ -35,18 +35,17 @@ jobs:
 
           GEOIP_URL="https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
           GEOSITE_URL="https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
-          GEOIP_DAT="${TMPDIR}/zkeenip.dat"
-          GEOSITE_DAT="${TMPDIR}/zkeen.dat"
 
           echo "[1] Скачиваем .dat файлы"
-          curl -L --fail -o "$GEOIP_DAT" "$GEOIP_URL"
-          curl -L --fail -o "$GEOSITE_DAT" "$GEOSITE_URL"
+          curl -L --fail -o "$TMPDIR/zkeenip.dat"   "$GEOIP_URL"
+          curl -L --fail -o "$TMPDIR/zkeen.dat"     "$GEOSITE_URL"
 
           echo "[2] Конвертируем .dat → текстовые списки"
-          ~/go/bin/geodat2srs geoip    -i "$GEOIP_DAT"   -o "$TMPDIR" --prefix "zkeen-ip-"
-          ~/go/bin/geodat2srs geosite  -i "$GEOSITE_DAT" -o "$TMPDIR" --prefix "zkeen-site-"
+          ~/go/bin/geodat2srs geoip   -i "$TMPDIR/zkeenip.dat" -o "$TMPDIR" --prefix "zkeen-ip-"
+          ~/go/bin/geodat2srs geosite -i "$TMPDIR/zkeen.dat"   -o "$TMPDIR" --prefix "zkeen-site-"
 
-          echo "[3] Собираем YAML + сразу генерируем бинарные .mrs (без mihomo!)"
+          echo "[3] Генерируем настоящие бинарные .mrs (только zstd, без mihomo)"
+
           create_mrs() {
             local yaml_file="$1"
             local mrs_file="${yaml_file%.yaml}.mrs"
@@ -54,74 +53,67 @@ jobs:
 
             [[ "$type" == "domain" ]] && type_code=1 || type_code=2
 
-            # сжимаем zstd-19
-            zstd -19 --no-check -f "$yaml_file" -o "${mrs_file}.zst"
+            zstd -19 --no-check -f "$yaml_file" -o "$mrs_file.zst"
 
-            # размер сжатого payload
-            payload_size=$(wc -c < "${mrs_file}.zst")
+            payload_size=$(wc -c < "$mrs_file.zst")
 
-            # пишем 16-байтовый заголовок MRS
+            # 16-байтовый заголовок MRS v1
             printf 'MRS\x01' > "$mrs_file"
-            # тип (uint32 little-endian)
             printf '%b' "$(printf '\\x%02x\\x00\\x00\\x00' $type_code)" >> "$mrs_file"
-            # размер payload (uint64 little-endian)
+            # uint64 little-endian размер payload
             printf '%08x' $payload_size \
               | sed -E 's/(..)(..)(..)(..)(..)(..)(..)(..)/\\x\8\\x\7\\x\6\\x\5\\x\4\\x\3\\x\2\\x\1/' \
               | xargs printf >> "$mrs_file"
 
-            # приклеиваем сжатые данные
-            cat "${mrs_file}.zst" >> "$mrs_file"
-            rm "${mrs_file}.zst" "${yaml_file}"
+            cat "$mrs_file.zst" >> "$mrs_file"
+            rm -f "$mrs_file.zst" "$yaml_file"
 
-            echo "✓ $mrs_file  ($(wc -c < "$mrs_file") байт)"
+            echo "  $mrs_file  ($(wc -c < "$mrs_file") байт)"
           }
 
-          # === geosite (domain) ===
+          # === geosite → domain ===
           for entry in "$TMPDIR"/zkeen-site-*; do
-            [ ! -e "$entry" ] && continue
-            name=$(basename "$entry")
-            category="${name#zkeen-site-}"
+            [[ -e "$entry" ]] || continue
+            category="${entry##*/zkeen-site-}"
             category="${category// /_}"
-            yaml="${GEOSITE_OUTDIR}/${category}.yaml"
+            yaml="$GEOSITE_OUTDIR/${category}.yaml"
 
             echo "payload:" > "$yaml"
-            if [ -d "$entry" ]; then
- then
-              find "$entry" -type f -print0 | xargs -0 cat | grep -v '^$' | sort -u | sed 's/^/  - /' >> "$yaml"
+            if [[ -d "$entry" ]]; then
+              find "$entry" -type f -print0 | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u | sed 's/^/  - /' >> "$yaml"
             else
               grep -v '^$' "$entry" | sort -u | sed 's/^/  - /' >> "$yaml"
             fi
 
-            [ -s "$yaml" ] && create_mrs "$yaml" domain || rm -f "$yaml"
+            [[ -s "$yaml" ]] && create_mrs "$yaml" domain || rm -f "$yaml"
           done
 
-          # === geoip (ipcidr) ===
+          # === geoip → ipcidr ===
           for entry in "$TMPDIR"/zkeen-ip-*; do
-            [ ! -e "$entry" ] && continue
-            name=$(basename "$entry")
-            category="${name#zkeen-ip-}"
+            [[ -e "$entry" ]] || continue
+            category="${entry##*/zkeen-ip-}"
             category="${category// /_}"
-            yaml="${GEOIP_OUTDIR}/${category}.yaml"
+            yaml="$GEOIP_OUTDIR/${category}.yaml"
 
             echo "payload:" > "$yaml"
-            if [ -d "$entry" ]; then
-              find "$entry" -type f -print0 | xargs -0 cat | grep -v '^$' | sort -u | sed 's/^/  - /' >> "$yaml"
+            if [[ -d "$entry" ]]; then
+              find "$entry" -type f -print0 | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u | sed 's/^/  - /' >> "$yaml"
             else
               grep -v '^$' "$entry" | sort -u | sed 's/^/  - /' >> "$yaml"
             fi
 
-            [ -s "$yaml" ] && create_mrs "$yaml" ipcidr || rm -f "$yaml"
+            [[ -s "$yaml" ]] && create_mrs "$yaml" ipcidr || rm -f "$yaml"
           done
 
-          echo "[4] Cleanup"
+          echo "[4] Очистка"
           rm -rf "$TMPDIR"
 
-          echo "Готово! Файлы лежат в lists/geosite/ и lists/geoip/"
+          echo "Готово! MRS-файлы находятся в lists/geosite/ и lists/geoip/"
 
-      - name: Commit & Push results
+      - name: Commit & Push
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lists/
-          git commit -m "auto: update .mrs rules $(date -u +%Y-%m-%d)" || echo "Nothing to commit"
+          git commit -m "auto: update mrs rules $(date -u +%F)" || echo "Нечего коммитить"
           git push
