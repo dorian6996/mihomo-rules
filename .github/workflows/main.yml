@@ -10,20 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Чекаут репозитория
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      # 2. Установка Go (нужен для сборки geo CLI)
+      - name: Setup Go
+        uses: actions/setup-go@v4
         with:
-          python-version: "3.x"
+          go-version: '1.20'
 
-      # Установка PyYAML
-      - name: Install dependencies
+      # 3. Сборка geo CLI из репо MetaCubeX/geo
+      - name: Build geo CLI
         run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
+          mkdir -p tools
+          go install github.com/MetaCubeX/geo/cmd/geo@master
+          export PATH="$PATH:$(go env GOPATH)/bin"
 
+      # 4. Скачиваем ZKEEN .dat файлы
       - name: Download ZKEEN dat files
         run: |
           mkdir -p dat
@@ -34,6 +38,7 @@ jobs:
             -o dat/geoip.dat \
             https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
 
+      # 5. Проверка dat-файлов
       - name: Validate DAT files
         run: |
           for f in dat/*.dat; do
@@ -45,10 +50,17 @@ jobs:
             fi
           done
 
+      # 6. Конвертация dat → YAML
       - name: Convert DAT → YAML
-        run: python3 scripts/convert_dat_to_yaml.py
+        run: |
+          mkdir -p lists/geosite lists/geoip
+          echo "Converting geosite.dat → lists/geosite/"
+          geo convert site -i v2ray -o sing -f lists/geosite/geosite.yaml dat/geosite.dat
+          echo "Converting geoip.dat → lists/geoip/"
+          geo convert ip -i v2ray -o sing -f lists/geoip/geoip.yaml dat/geoip.dat
 
-      - name: Commit & Push
+      # 7. Commit & push
+      - name: Commit & Push changes
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
