@@ -67,15 +67,6 @@ jobs:
           "${HOME}/go/bin/geodat2srs" geoip -i "${TMPDIR}/zkeenip.dat" -o "${TMPDIR}" --prefix "zkeen-ip-"
           "${HOME}/go/bin/geodat2srs" geosite -i "${TMPDIR}/zkeen.dat" -o "${TMPDIR}" --prefix "zkeen-site-"
 
-          # Проверяем, создались ли категории (лог первых 5 строк одной из них)
-          echo "[2.5] Checking extracted categories (sample)..."
-          if [ -d "${TMPDIR}/zkeen-site-youtube" ] || [ -f "${TMPDIR}/zkeen-site-youtube" ]; then
-            echo "Sample youtube category (first 5 lines):"
-            head -5 "${TMPDIR}/zkeen-site-youtube"/* 2>/dev/null | head -5 || echo "No content in youtube"
-          else
-            echo "No youtube category found — check if .dat has it"
-          fi
-
           echo "[3] Generating clean .yaml files for mihomo..."
 
           # Функция для создания YAML
