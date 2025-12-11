@@ -62,7 +62,7 @@ process_prefix() {
     # sanitize category (replace spaces with underscores)
     category="${category// /_}"
 
-    outfile="${destdir}/${category}.mrs"
+    outfile="${destdir}/${category}.msr"
 
     # if entry is a dir, find all files inside; if file — cat it
     if [ -d "$entry" ]; then
