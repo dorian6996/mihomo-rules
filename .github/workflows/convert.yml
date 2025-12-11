@@ -1,4 +1,4 @@
-name: ZKEEN dat → MRS (tested & working)
+name: ZKEEN dat → MRS
 
 on:
   workflow_dispatch:
@@ -8,16 +8,33 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      GOPATH: ${{ github.workspace }}/.gopath
+      GOBIN: ${{ github.workspace }}/.gopath/bin
+      PATH: ${{ github.workspace }}/.gopath/bin:/usr/local/go/bin:${PATH}
+
     steps:
-      - name: Checkout repo
+      - name: Checkout repo (force git, no REST API)
         uses: actions/checkout@v4
-
-      - name: Setup Go 1.22
-        uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+          submodules: false
+          lfs: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-       - name: Build v2dat from source (urlesistiana)
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+
+      - name: Prepare Go path
+        run: |
+          mkdir -p "${GOPATH}/bin"
+
+      - name: Build v2dat from source (urlesistiana)
         run: |
           set -euo pipefail
           git clone --depth 1 https://github.com/urlesistiana/v2dat.git v2dat-src
@@ -25,64 +42,68 @@ jobs:
           go build -o "${GOBIN}/v2dat" .
           "${GOBIN}/v2dat" --help | head -n 5
 
-      - name: Install mihomo CLI (for convert-ruleset)
+      - name: Install mihomo
         run: |
-          go install github.com/MetaCubeX/mihomo/cmd/mihomo@latest
-          mihomo version
+          set -euo pipefail
+          go install github.com/metacubex/mihomo@latest
+          mihomo version || true
 
-      - name: Download ZKEEN .dat files
+      - name: Download ZKEEN dat files (ONLY releases)
         run: |
+          set -euo pipefail
           mkdir -p tmp
-          curl -fsSL -o tmp/zkeenip.dat \
+
+          curl -fsS -L \
+            -o tmp/zkeenip.dat \
             https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
-          curl -fsSL -o tmp/zkeen.dat \
+
+          curl -fsS -L \
+            -o tmp/zkeen.dat \
             https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
+
           ls -lh tmp
 
-      - name: Unpack GeoIP.dat → txt
+      - name: Unpack GeoIP
         run: |
-          mkdir -p unpack/geoip
-          v2dat unpack tmp/zkeenip.dat -o unpack/geoip
-          ls -1 unpack/geoip | wc -l
+          mkdir -p tmp/geoip
+          "${GOBIN}/v2dat" unpack -d tmp/geoip tmp/zkeenip.dat
+          ls -lh tmp/geoip | head
 
-      - name: Unpack GeoSite.dat → txt
+      - name: Unpack GeoSite
         run: |
-          mkdir -p unpack/geosite
-          v2dat unpack tmp/zkeen.dat -o unpack/geosite
-          ls -1 unpack/geosite | wc -l
+          mkdir -p tmp/geosite
+          "${GOBIN}/v2dat" unpack -d tmp/geosite tmp/zkeen.dat
+          ls -lh tmp/geosite | head
 
-      - name: Convert TXT → real MRS (mihomo format)
+      - name: Convert GeoIP TXT → MRS
         run: |
-          mkdir -p lists/geoip lists/geosite
-
-          # GeoIP
-          for txt in unpack/geoip/*.txt; do
-            [[ -f "$txt" ]] || continue
-            name=$(basename "$txt" .txt | tr '[:upper:]' '[:lower:]')
-            mihomo convert-ruleset ipcidr text "$txt" "lists/geoip/${name}.mrs" && \
-              echo "MRS geoip/${name}.mrs ($(du -h "lists/geoip/${name}.mrs" | cut -f1))"
+          mkdir -p rules/geoip
+          shopt -s nullglob || true
+          for f in tmp/geoip/*.txt; do
+            name=$(basename "$f" .txt)
+            mihomo convert-ruleset ipcidr text "$f" "rules/geoip/$name.mrs" \
+            || cp "$f" "rules/geoip/$name.txt"
           done
 
-          # GeoSite
-          for txt in unpack/geosite/*.txt; do
-            [[ -f "$txt" ]] || continue
-            name=$(basename "$txt" .txt | tr '[:upper:]' '[:lower:]')
-            mihomo convert-ruleset domain text "$txt" "lists/geosite/${name}.mrs" && \
-              echo "MRS geosite/${name}.mrs ($(du -h "lists/geosite/${name}.mrs" | cut -f1))"
-          done
-
-      - name: Verify MRS magic (debug)
+      - name: Convert GeoSite TXT → MRS
         run: |
-          echo "Sample MRS headers:"
-          find lists -name "*.mrs" | head -5 | while read f; do
-            echo -n "$f: "
-            hexdump -C "$f" | head -1
+          mkdir -p rules/geosite
+          shopt -s nullglob || true
+          for f in tmp/geosite/*.txt; do
+            name=$(basename "$f" .txt)
+            mihomo convert-ruleset domain text "$f" "rules/geosite/$name.mrs" \
+            || cp "$f" "rules/geosite/$name.txt"
           done
 
       - name: Commit & Push
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lists/
-          git commit -m "auto: zkeen dat → mrs $(date -u +%F_%H-%M)" || echo "No changes"
-          git push
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add rules || true
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Auto-update ZKEEN → MRS"
+            git push || true
+          fi
