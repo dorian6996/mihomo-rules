@@ -1,9 +1,11 @@
-name: ZKEEN → mihomo yaml
+name: ZKEEN DAT to mihomo YAML
 
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+  schedule:
+    - cron: '0 5 * * *'
 
 jobs:
   build:
@@ -11,36 +13,68 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build yaml from zkeen.dat
+      - name: Install Python deps
+        run: pip install v2ray-geoip v2ray-geosite
+
+      - name: Parse ZKEEN DAT to YAML
         run: |
-          set -euo pipefail
+          python -c "
+          import os
+          from v2ray_geoip import load_geoip
+          from v2ray_geosite import load_geosite
+          from pathlib import Path
 
-          mkdir -p lists/geosite lists/geoip
+          ROOT = Path('.')
+          OUTDIR = ROOT / 'lists'
+          GEOSITE_OUT = OUTDIR / 'geosite'
+          GEOIP_OUT = OUTDIR / 'geoip'
 
-          curl -L --fail -L -o zkeenip.dat   https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
-          curl -L --fail -L -o zkeen.dat     https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
+          GEOSITE_OUT.mkdir(parents=True, exist_ok=True)
+          GEOIP_OUT.mkdir(parents=True, exist_ok=True)
 
-          curl -L -o unpack https://github.com/mkcert/v2ray-geo/releases/download/2024.12.10/v2ray-geo-unpack-linux-amd64
-          chmod +x unpack
+          # Скачиваем твои .dat
+          import requests
+          def download(url, path):
+              r = requests.get(url)
+              r.raise_for_status()
+              with open(path, 'wb') as f:
+                  f.write(r.content)
+              print(f'Downloaded {path.name} ({os.path.getsize(path)} bytes)')
 
-          ./unpack zkeen.dat   lists/geosite
-          ./unpack zkeenip.dat lists/geoip
+          download('https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat', ROOT / 'zkeenip.dat')
+          download('https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat', ROOT / 'zkeen.dat')
 
-          for txt in lists/geosite/*.txt lists/geoip/*.txt; do
-            [[ -f "$txt" ]] || continue
-            name=$(basename "$txt" .txt | tr '[:upper:]' '[:lower:]')
-            yaml="${txt%.*}.yaml"
-            echo "payload:" > "$yaml"
-            sed 's/^/  - /' "$txt" >> "$yaml"
-            items=$(wc -l < "$txt")
-            echo "Created $yaml ($items items)"
-            rm "$txt"
-          done
+          # Парсим geoip.dat
+          geoip = load_geoip(ROOT / 'zkeenip.dat')
+          for cat, entries in geoip.items():
+              if not entries: continue
+              yaml_path = GEOIP_OUT / f'{cat.lower()}.yaml'
+              with open(yaml_path, 'w') as f:
+                  f.write('payload:\n')
+                  for entry in entries:
+                      f.write(f'  - {repr(entry)}\n')
+              print(f'Generated geoip/{yaml_path.name} ({len(entries)} items)')
 
-      - name: Commit and push
+          # Парсим geosite.dat
+          geosite = load_geosite(ROOT / 'zkeen.dat')
+          for cat, entries in geosite.items():
+              if not entries: continue
+              yaml_path = GEOSITE_OUT / f'{cat.lower()}.yaml'
+              with open(yaml_path, 'w') as f:
+                  f.write('payload:\n')
+                  for entry in entries:
+                      f.write(f'  - {repr(entry)}\n')
+              print(f'Generated geosite/{yaml_path.name} ({len(entries)} items)')
+
+          # Cleanup
+          os.unlink('zkeenip.dat')
+          os.unlink('zkeen.dat')
+          print('Done! YAML in lists/')
+
+      - name: Commit & Push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lists/
-          git commit -m "zkeen to yaml $(date +%F)" || echo "nothing to commit"
+          git commit -m "zkeen dat to yaml $(date +%F)" || echo "no changes"
           git push
