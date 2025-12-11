@@ -1,4 +1,3 @@
-# .github/workflows/build-rules.yml
 name: Build MRS rulesets
 
 on:
