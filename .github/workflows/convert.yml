@@ -1,49 +1,49 @@
-name: Convert ZKEEN dat → MRS (Mihomo)
+name: Convert ZKEEN dat → MRS
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 * * * *"   # запускается каждый час
+    - cron: "0 */6 * * *"  # каждые 6 часов
 
 jobs:
   convert:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Xray-core
+      - name: Install v2dat
         run: |
-          XRAY_VER=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | grep tag_name | cut -d '"' -f 4)
-          wget -q https://github.com/XTLS/Xray-core/releases/download/${XRAY_VER}/Xray-linux-64.zip
-          unzip Xray-linux-64.zip xray
-          chmod +x xray
-          sudo mv xray /usr/local/bin/xray
+          V2DAT_VER=$(curl -s https://api.github.com/repos/urlesistiana/v2dat/releases/latest | grep tag_name | cut -d '"' -f 4)
+          wget -q https://github.com/urlesistiana/v2dat/releases/download/${V2DAT_VER}/v2dat-linux-64.zip
+          unzip v2dat-linux-64.zip v2dat
+          chmod +x v2dat
+          sudo mv v2dat /usr/local/bin/v2dat
 
       - name: Install Mihomo
         run: |
-          MIHOMO_VER=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | grep tag_name | cut -d '"' -f 4)
-          wget -q https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VER}/mihomo-linux-amd64-${MIHOMO_VER}.deb
-          sudo dpkg -i mihomo-linux-amd64-${MIHOMO_VER}.deb
+          VER=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | grep tag_name | cut -d '"' -f 4)
+          wget -q https://github.com/MetaCubeX/mihomo/releases/download/${VER}/mihomo-linux-amd64-${VER}.deb
+          sudo dpkg -i mihomo-linux-amd64-${VER}.deb
 
-      - name: Download ZKEEN GeoIP / GeoSite dat
+      - name: Download ZKEEN dat files
         run: |
           mkdir -p tmp
           wget -q https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat -O tmp/zkeenip.dat
           wget -q https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat -O tmp/zkeen.dat
 
-      - name: Extract GeoIP TXT
+      - name: Extract GeoIP → TXT
         run: |
           mkdir -p tmp/geoip
-          xray geoip -i tmp/zkeenip.dat -o tmp/geoip
+          v2dat geoip --dump tmp/zkeenip.dat --dir tmp/geoip
 
-      - name: Extract GeoSite TXT
+      - name: Extract GeoSite → TXT
         run: |
           mkdir -p tmp/geosite
-          xray geosite -i tmp/zkeen.dat -o tmp/geosite
+          v2dat geosite --dump tmp/zkeen.dat --dir tmp/geosite
 
-      - name: Convert GeoIP TXT → MRS
+      - name: Convert GeoIP → MRS
         run: |
           mkdir -p rules/geoip
           for f in tmp/geoip/*.txt; do
@@ -52,7 +52,7 @@ jobs:
             mihomo convert-ruleset ipcidr text "$f" "rules/geoip/$name.mrs"
           done
 
-      - name: Convert GeoSite TXT → MRS
+      - name: Convert GeoSite → MRS
         run: |
           mkdir -p rules/geosite
           for f in tmp/geosite/*.txt; do
@@ -61,7 +61,7 @@ jobs:
             mihomo convert-ruleset domain text "$f" "rules/geosite/$name.mrs"
           done
 
-      - name: Commit changes
+      - name: Commit MRS files
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
