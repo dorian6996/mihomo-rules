@@ -1,4 +1,4 @@
-name: Update ZKeen → Per-category MRS
+name: Update ZKeen → Per-category MSR
 
 on:
   schedule:
@@ -8,64 +8,38 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           persist-credentials: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v4
         with:
           go-version: "1.21"
-          cache: true
-      
-      # Кэш для Go модулей
-      - name: Cache Go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/go/bin
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-      
-      - name: Prepare folders
+
+      - name: Prepare & make script executable
         run: |
-          mkdir -p scripts lists lists/geosite lists/geoip
+          mkdir -p lists geoip geosite
           chmod +x scripts/convert.sh
-      
-      # Добавляем переменные окружения для curl
+
       - name: Run converter
         env:
           HOME: /home/runner
-          CURL_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
         run: |
           ./scripts/convert.sh
-      
-      - name: Verify generated files
-        run: |
-          echo "Generated GeoIP files:"
-          ls -lh lists/geoip/ || echo "No GeoIP files"
-          echo ""
-          echo "Generated GeoSite files:"
-          ls -lh lists/geosite/ || echo "No GeoSite files"
-      
-      - name: Commit per-category MRS
+
+      - name: Commit per-category lists
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lists
-          
+          git add lists || true
+          # remove previously generated files that no longer exist: detect deleted files
+          git ls-files --others --exclude-standard --ignored -z || true
           if ! git diff --staged --quiet; then
-            git commit -m "Auto-update per-category MRS lists [$(date +'%Y-%m-%d %H:%M:%S')]"
+            git commit -m "Auto-update per-category MSR lists"
             git push
-            echo "✓ Changes committed and pushed"
           else
-            echo "ℹ No changes to commit"
+            echo "No changes to commit"
           fi
