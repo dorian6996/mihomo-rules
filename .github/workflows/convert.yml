@@ -9,8 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      GOPATH: ${{ runner.home }}/go
-      PATH: /usr/local/go/bin:${{ runner.home }}/go/bin:${PATH}
+      GOPATH: $HOME/go
+      PATH: /usr/local/go/bin:$HOME/go/bin:${PATH}
 
     steps:
       - name: Checkout repo
