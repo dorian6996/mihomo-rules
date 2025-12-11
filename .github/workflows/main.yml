@@ -1,4 +1,4 @@
-name: Update ZKeen YAML Rules
+name: Update ZKEEN YAML Rules
 
 on:
   schedule:
@@ -10,26 +10,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Чекаут репозитория
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install Python
+      # 2. Установка Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
 
-      - name: Create dat folder
-        run: mkdir -p dat
-
+      # 3. Создаём папку dat и скачиваем ZKEEN dat файлы
       - name: Download ZKEEN dat files
         run: |
-          curl -L --fail --retry 5 --retry-delay 5 -o dat/geosite.dat https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
-          curl -L --fail --retry 5 --retry-delay 5 -o dat/geoip.dat https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
+          mkdir -p dat
+          echo "Downloading geosite.dat..."
+          curl -L --fail --retry 5 --retry-delay 5 \
+            -o dat/geosite.dat \
+            https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
+          echo "Downloading geoip.dat..."
+          curl -L --fail --retry 5 --retry-delay 5 \
+            -o dat/geoip.dat \
+            https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
 
-      - name: Convert dat → YAML
-        run: python3 scripts/convert_dat_to_yaml.py
+      # 4. Проверка dat-файлов
+      - name: Validate DAT files
+        run: |
+          for f in dat/*.dat; do
+            if [ ! -s "$f" ]; then
+              echo "ERROR: $f is empty" && exit 1
+            fi
+            if grep -q "<html" "$f"; then
+              echo "ERROR: $f contains HTML (probably 503 page)" && exit 1
+            fi
+          done
 
-      - name: Commit and push
+      # 5. Конвертация в YAML
+      - name: Convert DAT → YAML
+        run: |
+          mkdir -p lists/geosite lists/geoip
+          python3 scripts/convert_dat_to_yaml.py
+
+      # 6. Commit & Push
+      - name: Commit and Push
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
