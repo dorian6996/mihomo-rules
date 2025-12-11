@@ -10,24 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Чекаут репозитория
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2. Установка Go (нужен для сборки geo CLI)
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
 
-      # 3. Сборка geo CLI из репо MetaCubeX/geo
-      - name: Build geo CLI
+      - name: Install geo CLI
         run: |
-          mkdir -p tools
-          go install github.com/MetaCubeX/geo/cmd/geo@master
+          go install github.com/metacubex/geo/cmd/geo@master
           export PATH="$PATH:$(go env GOPATH)/bin"
 
-      # 4. Скачиваем ZKEEN .dat файлы
       - name: Download ZKEEN dat files
         run: |
           mkdir -p dat
@@ -38,7 +33,6 @@ jobs:
             -o dat/geoip.dat \
             https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
 
-      # 5. Проверка dat-файлов
       - name: Validate DAT files
         run: |
           for f in dat/*.dat; do
@@ -50,7 +44,6 @@ jobs:
             fi
           done
 
-      # 6. Конвертация dat → YAML
       - name: Convert DAT → YAML
         run: |
           mkdir -p lists/geosite lists/geoip
@@ -59,8 +52,7 @@ jobs:
           echo "Converting geoip.dat → lists/geoip/"
           geo convert ip -i v2ray -o sing -f lists/geoip/geoip.yaml dat/geoip.dat
 
-      # 7. Commit & push
-      - name: Commit & Push changes
+      - name: Commit & Push
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
