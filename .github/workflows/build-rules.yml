@@ -1,1 +1,83 @@
+name: Build YAML rulesets (mihomo compatible)
 
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 4 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install geodat2srs
+        run: go install github.com/runetfreedom/geodat2srs@latest
+
+      - name: Build clean .yaml rules
+        run: |
+          set -euo pipefail
+
+          ROOT="$(pwd)"
+          TMPDIR="${ROOT}/tmp_dat"
+          OUTDIR="${ROOT}/lists"
+          GEOSITE_OUT="${OUTDIR}/geosite"
+          GEOIP_OUT="${OUTDIR}/geoip"
+
+          mkdir -p "$TMPDIR" "$GEOSITE_OUT" "$GEOIP_OUT"
+
+          echo "Downloading .dat files..."
+          curl -L --fail -o "$TMPDIR/zkeenip.dat"   "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
+          curl -L --fail -o "$TMPDIR/zkeen.dat"     "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
+
+          echo "Converting .dat → text lists..."
+          ~/go/bin/geodat2srs geoip   -i "$TMPDIR/zkeen.dat" -o "$TMPDIR" --prefix "zkeen-site-"
+          ~/go/bin/geodat2srs geosite -i "$TMPDIR/zkeen.dat" -o "$TMPDIR" --prefix "zkeen-ip-"
+
+          echo "Creating clean .yaml files (mihomo payload format)"
+
+          for entry in "$TMPDIR"/zkeen-site-* "$TMPDIR"/zkeen-ip-*; do
+            [[ -e "$entry" ]] || continue
+
+            # Чистое имя: akamai.srs → akamai, cloudflare.srs → cloudflare
+            name="${entry##*/zkeen-*-}"
+            clean="${name%%.*}"           # убираем .srs и всё после
+            clean="${clean// /_}"            # пробелы → _
+            clean="${clean,,}"               # в нижний регистр
+            clean="${clean#site-}"           # если остался site- (на всякий случай)
+
+            # Определяем папку и поведение
+            if [[ "$entry" == *"zkeen-site-"* ]]; then
+              target_dir="$GEOSITE_OUT"
+              behavior="domain"
+            else
+              target_dir="$GEOIP_OUT"
+              behavior="ipcidr"
+            fi
+
+            yaml_file="$target_dir/${clean}.yaml"
+
+            echo "payload:" > "$yaml_file"
+            if [[ -d "$entry" ]]; then
+              find "$entry" -type f -print0 | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u | sed 's/^/s/^/  - /'
+            else
+              grep -v '^$' "$entry" | sort -u | sed 's/^/  - /
+            fi >> "$yaml_file"
+
+            echo "  $clean.yaml ($(wc -l < "$yaml_file") lines)"
+          done
+
+          rm -rf "$TMPDIR"
+
+          echo "Готово! YAML-файлы лежат в lists/geosite и lists/geoip"
+
+      - name: Commit & Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lists/
+          git commit -m "auto: update yaml rules $(date +%F)" || echo "Nothing to commit"
+          git push
