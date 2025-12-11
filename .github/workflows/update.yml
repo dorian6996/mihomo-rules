@@ -1,4 +1,4 @@
-name: Update ZKeen → Per-category MRS
+name: Update ZKeen → Per-category MSR
 
 on:
   schedule:
@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -23,7 +24,7 @@ jobs:
       - name: Prepare folders
         run: |
           mkdir -p scripts lists lists/geosite lists/geoip
-          chmod +x scripts/convert.sh
+          chmod +x scripts/convert.sh || true
 
       - name: Run converter
         env:
@@ -31,13 +32,13 @@ jobs:
         run: |
           ./scripts/convert.sh
 
-      - name: Commit per-category MRS
+      - name: Commit per-category lists
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lists
           if ! git diff --staged --quiet; then
-            git commit -m "Auto-update per-category MRS lists"
+            git commit -m "Auto-update per-category MSR lists"
             git push
           else
             echo "No changes"
