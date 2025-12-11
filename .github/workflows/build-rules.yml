@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 3 * * * *'
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
           sudo apt-get install -y zstd
           go install github.com/runetfreedom/geodat2srs@latest
 
-      - name: Build MRS files
+      - name: Build clean-named MRS files
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
@@ -40,11 +40,11 @@ jobs:
           curl -L --fail -o "$TMPDIR/zkeenip.dat"   "$GEOIP_URL"
           curl -L --fail -o "$TMPDIR/zkeen.dat"     "$GEOSITE_URL"
 
-          echo "[2] Конвертируем .dat → текстовые списки"
+          echo "[2] Конвертируем .dat → списки"
           ~/go/bin/geodat2srs geoip   -i "$TMPDIR/zkeenip.dat" -o "$TMPDIR" --prefix "zkeen-ip-"
           ~/go/bin/geodat2srs geosite -i "$TMPDIR/zkeen.dat"   -o "$TMPDIR" --prefix "zkeen-site-"
 
-          echo "[3] Генерируем настоящие бинарные .mrs (только zstd, без mihomo)"
+          echo "[3] Создаём бинарные .mrs с чистыми именами (youtube.mrs, oracle.mrs и т.д.)"
 
           create_mrs() {
             local yaml_file="$1"
@@ -54,28 +54,29 @@ jobs:
             [[ "$type" == "domain" ]] && type_code=1 || type_code=2
 
             zstd -19 --no-check -f "$yaml_file" -o "$mrs_file.zst"
-
             payload_size=$(wc -c < "$mrs_file.zst")
 
-            # 16-байтовый заголовок MRS v1
+            # 16-байт заголовок MRS v1
             printf 'MRS\x01' > "$mrs_file"
             printf '%b' "$(printf '\\x%02x\\x00\\x00\\x00' $type_code)" >> "$mrs_file"
-            # uint64 little-endian размер payload
             printf '%08x' $payload_size \
               | sed -E 's/(..)(..)(..)(..)(..)(..)(..)(..)/\\x\8\\x\7\\x\6\\x\5\\x\4\\x\3\\x\2\\x\1/' \
               | xargs printf >> "$mrs_file"
-
             cat "$mrs_file.zst" >> "$mrs_file"
             rm -f "$mrs_file.zst" "$yaml_file"
 
             echo "  $mrs_file  ($(wc -c < "$mrs_file") байт)"
           }
 
-          # === geosite → domain ===
+          # === geosite (domain) — чистые имена ===
           for entry in "$TMPDIR"/zkeen-site-*; do
             [[ -e "$entry" ]] || continue
+            # Убираем префикс и всё после первой точки (например akamai.srs → akamai)
             category="${entry##*/zkeen-site-}"
-            category="${category// /_}"
+            category="${category%%.*}"           # отрезаем .srs и другие расширения
+            category="${category// /_}"           # пробелы → _
+            category="${category,,}"              # в нижний регистр
+
             yaml="$GEOSITE_OUTDIR/${category}.yaml"
 
             echo "payload:" > "$yaml"
@@ -88,11 +89,14 @@ jobs:
             [[ -s "$yaml" ]] && create_mrs "$yaml" domain || rm -f "$yaml"
           done
 
-          # === geoip → ipcidr ===
+          # === geoip (ipcidr) — чистые имена ===
           for entry in "$TMPDIR"/zkeen-ip-*; do
             [[ -e "$entry" ]] || continue
             category="${entry##*/zkeen-ip-}"
+            category="${category%%.*}"
             category="${category// /_}"
+            category="${category,,}"
+
             yaml="$GEOIP_OUTDIR/${category}.yaml"
 
             echo "payload:" > "$yaml"
@@ -105,10 +109,8 @@ jobs:
             [[ -s "$yaml" ]] && create_mrs "$yaml" ipcidr || rm -f "$yaml"
           done
 
-          echo "[4] Очистка"
+          echo "[4] Готово!"
           rm -rf "$TMPDIR"
-
-          echo "Готово! MRS-файлы находятся в lists/geosite/ и lists/geoip/"
 
       - name: Commit & Push
         run: |
