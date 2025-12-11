@@ -1,30 +1,120 @@
-name: Build mihomo yaml rules
+name: Build YAML Rulesets from DAT (mihomo compatible)
 
-on: [push, workflow_dispatch, schedule]
+on:
+  workflow_dispatch:  # Ручной запуск
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 4 * * *'  # Каждый день в 04:00 UTC
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Convert .dat → .yaml directly
+      - name: Install geodat2srs
         run: |
-          mkdir -p lists/geosite lists/geoip
+          go install github.com/runetfreedom/geodat2srs@latest
 
-          # Скачиваем актуальные .dat
-          curl -L -L -o zkeenip.dat   https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
-          curl -L -o zkeen.dat       https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
-
-          # Прямое преобразование dat → yaml (одна команда на файл)
-          docker run --rm -v $(pwd):/work ghcr.io/metacubex/geoconvert:latest \
-            geoip   -i zkeenip.dat   -o lists/geoip   --mihomo
-          docker run --rm -v $(pwd):/work ghcr.io/metacubex/geoconvert:latest \
-            geosite -i zkeen.dat     -o lists/geosite --mihomo
-
-      - name: Commit & Push
+      - name: Download DAT and build YAML
         run: |
-          git config --global user.name "bot"
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          ROOT="$(pwd)"
+          TMPDIR="${ROOT}/tmp_dat"
+          OUTDIR="${ROOT}/lists"
+          GEOSITE_OUTDIR="${OUTDIR}/geosite"
+          GEOIP_OUTDIR="${OUTDIR}/geoip"
+
+          mkdir -p "$TMPDIR" "$GEOSITE_OUTDIR" "$GEOIP_OUTDIR"
+
+          # Скачиваем .dat файлы
+          echo "[1] Downloading .dat files..."
+          curl -L --fail --connect-timeout 30 --max-time 300 -o "${TMPDIR}/zkeenip.dat" \
+            "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
+          curl -L --fail --connect-timeout 30 --max-time 300 -o "${TMPDIR}/zkeen.dat" \
+            "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
+
+          # Конвертируем .dat в текстовые списки (geodat2srs извлекает категории)
+          echo "[2] Converting .dat to text lists..."
+          "${HOME}/go/bin/geodat2srs" geoip -i "${TMPDIR}/zkeenip.dat" -o "${TMPDIR}" --prefix "zkeen-ip-"
+          "${HOME}/go/bin/geodat2srs" geosite -i "${TMPDIR}/zkeen.dat" -o "${TMPDIR}" --prefix "zkeen-site-"
+
+          echo "[3] Generating clean .yaml files for mihomo (payload format)..."
+
+          # Функция для создания YAML из текста
+          create_yaml() {
+            local text_file="$1"
+            local yaml_file="$2"
+            if [ ! -s "$text_file" ]; then
+              echo "Skipped empty $yaml_file"
+              return 0
+            fi
+            echo "payload:" > "$yaml_file"
+            sed 's/^/  - /' "$text_file" >> "$yaml_file"
+            lines=$(wc -l < "$yaml_file")
+            echo "  Generated $yaml_file ($lines lines)"
+          }
+
+          # === Geosite (domain) ===
+          for entry in "${TMPDIR}"/zkeen-site-*; do
+            [[ -e "$entry" ]] || continue
+            # Чистое имя: zkeen-site-youtube.srs → youtube
+            category="${entry##*/zkeen-site-}"
+            category="${category%%.*}"  # Убираем .srs и после
+            category="${category// /_}"  # Пробелы в _
+            category="${category,,}"     # Нижний регистр
+
+            text_file="${GEOSITE_OUTDIR}/${category}.txt"
+            yaml_file="${GEOSITE_OUTDIR}/${category}.yaml"
+
+            # Собираем уникальный текст
+            if [[ -d "$entry" ]]; then
+              find "$entry" -type f -print0 2>/dev/null | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u > "$text_file"
+            else
+              grep -v '^$' "$entry" 2>/dev/null | sort -u > "$text_file"
+            fi
+
+            create_yaml "$text_file" "$yaml_file"
+            rm -f "$text_file"
+          done
+
+          # === GeoIP (ipcidr) ===
+          for entry in "${TMPDIR}"/zkeen-ip-*; do
+            [[ -e "$entry" ]] || continue
+            category="${entry##*/zkeen-ip-}"
+            category="${category%%.*}"
+            category="${category// /_}"
+            category="${category,,}"
+
+            text_file="${GEOIP_OUTDIR}/${category}.txt"
+            yaml_file="${GEOIP_OUTDIR}/${category}.yaml"
+
+            if [[ -d "$entry" ]]; then
+              find "$entry" -type f -print0 2>/dev/null | xargs -0 cat 2>/dev/null | grep -v '^$' | sort -u > "$text_file"
+            else
+              grep -v '^$' "$entry" 2>/dev/null | sort -u > "$text_file"
+            fi
+
+            create_yaml "$text_file" "$yaml_file"
+            rm -f "$text_file"
+          done
+
+          # Cleanup
+          rm -rf "$TMPDIR"
+          echo "Done! YAML files in lists/geosite/ and lists/geoip/"
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lists/
-          git commit -m "update yaml $(date +%F)" || exit 0
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "auto: update yaml rules from dat $(date -u +%Y-%m-%d)"
+            git push
+          fi
