@@ -13,13 +13,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install dat2yaml (converter)
-        run: |
-          mkdir -p tools
-          curl -L --fail --retry 5 --retry-delay 5 \
-            -o tools/dat2yaml \
-            https://github.com/Loyalsoldier/geoip/releases/latest/download/dat2yaml-linux-amd64
-          chmod +x tools/dat2yaml
+      - name: Install dat2yaml
+  run: |
+    mkdir -p tools
+    curl -L --fail --retry 5 --retry-delay 5 \
+      -o tools/dat2yaml \
+      https://raw.githubusercontent.com/MetaCubeX/meta-parser/main/tools/dat2yaml-linux-amd64
+    chmod +x tools/dat2yaml
+
 
       - name: Download ZKEEN DAT files
         run: |
