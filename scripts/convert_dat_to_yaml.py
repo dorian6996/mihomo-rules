@@ -20,3 +20,4 @@ def convert(dat_file, output_subdir):
 
 convert(os.path.join(DAT_DIR, "geosite.dat"), "geosite")
 convert(os.path.join(DAT_DIR, "geoip.dat"), "geoip")
+
