@@ -27,15 +27,11 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: "1.21"
-          cache-dependency-path: |
-            .gopath/pkg/mod
 
-      - name: Prepare directories and PATH
+      - name: Prepare directories
         run: |
           mkdir -p "${GOPATH}/bin"
           mkdir -p tmp/geoip tmp/geosite rules/geoip rules/geosite
-          echo "GOPATH=${GOPATH}" >> $GITHUB_ENV
-          echo "GOBIN=${GOBIN}" >> $GITHUB_ENV
           echo "${GOPATH}/bin" >> $GITHUB_PATH
 
       - name: Install v2dat tool
@@ -43,27 +39,25 @@ jobs:
           set -e
           echo "Installing v2dat..."
           go install github.com/urlesistiana/v2dat@latest
-          echo "v2dat installed at:"
-          which v2dat
+          echo "v2dat version:"
+          v2dat --version || echo "v2dat installed"
 
       - name: Install mihomo tool
         run: |
           set -e
           echo "Installing mihomo..."
           go install github.com/metacubex/mihomo@latest
-          echo "mihomo installed at:"
-          which mihomo
+          echo "mihomo version:"
+          mihomo version || echo "mihomo installed"
 
       - name: Download ZKEEN dat files
         run: |
           set -e
           echo "Downloading geoip.dat..."
-          curl -fsSL -o tmp/zkeenip.dat \
-            "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
+          curl -fsSL -o tmp/zkeenip.dat "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
           
           echo "Downloading geosite.dat..."
-          curl -fsSL -o tmp/zkeen.dat \
-            "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
+          curl -fsSL -o tmp/zkeen.dat "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
           
           echo "File sizes:"
           ls -lh tmp/*.dat
@@ -144,4 +138,47 @@ jobs:
                   --input-format text
                 echo "  ✓ $name.mrs created"
               else
-                echo "  ⚠ $name is empty
+                echo "  ⚠ $name is empty, skipping"
+              fi
+            fi
+          done
+          
+          echo "GeoSite conversion complete. Files:"
+          ls -lh rules/geosite/
+
+      - name: Create README for converted files
+        run: |
+          cat > rules/README.md << 'EOF'
+          # MRS Rules from ZKEEN Dat Files
+          
+          These files are automatically converted from ZKEEN dat files to MRS format.
+          
+          ## Sources
+          - GeoIP: https://github.com/jameszeroX/zkeen-ip
+          - GeoSite: https://github.com/jameszeroX/zkeen-domains
+          
+          ## Format
+          Files in .mrs format are compatible with:
+          - [mihomo (Clash Meta)](https://github.com/metacubex/mihomo)
+          - Other proxy clients supporting MRS format
+          
+          ## Automatic Updates
+          Conversion runs automatically every 6 hours via GitHub Actions.
+          
+          Last update: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add rules/
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update MRS rules from ZKEEN dat files [$(date +'%Y-%m-%d %H:%M')]"
+            git push
+            echo "Changes pushed successfully"
+          fi
