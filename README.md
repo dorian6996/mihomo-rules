@@ -1,6 +1,6 @@
 # Mihomo Rules — Automatic MSR Generation
 
-This repository automatically converts **ZKeen .dat files** into **binary MSR format** for use with Mihomo.
+This repository automatically converts **ZKeen .dat files** into **binary MRS format** for use with Mihomo.
 
 ---
 
