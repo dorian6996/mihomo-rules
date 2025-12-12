@@ -116,13 +116,13 @@ jobs:
                 line_count=$(wc -l < "rules/geoip/$name.txt")
                 echo "  ✓ TXT saved ($line_count IP rules)"
                 
-                # 2. Создаем YAML файл в формате payload (как у metacubex)
+                # 2. Создаем YAML файл в формате payload (как у metacubex) - БЕЗ кавычек
                 echo "payload:" > "rules/geoip/$name.yaml"
                 cat "rules/geoip/$name.txt" | while read line; do
-                  # Добавляем каждое правило как элемент списка
-                  echo "  - \"$line\"" >> "rules/geoip/$name.yaml"
+                  # Добавляем каждое правило без кавычек, как у metacubex
+                  echo "  - $line" >> "rules/geoip/$name.yaml"
                 done
-                echo "  ✓ YAML created (payload format)"
+                echo "  ✓ YAML created (payload format, no quotes)"
                 
                 # 3. Создаем MRS файл ТОЛЬКО через mihomo convert-ruleset
                 echo "  Creating MRS via mihomo..."
@@ -156,13 +156,19 @@ jobs:
                 line_count=$(wc -l < "rules/geosite/$name.txt")
                 echo "  ✓ TXT saved ($line_count domain rules)"
                 
-                # 2. Создаем YAML файл в формате payload (как у metacubex)
+                # 2. Создаем YAML файл в формате payload (как у metacubex) - + в начале, без кавычек
                 echo "payload:" > "rules/geosite/$name.yaml"
                 cat "rules/geosite/$name.txt" | while read line; do
-                  # Добавляем каждое правило как элемент списка
-                  echo "  - \"$line\"" >> "rules/geosite/$name.yaml"
+                  # Определяем, нужно ли добавлять + префикс
+                  if [[ "$line" =~ ^(\||\@|\*\.|\+\.|\.) ]]; then
+                    # Уже есть спец. символ, добавляем без изменений
+                    echo "  - $line" >> "rules/geosite/$name.yaml"
+                  else
+                    # Добавляем + префикс для суффиксных правил, как у metacubex
+                    echo "  - +.$line" >> "rules/geosite/$name.yaml"
+                  fi
                 done
-                echo "  ✓ YAML created (payload format)"
+                echo "  ✓ YAML created (payload format, + prefix, no quotes)"
                 
                 # 3. Создаем MRS файл ТОЛЬКО через mihomo convert-ruleset
                 echo "  Creating MRS via mihomo..."
@@ -194,7 +200,6 @@ jobs:
           echo "  YAML files: $(ls rules/geosite/*.yaml 2>/dev/null | wc -l)"
           echo "  MRS files:  $(ls rules/geosite/*.mrs 2>/dev/null | wc -l)"
 
-
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
@@ -205,7 +210,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: update rules (TXT/YAML/MRS via mihomo only) [$(date +'%Y-%m-%d %H:%M')]"
+            git commit -m "chore: update rules with proper formatting like metacubex [$(date +'%Y-%m-%d %H:%M')]"
             git push
             echo "Changes pushed successfully"
           fi
