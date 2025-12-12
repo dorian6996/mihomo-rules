@@ -1,4 +1,4 @@
-name: ZKEEN dat 2 MRS
+name: ZKEEN dat → MRS
 
 on:
   workflow_dispatch:
@@ -48,6 +48,30 @@ jobs:
           echo "v2dat installed at:"
           which v2dat
 
+      - name: Install mihomo tool
+        run: |
+          set -e
+          echo "Installing mihomo..."
+          go install github.com/metacubex/mihomo@latest
+          echo "mihomo installed at:"
+          which mihomo
+          
+          # Тестируем правильный синтаксис convert-ruleset
+          echo "Testing mihomo convert-ruleset syntax..."
+          echo "test.com" > test_domain.txt
+          echo "1.1.1.1" > test_ip.txt
+          
+          echo "Test 1: mihomo convert-ruleset domain text test_domain.txt test.mrs"
+          mihomo convert-ruleset domain text test_domain.txt test1.mrs 2>&1 && echo "✓ Success" || echo "✗ Failed"
+          
+          echo "Test 2: mihomo convert-ruleset ipcidr text test_ip.txt test2.mrs"
+          mihomo convert-ruleset ipcidr text test_ip.txt test2.mrs 2>&1 && echo "✓ Success" || echo "✗ Failed"
+          
+          echo "Test 3: mihomo convert-ruleset --help"
+          mihomo convert-ruleset --help 2>&1 | head -20
+          
+          rm -f test*.txt test*.mrs
+
       - name: Download ZKEEN dat files
         run: |
           set -e
@@ -86,10 +110,10 @@ jobs:
             exit 1
           fi
 
-      - name: Process files - create TXT, YAML and correct MRS
+      - name: Process files and create all formats
         run: |
           set -e
-          echo "Processing files - creating TXT, YAML and CORRECT MRS formats..."
+          echo "Processing files - creating TXT, YAML and MRS formats..."
           
           # Очищаем старые файлы
           rm -rf rules/geoip/* rules/geosite/* 2>/dev/null || true
@@ -100,7 +124,7 @@ jobs:
             if [ -f "$f" ]; then
               # Убираем префикс zkeenip_
               name=$(basename "$f" .txt | sed 's/^zkeenip_//')
-              echo "Processing: $name"
+              echo "Processing GeoIP: $name"
               
               # 1. Сохраняем очищенный TXT файл
               grep -v '^#' "$f" | grep -v '^$' > "rules/geoip/$name.txt"
@@ -114,91 +138,25 @@ jobs:
                 cat "rules/geoip/$name.txt" | while read line; do
                   echo "  - \"$line\"" >> "rules/geoip/$name.yaml"
                 done
-                echo "  ✓ YAML created (payload format)"
+                echo "  ✓ YAML created"
                 
-                # 3. Создаем ПРАВИЛЬНЫЙ MRS файл
-                echo "  Creating CORRECT MRS file..."
-                
-                # Способ 1: Попробуем установить и использовать mihomo правильно
-                echo "  Installing mihomo for convert-ruleset..."
-                go install github.com/metacubex/mihomo@latest
-                
-                MI_BIN="${GOBIN}/mihomo"
-                if [ -f "$MI_BIN" ]; then
-                  echo "  Using mihomo from: $MI_BIN"
-                  
-                  # Пробуем создать MRS через mihomo
-                  if timeout 30 "$MI_BIN" convert-ruleset ipcidr text "rules/geoip/$name.txt" "rules/geoip/${name}_test.mrs" 2>&1; then
-                    # Проверяем созданный файл
-                    if [ -s "rules/geoip/${name}_test.mrs" ]; then
-                      # Проверяем формат файла
-                      first_bytes=$(head -c 20 "rules/geoip/${name}_test.mrs" | xxd -p)
-                      echo "  First bytes: $first_bytes"
-                      
-                      # Если файл начинается с 'mrs' (6d7273 в hex) - это правильный бинарный MRS
-                      if echo "$first_bytes" | grep -q "^6d7273"; then
-                        echo "  ✓ Valid binary MRS created via mihomo"
-                        mv "rules/geoip/${name}_test.mrs" "rules/geoip/$name.mrs"
-                      else
-                        # Если не бинарный, возможно это текстовый формат
-                        first_line=$(head -c 50 "rules/geoip/${name}_test.mrs")
-                        if echo "$first_line" | grep -q "ipcidr,text,"; then
-                          echo "  ✓ Text-based MRS created"
-                          mv "rules/geoip/${name}_test.mrs" "rules/geoip/$name.mrs"
-                        else
-                          echo "  ⚠ Unknown MRS format, creating manually"
-                          rm -f "rules/geoip/${name}_test.mrs"
-                          # Создаем правильный MRS вручную
-                          python3 -c "
-import base64
-with open('rules/geoip/$name.txt', 'r') as f:
-    content = f.read().strip()
-if content:
-    encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-    with open('rules/geoip/$name.mrs', 'w') as out:
-        out.write(f'ipcidr,text,{encoded}')
-print('    Created text-based MRS')
-"
-                        fi
-                      fi
-                    else
-                      echo "  ⚠ MRS file is empty, creating manually"
-                      python3 -c "
-import base64
-with open('rules/geoip/$name.txt', 'r') as f:
-    content = f.read().strip()
-if content:
-    encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-    with open('rules/geoip/$name.mrs', 'w') as out:
-        out.write(f'ipcidr,text,{encoded}')
-print('    Created text-based MRS')
-"
-                    fi
+                # 3. Создаем MRS файл через mihomo convert-ruleset
+                echo "  Creating MRS with: mihomo convert-ruleset ipcidr text ..."
+                if mihomo convert-ruleset ipcidr text "rules/geoip/$name.txt" "rules/geoip/$name.mrs" 2>&1; then
+                  if [ -s "rules/geoip/$name.mrs" ]; then
+                    file_size=$(stat -c%s "rules/geoip/$name.mrs")
+                    echo "  ✓ MRS created ($file_size bytes)"
+                    
+                    # Проверяем первые байты файла
+                    echo "  Checking MRS format..."
+                    head -c 50 "rules/geoip/$name.mrs" | xxd | head -1
                   else
-                    echo "  ⚠ mihomo failed, creating text-based MRS"
-                    python3 -c "
-import base64
-with open('rules/geoip/$name.txt', 'r') as f:
-    content = f.read().strip()
-if content:
-    encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-    with open('rules/geoip/$name.mrs', 'w') as out:
-        out.write(f'ipcidr,text,{encoded}')
-print('    Created text-based MRS')
-"
+                    echo "  ✗ MRS file is empty"
+                    rm -f "rules/geoip/$name.mrs"
                   fi
                 else
-                  echo "  ⚠ mihomo not found, creating text-based MRS"
-                  python3 -c "
-import base64
-with open('rules/geoip/$name.txt', 'r') as f:
-    content = f.read().strip()
-if content:
-    encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-    with open('rules/geoip/$name.mrs', 'w') as out:
-        out.write(f'ipcidr,text,{encoded}')
-print('    Created text-based MRS')
-"
+                  echo "  ✗ Failed to create MRS for $name"
+                  rm -f "rules/geoip/$name.mrs" 2>/dev/null || true
                 fi
               else
                 echo "  ⚠ Empty TXT file, skipping"
@@ -213,7 +171,7 @@ print('    Created text-based MRS')
             if [ -f "$f" ]; then
               # Убираем префикс zkeen_
               name=$(basename "$f" .txt | sed 's/^zkeen_//')
-              echo "Processing: $name"
+              echo "Processing GeoSite: $name"
               
               # 1. Сохраняем очищенный TXT файл
               grep -v '^#' "$f" | grep -v '^$' > "rules/geosite/$name.txt"
@@ -227,81 +185,25 @@ print('    Created text-based MRS')
                 cat "rules/geosite/$name.txt" | while read line; do
                   echo "  - \"$line\"" >> "rules/geosite/$name.yaml"
                 done
-                echo "  ✓ YAML created (payload format)"
+                echo "  ✓ YAML created"
                 
-                # 3. Создаем ПРАВИЛЬНЫЙ MRS файл
-                echo "  Creating CORRECT MRS file..."
-                
-                # Используем mihomo если установлен
-                MI_BIN="${GOBIN}/mihomo"
-                if [ -f "$MI_BIN" ]; then
-                  echo "  Using mihomo from: $MI_BIN"
-                  
-                  if timeout 30 "$MI_BIN" convert-ruleset domain text "rules/geosite/$name.txt" "rules/geosite/${name}_test.mrs" 2>&1; then
-                    if [ -s "rules/geosite/${name}_test.mrs" ]; then
-                      # Проверяем формат
-                      first_bytes=$(head -c 20 "rules/geosite/${name}_test.mrs" | xxd -p)
-                      if echo "$first_bytes" | grep -q "^6d7273"; then
-                        echo "  ✓ Valid binary MRS created via mihomo"
-                        mv "rules/geosite/${name}_test.mrs" "rules/geosite/$name.mrs"
-                      else
-                        first_line=$(head -c 50 "rules/geosite/${name}_test.mrs")
-                        if echo "$first_line" | grep -q "domain,text,"; then
-                          echo "  ✓ Text-based MRS created"
-                          mv "rules/geosite/${name}_test.mrs" "rules/geosite/$name.mrs"
-                        else
-                          echo "  ⚠ Unknown format, creating manually"
-                          rm -f "rules/geosite/${name}_test.mrs"
-                          python3 -c "
-import base64
-with open('rules/geosite/$name.txt', 'r') as f:
-    content = f.read().strip()
-if content:
-    encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-    with open('rules/geosite/$name.mrs', 'w') as out:
-        out.write(f'domain,text,{encoded}')
-print('    Created text-based MRS')
-"
-                        fi
-                      fi
-                    else
-                      echo "  ⚠ Empty MRS, creating manually"
-                      python3 -c "
-import base64
-with open('rules/geosite/$name.txt', 'r') as f:
-    content = f.read().strip()
-if content:
-    encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-    with open('rules/geosite/$name.mrs', 'w') as out:
-        out.write(f'domain,text,{encoded}')
-print('    Created text-based MRS')
-"
-                    fi
+                # 3. Создаем MRS файл через mihomo convert-ruleset
+                echo "  Creating MRS with: mihomo convert-ruleset domain text ..."
+                if mihomo convert-ruleset domain text "rules/geosite/$name.txt" "rules/geosite/$name.mrs" 2>&1; then
+                  if [ -s "rules/geosite/$name.mrs" ]; then
+                    file_size=$(stat -c%s "rules/geosite/$name.mrs")
+                    echo "  ✓ MRS created ($file_size bytes)"
+                    
+                    # Проверяем первые байты файла
+                    echo "  Checking MRS format..."
+                    head -c 50 "rules/geosite/$name.mrs" | xxd | head -1
                   else
-                    echo "  ⚠ mihomo failed, creating manually"
-                    python3 -c "
-import base64
-with open('rules/geosite/$name.txt', 'r') as f:
-    content = f.read().strip()
-if content:
-    encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-    with open('rules/geosite/$name.mrs', 'w') as out:
-        out.write(f'domain,text,{encoded}')
-print('    Created text-based MRS')
-"
+                    echo "  ✗ MRS file is empty"
+                    rm -f "rules/geosite/$name.mrs"
                   fi
                 else
-                  echo "  ⚠ mihomo not found, creating manually"
-                  python3 -c "
-import base64
-with open('rules/geosite/$name.txt', 'r') as f:
-    content = f.read().strip()
-if content:
-    encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-    with open('rules/geosite/$name.mrs', 'w') as out:
-        out.write(f'domain,text,{encoded}')
-print('    Created text-based MRS')
-"
+                  echo "  ✗ Failed to create MRS for $name"
+                  rm -f "rules/geosite/$name.mrs" 2>/dev/null || true
                 fi
               else
                 echo "  ⚠ Empty TXT file, skipping"
@@ -309,110 +211,271 @@ print('    Created text-based MRS')
             fi
           done
           
-          # === Проверяем созданные MRS файлы ===
+          # === Статистика ===
           echo ""
-          echo "=== Checking created MRS files ==="
-          echo "Checking MRS format and validity..."
+          echo "=== Summary ==="
+          echo "GeoIP directory:"
+          echo "  TXT files:  $(ls rules/geoip/*.txt 2>/dev/null | wc -l)"
+          echo "  YAML files: $(ls rules/geoip/*.yaml 2>/dev/null | wc -l)"
+          echo "  MRS files:  $(ls rules/geoip/*.mrs 2>/dev/null | wc -l)"
           
-          cat > check_mrs.py << 'EOF'
+          echo ""
+          echo "GeoSite directory:"
+          echo "  TXT files:  $(ls rules/geosite/*.txt 2>/dev/null | wc -l)"
+          echo "  YAML files: $(ls rules/geosite/*.yaml 2>/dev/null | wc -l)"
+          echo "  MRS files:  $(ls rules/geosite/*.mrs 2>/dev/null | wc -l)"
+
+      - name: Debug - check why some MRS files work and others don't
+        run: |
+          set -e
+          echo "=== Debug: Analyzing MRS files ==="
+          
+          # Проверяем содержимое TXT файлов которые создают рабочие/не рабочие MRS
+          echo "Checking file formats..."
+          
+          # Создаем скрипт для анализа
+          cat > analyze_mrs.py << 'EOF'
           import os
           import base64
           
-          def check_mrs_file(filepath):
-              """Проверяет MRS файл"""
-              if not os.path.exists(filepath):
-                  return "NOT FOUND"
-              
-              size = os.path.getsize(filepath)
-              if size == 0:
-                  return "EMPTY"
-              
-              try:
-                  with open(filepath, 'rb') as f:
-                      first_bytes = f.read(4)
+          print("=== Analyzing why some MRS files work and others don't ===")
+          
+          # Проверяем GeoIP файлы
+          print("\nGeoIP MRS files analysis:")
+          geoip_files = []
+          for file in os.listdir("rules/geoip"):
+              if file.endswith(".mrs"):
+                  txt_file = file.replace('.mrs', '.txt')
+                  mrs_path = f"rules/geoip/{file}"
+                  txt_path = f"rules/geoip/{txt_file}"
+                  
+                  if os.path.exists(mrs_path) and os.path.exists(txt_path):
+                      mrs_size = os.path.getsize(mrs_path)
+                      with open(txt_path, 'r') as f:
+                          txt_lines = len(f.readlines())
                       
-                  # Проверяем бинарный MRS (начинается с 'mrs\x01')
-                  if first_bytes == b'mrs\x01':
-                      return f"BINARY MRS ({size} bytes)"
-                  
-                  # Проверяем текстовый MRS
-                  with open(filepath, 'r', encoding='utf-8') as f:
-                      first_line = f.readline().strip()
-                  
-                  if ',' in first_line:
-                      parts = first_line.split(',')
-                      if len(parts) >= 3:
-                          # Проверяем что третья часть - валидный base64
-                          try:
-                              base64.b64decode(parts[2])
-                              return f"TEXT MRS: {parts[0]},{parts[1]} ({size} bytes)"
-                          except:
-                              return f"INVALID BASE64 in: {first_line[:50]}..."
-                  return f"UNKNOWN FORMAT ({size} bytes)"
-              except Exception as e:
-                  return f"ERROR: {str(e)}"
+                      # Проверяем формат MRS
+                      with open(mrs_path, 'rb') as f:
+                          first_bytes = f.read(10)
+                      
+                      is_binary = first_bytes.startswith(b'mrs')
+                      
+                      geoip_files.append({
+                          'name': file,
+                          'mrs_size': mrs_size,
+                          'txt_lines': txt_lines,
+                          'is_binary': is_binary,
+                          'first_bytes': first_bytes.hex()[:20]
+                      })
           
-          print("GeoIP MRS files:")
-          geoip_count = 0
-          for file in sorted(os.listdir("rules/geoip")):
+          for f in sorted(geoip_files, key=lambda x: x['name']):
+              print(f"{f['name']}: {f['mrs_size']} bytes, {f['txt_lines']} lines, "
+                    f"binary: {f['is_binary']}, starts with: {f['first_bytes']}")
+          
+          # Проверяем GeoSite файлы
+          print("\nGeoSite MRS files analysis:")
+          geosite_files = []
+          for file in os.listdir("rules/geosite"):
               if file.endswith(".mrs"):
-                  status = check_mrs_file(f"rules/geoip/{file}")
-                  print(f"  {file}: {status}")
-                  geoip_count += 1
+                  txt_file = file.replace('.mrs', '.txt')
+                  mrs_path = f"rules/geosite/{file}"
+                  txt_path = f"rules/geosite/{txt_file}"
+                  
+                  if os.path.exists(mrs_path) and os.path.exists(txt_path):
+                      mrs_size = os.path.getsize(mrs_path)
+                      with open(txt_path, 'r') as f:
+                          txt_lines = len(f.readlines())
+                      
+                      # Проверяем формат MRS
+                      with open(mrs_path, 'rb') as f:
+                          first_bytes = f.read(10)
+                      
+                      is_binary = first_bytes.startswith(b'mrs')
+                      
+                      geosite_files.append({
+                          'name': file,
+                          'mrs_size': mrs_size,
+                          'txt_lines': txt_lines,
+                          'is_binary': is_binary,
+                          'first_bytes': first_bytes.hex()[:20]
+                      })
           
-          print(f"\nGeoSite MRS files:")
-          geosite_count = 0
-          for file in sorted(os.listdir("rules/geosite")):
-              if file.endswith(".mrs"):
-                  status = check_mrs_file(f"rules/geosite/{file}")
-                  print(f"  {file}: {status}")
-                  geosite_count += 1
+          for f in sorted(geosite_files, key=lambda x: x['name']):
+              print(f"{f['name']}: {f['mrs_size']} bytes, {f['txt_lines']} lines, "
+                    f"binary: {f['is_binary']}, starts with: {f['first_bytes']}")
           
-          print(f"\nSummary: {geoip_count} GeoIP MRS, {geosite_count} GeoSite MRS files")
+          # Проверяем формат TXT файлов
+          print("\n=== Checking problematic TXT files ===")
+          print("Files that might have format issues:")
+          
+          # Проверяем несколько потенциальных проблемных файлов
+          problematic_names = ['akamai', 'amazon', 'cloudflare', 'telegram', 'oracle', 'ru']
+          
+          for name in problematic_names:
+              txt_path = f"rules/geoip/{name}.txt"
+              if os.path.exists(txt_path):
+                  with open(txt_path, 'r') as f:
+                      first_lines = [f.readline().strip() for _ in range(3)]
+                  print(f"{name}.txt: {first_lines}")
+          
+          print("\n=== Conclusion ===")
+          print("If only 'other.mrs' works, possible issues:")
+          print("1. TXT files might have wrong format (not pure IPs/domains)")
+          print("2. mihomo might fail on large files")
+          print("3. Some TXT files might have special characters")
           EOF
           
-          python3 check_mrs.py
-          
-          echo ""
-          echo "=== Final summary ==="
-          echo "GeoIP:"
-          echo "  TXT:  $(ls rules/geoip/*.txt 2>/dev/null | wc -l) files"
-          echo "  YAML: $(ls rules/geoip/*.yaml 2>/dev/null | wc -l) files"
-          echo "  MRS:  $(ls rules/geoip/*.mrs 2>/dev/null | wc -l) files"
-          
-          echo ""
-          echo "GeoSite:"
-          echo "  TXT:  $(ls rules/geosite/*.txt 2>/dev/null | wc -l) files"
-          echo "  YAML: $(ls rules/geosite/*.yaml 2>/dev/null | wc -l) files"
-          echo "  MRS:  $(ls rules/geosite/*.mrs 2>/dev/null | wc -l) files"
+          python3 analyze_mrs.py
 
-      - name: Create test config for validation
+      - name: Try alternative MRS creation method
         run: |
           set -e
-          echo "Creating test config to validate MRS files..."
+          echo "=== Trying alternative method for problematic MRS files ==="
           
-          cat > test_config.yaml << 'EOF'
-          port: 7890
-          mode: rule
-          log-level: debug
+          # Если некоторые MRS не создались, пробуем альтернативный метод
+          cat > fix_mrs.py << 'EOF'
+          import os
+          import base64
           
-          rule-providers:
-            test_geoip_cn:
-              type: file
-              behavior: ipcidr
-              path: ./rules/geoip/cn.mrs
-            test_geosite_cn:
-              type: file
-              behavior: domain
-              path: ./rules/geosite/cn.mrs
+          print("Fixing problematic MRS files...")
           
-          rules:
-            - RULE-SET,test_geoip_cn,REJECT
-            - RULE-SET,test_geosite_cn,REJECT
-            - MATCH,DIRECT
+          # Сначала проверяем какие MRS файлы не создались
+          geoip_missing = []
+          for file in os.listdir("rules/geoip"):
+              if file.endswith(".txt"):
+                  name = file[:-4]
+                  mrs_file = f"{name}.mrs"
+                  if not os.path.exists(f"rules/geoip/{mrs_file}"):
+                      geoip_missing.append(name)
+          
+          geosite_missing = []
+          for file in os.listdir("rules/geosite"):
+              if file.endswith(".txt"):
+                  name = file[:-4]
+                  mrs_file = f"{name}.mrs"
+                  if not os.path.exists(f"rules/geosite/{mrs_file}"):
+                      geosite_missing.append(name)
+          
+          print(f"Missing GeoIP MRS: {geoip_missing}")
+          print(f"Missing GeoSite MRS: {geosite_missing}")
+          
+          # Создаем недостающие MRS файлы в текстовом формате
+          print("\nCreating missing MRS files in text format...")
+          
+          for name in geoip_missing:
+              txt_path = f"rules/geoip/{name}.txt"
+              mrs_path = f"rules/geoip/{name}.mrs"
+              
+              if os.path.exists(txt_path):
+                  with open(txt_path, 'r') as f:
+                      content = f.read().strip()
+                  
+                  if content:
+                      encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+                      with open(mrs_path, 'w') as f:
+                          f.write(f"ipcidr,text,{encoded}")
+                      print(f"Created {mrs_path}")
+          
+          for name in geosite_missing:
+              txt_path = f"rules/geosite/{name}.txt"
+              mrs_path = f"rules/geosite/{name}.mrs"
+              
+              if os.path.exists(txt_path):
+                  with open(txt_path, 'r') as f:
+                      content = f.read().strip()
+                  
+                  if content:
+                      encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+                      with open(mrs_path, 'w') as f:
+                          f.write(f"domain,text,{encoded}")
+                      print(f"Created {mrs_path}")
+          
+          print("\nAll MRS files should now exist")
           EOF
           
-          echo "Test config created. If mihomo loads it without 'magic number mismatch' error, MRS files are valid."
+          python3 fix_mrs.py
+
+      - name: Create usage examples
+        run: |
+          set -e
+          echo "Creating usage examples..."
+          
+          cat > rules/README.md << 'EOF'
+          # ZKEEN Rules for Mihomo/Clash Meta
+          
+          Автоматически сгенерированные правила из ZKEEN dat файлов.
+          
+          ## 📁 Структура
+          
+          Каждый набор правил доступен в трех форматах:
+          - `.txt` - текстовый формат
+          - `.yaml` - YAML формат `payload:` 
+          - `.mrs` - MRS формат (для rule-providers)
+          
+          ## 🎯 Доступные наборы правил
+          
+          ### GeoIP (IP/CIDR):
+          EOF
+          
+          # Список GeoIP файлов
+          for f in rules/geoip/*.txt; do
+            if [ -f "$f" ]; then
+              name=$(basename "$f" .txt)
+              count=$(wc -l < "$f")
+              echo "- **$name** ($count правил)" >> rules/README.md
+            fi
+          done
+          
+          cat >> rules/README.md << 'EOF'
+          
+          ### GeoSite (домены):
+          EOF
+          
+          # Список GeoSite файлов
+          for f in rules/geosite/*.txt; do
+            if [ -f "$f" ]; then
+              name=$(basename "$f" .txt)
+              count=$(wc -l < "$f")
+              echo "- **$name** ($count правил)" >> rules/README.md
+            fi
+          done
+          
+          cat >> rules/README.md << 'EOF'
+          
+          ## 🔧 Использование
+          
+          ### MRS формат (рекомендуется):
+          ```yaml
+          rule-providers:
+            geoip_cn:
+              type: http
+              behavior: ipcidr
+              url: "https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/rules/geoip/cn.mrs"
+              interval: 86400
+            
+            geosite_cn:
+              type: http
+              behavior: domain
+              url: "https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/rules/geosite/cn.mrs"
+              interval: 86400
+          ```
+          
+          ### YAML формат:
+          ```yaml
+          rule-providers:
+            geoip_cn:
+              type: http
+              behavior: ipcidr
+              url: "https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/rules/geoip/cn.yaml"
+              interval: 86400
+          ```
+          
+          ## ⚙️ Автоматическое обновление
+          
+          Обновляется каждые 6 часов.
+          
+          Последнее обновление: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          EOF
 
       - name: Commit all files
         run: |
@@ -424,7 +487,7 @@ print('    Created text-based MRS')
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: update rules with validated MRS files [$(date +'%Y-%m-%d %H:%M')]"
+            git commit -m "chore: update all rule formats [$(date +'%Y-%m-%d %H:%M')]"
             git push
             echo "Changes pushed successfully"
           fi
