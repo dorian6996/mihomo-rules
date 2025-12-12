@@ -1,0 +1,241 @@
+name: dat 2 Mihomo
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      GOPATH: ${{ github.workspace }}/.gopath
+      GOBIN: ${{ github.workspace }}/.gopath/bin
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+
+      - name: Prepare directories
+        run: |
+          mkdir -p "${GOPATH}/bin"
+          mkdir -p tmp/geoip tmp/geosite 
+          mkdir -p rules/geoip rules/geosite
+          echo "${GOPATH}/bin" >> $GITHUB_PATH
+
+      - name: Install v2dat tool
+        run: |
+          set -e
+          echo "Installing v2dat..."
+          go install github.com/urlesistiana/v2dat@latest
+          echo "v2dat installed at:"
+          which v2dat
+
+      - name: Install mihomo tool
+        run: |
+          set -e
+          echo "Installing mihomo..."
+          go install github.com/metacubex/mihomo@latest
+          echo "mihomo installed at:"
+          which mihomo
+          echo "Testing mihomo convert-ruleset..."
+          echo "Test rule" > test.txt
+          mihomo convert-ruleset domain text test.txt test.mrs 2>&1 && echo "✓ mihomo works" || echo "⚠ mihomo test failed"
+          rm -f test.txt test.mrs
+
+      - name: Download ZKEEN dat files
+        run: |
+          set -e
+          echo "Downloading geoip.dat..."
+          curl -fsSL -o tmp/zkeenip.dat "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
+          
+          echo "Downloading geosite.dat..."
+          curl -fsSL -o tmp/zkeen.dat "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
+          
+          echo "File sizes:"
+          ls -lh tmp/*.dat
+
+      - name: Unpack GeoIP dat file
+        run: |
+          set -e
+          echo "Unpacking geoip.dat..."
+          if [ -f tmp/zkeenip.dat ]; then
+            v2dat unpack geoip -o tmp/geoip tmp/zkeenip.dat
+            echo "Unpacked geoip files:"
+            ls -lh tmp/geoip/*.txt 2>/dev/null | head -5 || echo "No .txt files found"
+          else
+            echo "Error: zkeenip.dat not found!"
+            exit 1
+          fi
+
+      - name: Unpack GeoSite dat file
+        run: |
+          set -e
+          echo "Unpacking geosite.dat..."
+          if [ -f tmp/zkeen.dat ]; then
+            v2dat unpack geosite -o tmp/geosite tmp/zkeen.dat
+            echo "Unpacked geosite files:"
+            ls -lh tmp/geosite/*.txt 2>/dev/null | head -5 || echo "No .txt files found"
+          else
+            echo "Error: zkeen.dat not found!"
+            exit 1
+          fi
+
+      - name: Process files - save TXT, create YAML and MRS
+        run: |
+          set -e
+          echo "Processing files - creating TXT, YAML and MRS formats..."
+          
+          # Сохраняем ваш кастомный youtube.yaml если он существует
+          if [ -f "rules/geosite/youtube.yaml" ]; then
+            echo "⚠ Backing up custom youtube.yaml file..."
+            cp "rules/geosite/youtube.yaml" "rules/geosite/youtube.yaml.backup"
+          fi
+          
+          # Очищаем старые файлы, кроме youtube.yaml
+          find rules/geoip -type f ! -name 'youtube.yaml' -delete 2>/dev/null || true
+          find rules/geosite -type f ! -name 'youtube.yaml' -delete 2>/dev/null || true
+          
+          # === Обрабатываем GeoIP файлы ===
+          echo "=== Processing GeoIP files ==="
+          for f in tmp/geoip/zkeenip_*.txt; do
+            if [ -f "$f" ]; then
+              # Убираем префикс zkeenip_
+              name=$(basename "$f" .txt | sed 's/^zkeenip_//')
+              echo "Processing: $name"
+              
+              # 1. Сохраняем очищенный TXT файл (убираем комментарии и пустые строки)
+              grep -v '^#' "$f" | grep -v '^$' > "rules/geoip/$name.txt"
+              
+              if [ -s "rules/geoip/$name.txt" ]; then
+                line_count=$(wc -l < "rules/geoip/$name.txt")
+                echo "  ✓ TXT saved ($line_count IP rules)"
+                
+                # 2. Создаем YAML файл в формате payload (как у metacubex) - БЕЗ кавычек
+                echo "payload:" > "rules/geoip/$name.yaml"
+                cat "rules/geoip/$name.txt" | while read line; do
+                  # Добавляем каждое правило без кавычек, как у metacubex
+                  echo "  - $line" >> "rules/geoip/$name.yaml"
+                done
+                echo "  ✓ YAML created (payload format, no quotes)"
+                
+                # 3. Создаем MRS файл ТОЛЬКО через mihomo convert-ruleset
+                echo "  Creating MRS via mihomo..."
+                if mihomo convert-ruleset ipcidr text "rules/geoip/$name.txt" "rules/geoip/$name.mrs" 2>&1; then
+                  echo "  ✓ MRS created via mihomo"
+                else
+                  echo "  ✗ FAILED to create MRS via mihomo"
+                  # Если mihomo не сработал, НЕ создаем MRS файл вообще
+                  rm -f "rules/geoip/$name.mrs" 2>/dev/null || true
+                fi
+              else
+                echo "  ⚠ Empty file, skipping"
+                rm -f "rules/geoip/$name.txt" 2>/dev/null || true
+              fi
+            fi
+          done
+          
+          # === Обрабатываем GeoSite файлы ===
+          echo ""
+          echo "=== Processing GeoSite files ==="
+          for f in tmp/geosite/zkeen_*.txt; do
+            if [ -f "$f" ]; then
+              # Убираем префикс zkeen_
+              name=$(basename "$f" .txt | sed 's/^zkeen_//')
+              echo "Processing: $name"
+              
+              # Пропускаем youtube если файл уже существует (ваш кастомный)
+              if [ "$name" = "youtube" ] && [ -f "rules/geosite/youtube.yaml" ]; then
+                echo "  ⚠ Skipping youtube - custom file preserved"
+                continue
+              fi
+              
+              # 1. Сохраняем очищенный TXT файл (убираем комментарии и пустые строки)
+              grep -v '^#' "$f" | grep -v '^$' > "rules/geosite/$name.txt"
+              
+              if [ -s "rules/geosite/$name.txt" ]; then
+                line_count=$(wc -l < "rules/geosite/$name.txt")
+                echo "  ✓ TXT saved ($line_count domain rules)"
+                
+                # 2. Создаем YAML файл в формате payload (как у metacubex) - + в начале, без кавычек
+                echo "payload:" > "rules/geosite/$name.yaml"
+                cat "rules/geosite/$name.txt" | while read line; do
+                  # Определяем, нужно ли добавлять + префикс
+                  if [[ "$line" =~ ^(\||\@|\*\.|\+\.|\.) ]]; then
+                    # Уже есть спец. символ, добавляем без изменений
+                    echo "  - $line" >> "rules/geosite/$name.yaml"
+                  else
+                    # Добавляем + префикс для суффиксных правил, как у metacubex
+                    echo "  - +.$line" >> "rules/geosite/$name.yaml"
+                  fi
+                done
+                echo "  ✓ YAML created (payload format, + prefix, no quotes)"
+                
+                # 3. Создаем MRS файл ТОЛЬКО через mihomo convert-ruleset
+                echo "  Creating MRS via mihomo..."
+                if mihomo convert-ruleset domain text "rules/geosite/$name.txt" "rules/geosite/$name.mrs" 2>&1; then
+                  echo "  ✓ MRS created via mihomo"
+                else
+                  echo "  ✗ FAILED to create MRS via mihomo"
+                  # Если mihomo не сработал, НЕ создаем MRS файл вообще
+                  rm -f "rules/geosite/$name.mrs" 2>/dev/null || true
+                fi
+              else
+                echo "  ⚠ Empty file, skipping"
+                rm -f "rules/geosite/$name.txt" 2>/dev/null || true
+              fi
+            fi
+          done
+          
+          # Восстанавливаем backup если был
+          if [ -f "rules/geosite/youtube.yaml.backup" ]; then
+            echo "⚠ Restoring custom youtube.yaml from backup..."
+            # Удаляем автоматически созданный (если успел создаться)
+            rm -f "rules/geosite/youtube.yaml" 2>/dev/null || true
+            rm -f "rules/geosite/youtube.txt" 2>/dev/null || true
+            rm -f "rules/geosite/youtube.mrs" 2>/dev/null || true
+            # Восстанавливаем кастомный
+            mv "rules/geosite/youtube.yaml.backup" "rules/geosite/youtube.yaml"
+            echo "  ✓ Custom youtube.yaml preserved"
+          fi
+          
+          # === Итоговая статистика ===
+          echo ""
+          echo "=== Summary ==="
+          echo "GeoIP directory (rules/geoip/):"
+          echo "  TXT files:  $(find rules/geoip -name "*.txt" 2>/dev/null | wc -l)"
+          echo "  YAML files: $(find rules/geoip -name "*.yaml" 2>/dev/null | wc -l)"
+          echo "  MRS files:  $(find rules/geoip -name "*.mrs" 2>/dev/null | wc -l)"
+          
+          echo ""
+          echo "GeoSite directory (rules/geosite/):"
+          echo "  TXT files:  $(find rules/geosite -name "*.txt" ! -name "youtube.txt" 2>/dev/null | wc -l)"
+          echo "  YAML files: $(find rules/geosite -name "*.yaml" 2>/dev/null | wc -l) (youtube.yaml preserved)"
+          echo "  MRS files:  $(find rules/geosite -name "*.mrs" ! -name "youtube.mrs" 2>/dev/null | wc -l)"
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add rules/
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update rules (youtube.yaml preserved) [$(date +'%Y-%m-%d %H:%M')]"
+            git push
+            echo "Changes pushed successfully"
+          fi
