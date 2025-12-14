@@ -100,6 +100,7 @@ x.ai
 youtrack.cloud
 yupp.ai
 keyword:4pda.
+aadg.msidentity.com
 asset.launcher.omniverse.nvidia.com
 auth.hpe.com
 avast.com
@@ -273,7 +274,7 @@ broncosportforum.com
 btod.com
 buf.build
 builds.parsec.app
-capcut.com
+keyword:capcut
 cambiumnetworks.com
 canva.dev
 canva.com
@@ -487,6 +488,7 @@ livejournal.com
 llama3-1.llamameta.net
 localbitcoins.com
 logo.com
+logrules.fr
 lowes.com
 lseg.com
 ltglink.lt
@@ -531,7 +533,7 @@ keyword:mouser.
 mssg.me
 musicbrainz.org
 keyword:myfonts.
-myheritage.com
+keyword:myheritage
 myprepaidcenter.com
 myqrcode.com
 nba.com
@@ -554,6 +556,7 @@ nordpass.com
 nordprotect.com
 nordstellar.com
 norton.com
+notepad2.com
 nxp.com
 octopart.com
 octopart-clicks.com
