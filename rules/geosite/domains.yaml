@@ -43,6 +43,9 @@ payload:
   - +.snapkit.com
   - +.sc-jpl.com
   - +.sc-static.net
+  - +.hcaptcha.com
+  - +.keyword:signal
+  - +.whispersystems.org
   - +.doubleclick.net
   - +.gvt1.com
   - +.play.google.com
@@ -149,6 +152,7 @@ payload:
   - +.cnd2exp.online
   - +.fast-torrent.club
   - +.filmitorrent.net
+  - +.flac24.ru
   - +.kat.am
   - +.keyword:kinozal
   - +.kinozaltv.life
@@ -237,6 +241,7 @@ payload:
   - +.f95zone.to
   - +.fikfap.com
   - +.freeones.com
+  - +.fuckingfreemovies.com
   - +.hentai-foundry.com
   - +.hentaichan.live
   - +.hitomi.la
@@ -245,6 +250,7 @@ payload:
   - +.island-of-pleasure.site
   - +.motherless.com
   - +.multporn.net
+  - +.nastyasiansluts.com
   - +.keyword:nhentai
   - +.nsfwalbum.com
   - +.keyword:nude-moon
@@ -323,6 +329,7 @@ payload:
   - +.hetzner.com
   - +.hola.org
   - +.hostgator.com
+  - +.invizible.net
   - +.ipburger.com
   - +.lantern.io
   - +.leafletjs.com
@@ -352,6 +359,7 @@ payload:
   - +.redshieldvpn.com
   - +.keyword:rockblack
   - +.surfshark.com
+  - +.tech.ru
   - +.tempmail.plus
   - +.the.hosting
   - +.tiptop-vpn.com
@@ -413,10 +421,12 @@ payload:
   - +.equalitie.org
   - +.keyword:etlgr.
   - +.exchanger.bits.media
+  - +.exler.es
   - +.fansly.com
   - +.fastpic.org
   - +.fastpic.ru
   - +.fex.net
+  - +.fitgirl-repacks.site
   - +.flashscore.com
   - +.forum2x2.ru
   - +.freebitco.in
@@ -486,7 +496,6 @@ payload:
   - +.satsat.info
   - +.saverudata.net
   - +.keyword:scryde
-  - +.signal.org
   - +.simplex.im
   - +.skiff.com
   - +.keyword:skladchi

@@ -523,6 +523,7 @@ payload:
   - +.microfocus.com
   - +.middlewareinventory.com
   - +.militarnyi.com
+  - +.mint.com
   - +.mixcloud.com
   - +.keyword:mongodb.
   - +.moneypuck.com
@@ -543,6 +544,7 @@ payload:
   - +.neo4j.com
   - +.nesinc.com
   - +.netapp.com
+  - +.neuesbad.de
   - +.newark.com
   - +.nexar.com
   - +.nfl.com
@@ -594,6 +596,7 @@ payload:
   - +.pearsonvue.com
   - +.penguin.com
   - +.penguinrandomhouse.com
+  - +.pepephone.com
   - +.pepperl-fuchs.com
   - +.perforce.com
   - +.perlego.com
@@ -759,6 +762,7 @@ payload:
   - +.trailhead.com
   - +.transferwise.com
   - +.trustwave.com
+  - +.tsheets.com
   - +.tsmc.com
   - +.tvdevinfo.com
   - +.tvn24.pl

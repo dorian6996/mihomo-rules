@@ -42,6 +42,9 @@ snap.com
 snapkit.com
 sc-jpl.com
 sc-static.net
+hcaptcha.com
+keyword:signal
+whispersystems.org
 doubleclick.net
 gvt1.com
 play.google.com
@@ -148,6 +151,7 @@ cloudtorrents.com
 cnd2exp.online
 fast-torrent.club
 filmitorrent.net
+flac24.ru
 kat.am
 keyword:kinozal
 kinozaltv.life
@@ -236,6 +240,7 @@ f95-zone.to
 f95zone.to
 fikfap.com
 freeones.com
+fuckingfreemovies.com
 hentai-foundry.com
 hentaichan.live
 hitomi.la
@@ -244,6 +249,7 @@ imx.to
 island-of-pleasure.site
 motherless.com
 multporn.net
+nastyasiansluts.com
 keyword:nhentai
 nsfwalbum.com
 keyword:nude-moon
@@ -322,6 +328,7 @@ godaddy.com
 hetzner.com
 hola.org
 hostgator.com
+invizible.net
 ipburger.com
 lantern.io
 leafletjs.com
@@ -351,6 +358,7 @@ radiojar.com
 redshieldvpn.com
 keyword:rockblack
 surfshark.com
+tech.ru
 tempmail.plus
 the.hosting
 tiptop-vpn.com
@@ -412,10 +420,12 @@ elements.envato.com
 equalitie.org
 keyword:etlgr.
 exchanger.bits.media
+exler.es
 fansly.com
 fastpic.org
 fastpic.ru
 fex.net
+fitgirl-repacks.site
 flashscore.com
 forum2x2.ru
 freebitco.in
@@ -485,7 +495,6 @@ rumble.com
 satsat.info
 saverudata.net
 keyword:scryde
-signal.org
 simplex.im
 skiff.com
 keyword:skladchi

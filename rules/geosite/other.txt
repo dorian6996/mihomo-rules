@@ -522,6 +522,7 @@ microchip.com
 microfocus.com
 middlewareinventory.com
 militarnyi.com
+mint.com
 mixcloud.com
 keyword:mongodb.
 moneypuck.com
@@ -542,6 +543,7 @@ neff-home.com
 neo4j.com
 nesinc.com
 netapp.com
+neuesbad.de
 newark.com
 nexar.com
 nfl.com
@@ -593,6 +595,7 @@ pdq.com
 pearsonvue.com
 penguin.com
 penguinrandomhouse.com
+pepephone.com
 pepperl-fuchs.com
 perforce.com
 perlego.com
@@ -758,6 +761,7 @@ trailblazer.me
 trailhead.com
 transferwise.com
 trustwave.com
+tsheets.com
 tsmc.com
 tvdevinfo.com
 tvn24.pl
