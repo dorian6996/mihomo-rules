@@ -78,6 +78,7 @@ threads.net
 twimg.com
 keyword:twitter
 twttr.com
+wa.me
 keyword:whatsapp
 x.com
 keyword:acestream
@@ -310,6 +311,7 @@ blncapi.com
 bluehost.com
 censorship.no
 censortracker.org
+cloud-ip.cc
 keyword:cloudflare
 cloudfront.net
 croxyproxy.com
@@ -467,6 +469,7 @@ livetv.sx
 lis-skins.com
 keyword:lolz.
 lu4.org
+magaz.global
 mailchi.mp
 manyvids.com
 matrix-client.matrix.org
@@ -483,6 +486,7 @@ out.com
 pay.freekassa.ru
 peaceplea.org
 prnt.sc
+pvpessence.com
 qaweb.dev
 quora.com
 readymag.website
@@ -496,6 +500,7 @@ satsat.info
 saverudata.net
 keyword:scryde
 simplex.im
+simplexonflux.com
 skiff.com
 keyword:skladchi
 s

@@ -211,7 +211,13 @@ payload:
   - +.spotify.com
   - +.theaudiodb.com
   - +.themoviedb.org
+  - +.thetvdb.com
   - +.tmdb.org
+  - +.a-vrv.akamaized.net
+  - +.crunchbase.com
+  - +.crunchyroll.com
+  - +.v.vrv.co
+  - +.vod-fy.crunchyrollcdn.com
   - +.2407.pl
   - +.6pm.com
   - +.8chan.moe
@@ -250,11 +256,13 @@ payload:
   - +.app.n8n.cloud
   - +.arc.net
   - +.archive.org
+  - +.arduino.cc
   - +.arinet.com
   - +.arm.com
   - +.att.com
   - +.av-connection.com
   - +.aws.tcljd.com
+  - +.awswaf.com
   - +.badoo.com
   - +.bandcamp.com
   - +.bcbits.com
@@ -304,14 +312,13 @@ payload:
   - +.colamco.com
   - +.comfyui-wiki.com
   - +.contabo.com
+  - +.cookielaw.org
   - +.copernicus.eu
   - +.corsair.com
   - +.coursera.org
   - +.cpu-monkey.com
   - +.credly.com
   - +.crowdstrike.com
-  - +.crunchbase.com
-  - +.crunchyroll.com
   - +.cucumber.io
   - +.cvedetails.com
   - +.cxstudio.clarabridge.net
@@ -341,6 +348,7 @@ payload:
   - +.disctech.com
   - +.dnb.com
   - +.dochub.com
+  - +.keyword:document360.
   - +.doma.xyz
   - +.download.screamingfrog.co.uk
   - +.downloads.ndi.tv
@@ -454,6 +462,7 @@ payload:
   - +.ipdata.co
   - +.iperf3serverlist.net
   - +.ipinfo.io
+  - +.iplocationtools.com
   - +.itninja.com
   - +.jabra.com
   - +.jamf.com
@@ -465,6 +474,7 @@ payload:
   - +.keepsolid.com
   - +.keysight.com
   - +.kismia.com
+  - +.klarna.com
   - +.klaviyo.com
   - +.kmail-lists.com
   - +.kowalski7cc.xyz
@@ -524,6 +534,7 @@ payload:
   - +.middlewareinventory.com
   - +.militarnyi.com
   - +.mint.com
+  - +.mintmobile.com
   - +.mixcloud.com
   - +.keyword:mongodb.
   - +.moneypuck.com
@@ -545,6 +556,7 @@ payload:
   - +.nesinc.com
   - +.netapp.com
   - +.neuesbad.de
+  - +.new.abb.com
   - +.newark.com
   - +.nexar.com
   - +.nfl.com
@@ -587,6 +599,7 @@ payload:
   - +.parts-express.com
   - +.path3.xtracloud.net
   - +.patreon.com
+  - +.patreonusercontent.com
   - +.paypal.com
   - +.paytr.com
   - +.pbteen.com
@@ -730,6 +743,7 @@ payload:
   - +.syncfusion.com
   - +.systemtek.co.uk
   - +.swagger.io
+  - +.swapd.co
   - +.swissinfo.ch
   - +.sysdig.com
   - +.tableau.com
@@ -821,6 +835,7 @@ payload:
   - +.wpengine.com
   - +.wunderground.com
   - +.xfantazy.com
+  - +.xiaomi.eu
   - +.xmg.gg
   - +.xrite.com
   - +.yandexwebcache.org
