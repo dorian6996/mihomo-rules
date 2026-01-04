@@ -143,6 +143,7 @@ liveupdate.symantecliveupdate.com
 login.amd.com
 malwarebytes.com
 mkssoftware.com
+net.anydesk.com
 netacad.com
 okta.com
 omnissa.com
@@ -751,6 +752,7 @@ talosintelligence.com
 te.com
 teads.tv
 techbargains.com
+technobezz.com
 techthoughts.info
 templatemonster.com
 temu.com
