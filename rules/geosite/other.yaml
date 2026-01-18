@@ -214,7 +214,7 @@ payload:
   - +.themoviedb.org
   - +.thetvdb.com
   - +.tmdb.org
-  - +.a-vrv.akamaized.net
+  - +.akamaized.net
   - +.crunchbase.com
   - +.crunchyroll.com
   - +.v.vrv.co
@@ -394,6 +394,7 @@ payload:
   - +.fncstatic.com
   - +.force-user-content.com
   - +.force.com
+  - +.fordfoundation.org
   - +.fordpartsgiant.com
   - +.footballapi.pulselive.com
   - +.fortiguard.com
@@ -529,6 +530,7 @@ payload:
   - +.metabrainz.org
   - +.metacritic.com
   - +.metopera.org
+  - +.mi.com
   - +.michaelkors.global
   - +.microcenter.com
   - +.microchip.com
@@ -537,6 +539,7 @@ payload:
   - +.militarnyi.com
   - +.mint.com
   - +.mintmobile.com
+  - +.miui.com
   - +.mixcloud.com
   - +.keyword:mongodb.
   - +.moneypuck.com
@@ -561,6 +564,8 @@ payload:
   - +.new.abb.com
   - +.newark.com
   - +.nexar.com
+  - +.nexus-cdn.com
+  - +.nexusmods.com
   - +.nfl.com
   - +.keyword:nike.
   - +.nitropay.com
@@ -644,6 +649,7 @@ payload:
   - +.promods.net
   - +.proxyscrape.com
   - +.ptc.com
+  - +.pubnub.com
   - +.pump.fun
   - +.qcad.org
   - +.qobuz.com
