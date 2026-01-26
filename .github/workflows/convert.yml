@@ -150,4 +150,3 @@ jobs:
           git add rules/
           git diff --staged --quiet || git commit -m "chore: rebuild rules via viewer logic"
           git push
-        fi
