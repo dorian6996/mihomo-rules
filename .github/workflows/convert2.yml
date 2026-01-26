@@ -2,9 +2,7 @@ name: ZKEEN dat → mihomo rules (geofileviewer correct, FINAL)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *"
-
+ 
 permissions:
   contents: write
 
