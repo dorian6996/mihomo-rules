@@ -1,2 +1,2 @@
-payload:.com
-  - +.dummy.nul.com
+payload:
+  - +.dummy.nul

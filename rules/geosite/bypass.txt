@@ -1,1 +1,1 @@
-dummy.nul.com
+dummy.nul
