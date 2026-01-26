@@ -1,4 +1,4 @@
-name: ZKEEN dat → mihomo rules (geofileviewer logic)
+name: ZKEEN dat → mihomo rules (geofileviewer logic, final)
 
 on:
   workflow_dispatch:
@@ -63,52 +63,95 @@ jobs:
           done
 
       # =========================
-      # GEOSITE (через geofileviewer)
+      # GEOSITE (логика geofileviewer)
       # =========================
-      - name: Clone geofileviewer
+      - name: Parse geosite.dat (geofileviewer logic)
         run: |
-          git clone --depth=1 https://github.com/jomertix/geofileviewer.git gv
-
-      - name: Install geofileviewer deps
-        run: |
-          cd gv
-          npm install
-
-      - name: Export geosite via geofileviewer
-        run: |
-          cd gv
           node << 'EOF'
           const fs = require('fs');
-          const { parseGeoSite } = require('./src/geosite');
+          const path = require('path');
 
-          const data = fs.readFileSync('../tmp/geosite.dat');
-          const result = parseGeoSite(data);
-
-          fs.writeFileSync('../tmp/geosite.json', JSON.stringify(result, null, 2));
-          EOF
-
-      - name: Build geosite rules (mihomo format)
-        run: |
-          rm -rf rules/geosite/*
-          node << 'EOF'
-          const fs = require('fs');
-
-          const data = JSON.parse(fs.readFileSync('tmp/geosite.json', 'utf8'));
-
-          for (const [name, domains] of Object.entries(data)) {
-            const yamlPath = `rules/geosite/${name}.yaml`;
-            const txtPath  = `rules/geosite/${name}.txt`;
-
-            fs.writeFileSync(yamlPath, 'payload:\n');
-            fs.writeFileSync(txtPath, '');
-
-            for (const d of domains) {
-              fs.appendFileSync(yamlPath, `  - +.${d}\n`);
-              fs.appendFileSync(txtPath, `${d}\n`);
+          // ---- helpers from geofileviewer logic ----
+          function readVarint(buf, offset) {
+            let result = 0;
+            let shift = 0;
+            let pos = offset;
+            while (true) {
+              const b = buf[pos++];
+              result |= (b & 0x7f) << shift;
+              if ((b & 0x80) === 0) break;
+              shift += 7;
             }
+            return [result, pos];
+          }
+
+          function parseGeoSite(buffer) {
+            let pos = 0;
+            const groups = {};
+
+            while (pos < buffer.length) {
+              let size;
+              try {
+                [size, pos] = readVarint(buffer, pos);
+              } catch {
+                break;
+              }
+              const block = buffer.slice(pos, pos + size);
+              pos += size;
+
+              let name = null;
+              const domains = [];
+
+              let i = 0;
+              while (i < block.length) {
+                const tag = block[i++];
+                const field = tag >> 3;
+                const wire = tag & 7;
+
+                if (wire === 2) {
+                  let len;
+                  [len, i] = readVarint(block, i);
+                  const value = block.slice(i, i + len);
+                  i += len;
+
+                  if (field === 1) {
+                    name = value.toString('utf8').toLowerCase();
+                  } else if (field === 2) {
+                    domains.push(value.toString('utf8'));
+                  }
+                } else {
+                  i++;
+                }
+              }
+
+              if (name && domains.length) {
+                groups[name] = Array.from(new Set(domains));
+              }
+            }
+            return groups;
+          }
+
+          const data = fs.readFileSync('tmp/geosite.dat');
+          const groups = parseGeoSite(data);
+
+          fs.mkdirSync('rules/geosite', { recursive: true });
+
+          for (const [name, domains] of Object.entries(groups)) {
+            const txt = [];
+            const yaml = ['payload:'];
+
+            for (const d of domains.sort()) {
+              txt.push(d);
+              yaml.push(`  - +.${d}`);
+            }
+
+            fs.writeFileSync(`rules/geosite/${name}.txt`, txt.join('\n') + '\n');
+            fs.writeFileSync(`rules/geosite/${name}.yaml`, yaml.join('\n') + '\n');
           }
           EOF
 
+      - name: Build geosite MRS
+        run: |
           for f in rules/geosite/*.txt; do
             name=$(basename "$f" .txt)
             mihomo convert-ruleset domain text \
@@ -124,6 +167,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes"
           else
-            git commit -m "chore: rebuild rules using geofileviewer logic"
+            git commit -m "chore: rebuild geo rules (geofileviewer logic)"
             git push
           fi
