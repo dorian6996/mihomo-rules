@@ -1,29 +1,29 @@
 payload:
-  - +.keyword:browserleaks
+  - +.browserleaks
   - +.ip.me
-  - +.keyword:nperf.
+  - +.nperf.
   - +.ooklaserver.net
   - +.speedtest.net
-  - +.keyword:whoer.
-  - +.keyword:discord
+  - +.whoer.
+  - +.discord
   - +.blox.com
   - +.goblocks.com
   - +.goblox.com
   - +.gooblox.com
   - +.humancoexperience.com
-  - +.keyword:rblx
+  - +.rblx
   - +.rbx.com
-  - +.keyword:rbxcdn
+  - +.rbxcdn
   - +.rbxinfra.net
   - +.rbxlabs.com
   - +.rbxtrk.com
   - +.ro-blox.com
   - +.roadblocks.com
   - +.roblocks.com
-  - +.keyword:roblox
+  - +.roblox
   - +.rowblocks.com
   - +.rowblox.com
-  - +.keyword:telegram
+  - +.telegram
   - +.comments.app
   - +.contest.com
   - +.fragment.com
@@ -44,7 +44,7 @@ payload:
   - +.sc-jpl.com
   - +.sc-static.net
   - +.hcaptcha.com
-  - +.keyword:signal
+  - +.signal
   - +.whispersystems.org
   - +.doubleclick.net
   - +.gvt1.com
@@ -58,7 +58,7 @@ payload:
   - +.cdnfacebook.com
   - +.cdninstagram.com
   - +.f.vision
-  - +.keyword:facebook
+  - +.facebook
   - +.fb.com
   - +.fb.me
   - +.fbcdn.net
@@ -77,22 +77,22 @@ payload:
   - +.threads.com
   - +.threads.net
   - +.twimg.com
-  - +.keyword:twitter
+  - +.twitter
   - +.twttr.com
   - +.wa.me
-  - +.keyword:whatsapp
+  - +.whatsapp
   - +.x.com
-  - +.keyword:acestream
+  - +.acestream
   - +.api.service-kp.com
-  - +.keyword:cbilling
+  - +.cbilling
   - +.cloud.cdnland.in
   - +.cloudex.cc
-  - +.keyword:coldfilm
+  - +.coldfilm
   - +.cub.red
   - +.d.lordsfilm.info
   - +.denms.ru
   - +.fat.allarknow.online
-  - +.keyword:filmix
+  - +.filmix
   - +.filmozavr.com
   - +.forumtv.org
   - +.hdkinoteatr.com
@@ -104,17 +104,17 @@ payload:
   - +.kino-ussr.ru
   - +.kino.pub
   - +.kinobase.org
-  - +.keyword:kinogo
+  - +.kinogo
   - +.kinokopilka.pro
   - +.kinokrad.pics
   - +.kinopub.me
   - +.kinopub.online
-  - +.keyword:kinovibe
+  - +.kinovibe
   - +.kinovod.net
   - +.kpapp.link
   - +.le-production.tv
-  - +.keyword:lordfillm
-  - +.keyword:lostfilm
+  - +.lordfillm
+  - +.lostfilm
   - +.megogo.net
   - +.melord.net
   - +.metal-archives.com
@@ -126,16 +126,16 @@ payload:
   - +.ottbill.cc
   - +.ottg.app
   - +.pimpletv.ru
-  - +.keyword:rezka
+  - +.rezka
   - +.rezkify.com
-  - +.keyword:seasonvar
-  - +.keyword:selezen
+  - +.seasonvar
+  - +.selezen
   - +.sndcdn.com
   - +.soundcloud.com
   - +.spirit-of-metal.com
   - +.stream.voidboost.cc
   - +.tidal.com
-  - +.keyword:ultradox
+  - +.ultradox
   - +.vcdn.biz
   - +.vipdrive.net
   - +.webservice.fanart.tv
@@ -155,20 +155,20 @@ payload:
   - +.filmitorrent.net
   - +.flac24.ru
   - +.kat.am
-  - +.keyword:kinozal
+  - +.kinozal
   - +.kinozaltv.life
-  - +.keyword:megapeer
+  - +.megapeer
   - +.newstudio.tv
   - +.nnmclub.to
   - +.opentrackr.org
   - +.pb.wtf
-  - +.keyword:piratbit
+  - +.piratbit
   - +.pornolab.net
   - +.riperam.org
   - +.rustorka.com
   - +.rutor.info
   - +.rutor.is
-  - +.keyword:rutracker
+  - +.rutracker
   - +.seedoff.zannn.top
   - +.thepiratebay.org
   - +.torrent.by
@@ -180,7 +180,7 @@ payload:
   - +.amedia.vip
   - +.anidub.com
   - +.anilib.me
-  - +.keyword:anilibria
+  - +.anilibria
   - +.animaunt.org
   - +.anime-bit.org
   - +.anime-portal.su
@@ -188,13 +188,13 @@ payload:
   - +.animebest.org
   - +.animedub.ru
   - +.animegg.org
-  - +.keyword:animego
+  - +.animego
   - +.animeonlinesu.net
   - +.animeshka.net
   - +.animespirit.ru
   - +.animestars.org
   - +.animethemes.moe
-  - +.keyword:animevost
+  - +.animevost
   - +.anistars.ru
   - +.anixart.tv
   - +.bato.to
@@ -202,7 +202,7 @@ payload:
   - +.dorama.live
   - +.doramalive.ru
   - +.doramy.club
-  - +.keyword:ficbook
+  - +.ficbook
   - +.furaffinity.net
   - +.gelbooru.com
   - +.hath.network
@@ -211,7 +211,7 @@ payload:
   - +.jut-su.net
   - +.jutsu.ru
   - +.kara.su
-  - +.keyword:kemono
+  - +.kemono
   - +.mangadex.org
   - +.mangahub.ru
   - +.mangamammy.ru
@@ -253,9 +253,9 @@ payload:
   - +.motherless.com
   - +.multporn.net
   - +.nastyasiansluts.com
-  - +.keyword:nhentai
+  - +.nhentai
   - +.nsfwalbum.com
-  - +.keyword:nude-moon
+  - +.nude-moon
   - +.phncdn.com
   - +.playboy.com
   - +.pornhub.com
@@ -264,17 +264,17 @@ payload:
   - +.reddxxx.com
   - +.redgifs.com
   - +.redtube.com
-  - +.keyword:rule34
+  - +.rule34
   - +.rusvideos.net
   - +.sankakucomplex.com
-  - +.keyword:sex-studentki
+  - +.sex-studentki
   - +.stulchik.net
   - +.theporndude.com
   - +.trahkino.me
   - +.vipergirls.to
   - +.xhamster.com
   - +.xhamsterlive.com
-  - +.keyword:xnxx
+  - +.xnxx
   - +.xhcdn.com
   - +.xv-ru.com
   - +.xvideos.com
@@ -284,14 +284,14 @@ payload:
   - +.abook-club.ru
   - +.audiobookbay.lu
   - +.babook.org
-  - +.keyword:flibusta
+  - +.flibusta
   - +.flisland.net
   - +.freedomletters.org
   - +.goodreads.com
   - +.lib.rus.ec
-  - +.keyword:libgen
+  - +.libgen
   - +.litpoint.org
-  - +.keyword:sci-hub
+  - +.sci-hub
   - +.searchfloor.org
   - +.smashwords.com
   - +.github.io
@@ -308,13 +308,13 @@ payload:
   - +.aws.com
   - +.bitmask.net
   - +.b-cdn.net
-  - +.keyword:blancvpn
+  - +.blancvpn
   - +.blncapi.com
   - +.bluehost.com
   - +.censorship.no
   - +.censortracker.org
   - +.cloud-ip.cc
-  - +.keyword:cloudflare
+  - +.cloudflare
   - +.cloudfront.net
   - +.croxyproxy.com
   - +.cyberghostvpn.com
@@ -354,13 +354,13 @@ payload:
   - +.proton.me
   - +.protonmail.ch
   - +.protonmail.com
-  - +.keyword:protonvpn
+  - +.protonvpn
   - +.proxyline.net
   - +.psiphon.ca
   - +.racevpn.com
   - +.radiojar.com
   - +.redshieldvpn.com
-  - +.keyword:rockblack
+  - +.rockblack
   - +.surfshark.com
   - +.tech.ru
   - +.tempmail.plus
@@ -385,7 +385,7 @@ payload:
   - +.5sim.net
   - +.7tv.app
   - +.allegro.pl
-  - +.keyword:annas-archive
+  - +.annas-archive
   - +.amdm.ru
   - +.aol.com
   - +.apkmirror.com
@@ -394,7 +394,7 @@ payload:
   - +.archive.ph
   - +.archiveofourown.org
   - +.baginya.org
-  - +.keyword:bestchange
+  - +.bestchange
   - +.betterttv.net
   - +.bigstockphoto.com
   - +.bitcoin.org
@@ -403,10 +403,10 @@ payload:
   - +.booth.pximg.net
   - +.botnadzor.org
   - +.bp.blogspot.com
-  - +.keyword:bs2best
+  - +.bs2best
   - +.bsme.at
   - +.buymeacoffee.com
-  - +.keyword:byewhitelists
+  - +.byewhitelists
   - +.cannaweed.com
   - +.chess.com
   - +.chordu.com
@@ -423,7 +423,7 @@ payload:
   - +.eggertspiele.de
   - +.elements.envato.com
   - +.equalitie.org
-  - +.keyword:etlgr.
+  - +.etlgr.
   - +.exchanger.bits.media
   - +.exler.es
   - +.fansly.com
@@ -471,7 +471,7 @@ payload:
   - +.live.chat.eveonline.com
   - +.livetv.sx
   - +.lis-skins.com
-  - +.keyword:lolz.
+  - +.lolz.
   - +.lu4.org
   - +.magaz.global
   - +.mailchi.mp
@@ -494,7 +494,7 @@ payload:
   - +.qaweb.dev
   - +.quora.com
   - +.readymag.website
-  - +.keyword:rentry.
+  - +.rentry.
   - +.restream.io
   - +.riseup.net
   - +.roskomsvoboda.org
@@ -502,11 +502,11 @@ payload:
   - +.rumble.com
   - +.satsat.info
   - +.saverudata.net
-  - +.keyword:scryde
+  - +.scryde
   - +.simplex.im
   - +.simplexonflux.com
   - +.skiff.com
-  - +.keyword:skladchi
+  - +.skladchi
   - +.s
   - +.slifki.biz
   - +.sms-activate.io
@@ -531,7 +531,7 @@ payload:
   - +.twinlife-systems.com
   - +.twirpx.com
   - +.ufile.io
-  - +.keyword:urbanculture
+  - +.urbanculture
   - +.valhalla-age.org
   - +.valhalla-essence.org
   - +.viber.com
@@ -559,7 +559,7 @@ payload:
   - +.espreso.tv
   - +.fcdynamo.com
   - +.forum.vinograd.info
-  - +.keyword:glavred
+  - +.glavred
   - +.liga.net
   - +.myrotvorets.center
   - +.novaline.fm
