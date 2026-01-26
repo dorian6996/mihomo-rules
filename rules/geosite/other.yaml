@@ -1,123 +1,123 @@
-payload:
-  - +.notion
-  - +.ai.google.dev
+payload:.com
+  - +.notion.com
+  - +.ai.google.dev.com
   - +.aisandbox-pa.googleapis.com
   - +.aistudio.google.com
   - +.aitestkitchen.withgoogle.com
   - +.bard.google.com
   - +.clients6.google.com
   - +.deepmind.com
-  - +.deepmind.google
+  - +.deepmind.google.com
   - +.geller-pa.googleapis.com
-  - +.gemini.google
+  - +.gemini.google.com
   - +.generativelanguage.googleapis.com
   - +.googletagservices.com
   - +.illuminate.google.com
-  - +.jules.google
-  - +.labs.google
+  - +.jules.google.com
+  - +.labs.google.com
   - +.learning.google.com
   - +.lookerstudio.google.com
   - +.makersuite.google.com
-  - +.notebooklm.google
+  - +.notebooklm.google.com
   - +.proactivebackend-pa.googleapis.com
   - +.robinfrontend-pa.googleapis.com
   - +.stitch.withgoogle.com
-  - +.usher.ttvnw.net
-  - +.gql.twitch.tv
+  - +.usher.ttvnw.net.com
+  - +.gql.twitch.tv.com
   - +.byteoversea.com
   - +.muscdn.com
-  - +.musical.ly
+  - +.musical.ly.com
   - +.tik-tokapi.com
-  - +.tiktok
+  - +.tiktok.com
   - +.ttlivecdn.com
-  - +.ttoverseaus.net
+  - +.ttoverseaus.net.com
   - +.ttwstatic.com
-  - +.compose-spec.io
-  - +.docker
-  - +.adobe
-  - +.astockcdn.net
-  - +.behance.net
-  - +.ftcdn.net
-  - +.typekit
-  - +.autodesk
+  - +.compose-spec.io.com
+  - +.docker.com
+  - +.adobe.com
+  - +.astockcdn.net.com
+  - +.behance.net.com
+  - +.ftcdn.net.com
+  - +.typekit.com
+  - +.autodesk.com
   - +.autocad.com
-  - +.a360.co
+  - +.a360.co.com
   - +.tinkercad.com
-  - +.sendgrid.net
-  - +.omtrdc.net
-  - +.bosch
+  - +.sendgrid.net.com
+  - +.omtrdc.net.com
+  - +.bosch.com
   - +.bsh-group.com
-  - +.home-connect
-  - +.homeconnectegw
-  - +.a-msedge.net
-  - +.adaptive.ai
+  - +.home-connect.com
+  - +.homeconnectegw.com
+  - +.a-msedge.net.com
+  - +.adaptive.ai.com
   - +.ai-chat.bsg.brave.com
-  - +.altsociety.ai
+  - +.altsociety.ai.com
   - +.anthropic.com
-  - +.api.cohere.ai
+  - +.api.cohere.ai.com
   - +.api.github.com
   - +.app.reve.com
   - +.augmentcode.com
   - +.bing.com
-  - +.blinkshot.io
+  - +.blinkshot.io.com
   - +.chatgpt.com
   - +.cici.com
-  - +.claude.ai
-  - +.codegpt.co
+  - +.claude.ai.com
+  - +.codegpt.co.com
   - +.codeium.com
   - +.composer.opera-api.com
-  - +.copilot
-  - +.d.docs.live.net
-  - +.fastflux.ai
-  - +.genspark.ai
-  - +.geospy.ai
-  - +.grazie.ai
+  - +.copilot.com
+  - +.d.docs.live.net.com
+  - +.fastflux.ai.com
+  - +.genspark.ai.com
+  - +.geospy.ai.com
+  - +.grazie.ai.com
   - +.grok.com
   - +.groq.com
-  - +.hume.ai
-  - +.inference.cerebras.ai
-  - +.intellij.net
-  - +.jetbrains
-  - +.lenso.ai
-  - +.lightning.ai
-  - +.manus.im
-  - +.mchost.guru
+  - +.hume.ai.com
+  - +.inference.cerebras.ai.com
+  - +.intellij.net.com
+  - +.jetbrains.com
+  - +.lenso.ai.com
+  - +.lightning.ai.com
+  - +.manus.im.com
+  - +.mchost.guru.com
   - +.oaistatic.com
   - +.oaiusercontent.com
   - +.openai.com
   - +.origin-tracker.githubusercontent.com
-  - +.pephop.ai
-  - +.play.ai
-  - +.play.ht
-  - +.recraft.ai
-  - +.reka.ai
-  - +.reve.art
+  - +.pephop.ai.com
+  - +.play.ai.com
+  - +.play.ht.com
+  - +.recraft.ai.com
+  - +.reka.ai.com
+  - +.reve.art.com
   - +.sora.com
-  - +.t3.chat
-  - +.toolbox.app
-  - +.trae.ai
+  - +.t3.chat.com
+  - +.toolbox.app.com
+  - +.trae.ai.com
   - +.vscode-auth.github.com
-  - +.x.ai
-  - +.youtrack.cloud
-  - +.yupp.ai
-  - +.4pda.
+  - +.x.ai.com
+  - +.youtrack.cloud.com
+  - +.yupp.ai.com
+  - +.4pda..com
   - +.aadg.msidentity.com
   - +.asset.launcher.omniverse.nvidia.com
   - +.auth.hpe.com
   - +.avast.com
-  - +.avast.ru
-  - +.avcdn.net
+  - +.avast.ru.com
+  - +.avcdn.net.com
   - +.avira.com
   - +.bitdefender.com
   - +.bluesky-soft.com
   - +.broadcom.com
-  - +.buanzo.org
-  - +.cdn77.org
+  - +.buanzo.org.com
+  - +.cdn77.org.com
   - +.cisco.com
-  - +.ciscobinary.openh264.org
-  - +.clamav.net
+  - +.ciscobinary.openh264.org.com
+  - +.clamav.net.com
   - +.csdlcdn.vaio.com
-  - +.daemon-tools.cc
+  - +.daemon-tools.cc.com
   - +.dell.com
   - +.dellcdn.com
   - +.delltechnologies.com
@@ -126,7 +126,7 @@ payload:
   - +.download.microsoft.com
   - +.ecs.office.com
   - +.edge.microsoft.com
-  - +.elby.ch
+  - +.elby.ch.com
   - +.filerun.com
   - +.fortinet.com
   - +.forum.ansible.com
@@ -135,9 +135,9 @@ payload:
   - +.habr.com
   - +.hostinger.com
   - +.ibm.com
-  - +.intel.
+  - +.intel..com
   - +.install.launcher.omniverse.nvidia.com
-  - +.it-actual.ru
+  - +.it-actual.ru.com
   - +.lenovo.com
   - +.liveupdate.symantec.com
   - +.liveupdate.symantecliveupdate.com
@@ -154,15 +154,15 @@ payload:
   - +.prowlarr.com
   - +.romantelychko.com
   - +.shop.paragon-software.com
-  - +.snort.org
+  - +.snort.org.com
   - +.support.anydesk.com
   - +.synoforum.com
   - +.syslog-ng.com
   - +.teamviewer.com
   - +.tools.keycdn.com
-  - +.webnames.ca
+  - +.webnames.ca.com
   - +.vmware.com
-  - +.xerox.co.uk
+  - +.xerox.co.uk.com
   - +.xerox.com
   - +.zerossl.com
   - +.alienwarearena.com
@@ -174,15 +174,15 @@ payload:
   - +.clashroyaleapp.com
   - +.g2a.com
   - +.gambody.com
-  - +.game.co.uk
+  - +.game.co.uk.com
   - +.gamedistribution.com
   - +.gamestop.com
   - +.gaming.amazon.com
-  - +.ghostrc.game.idtech.services
+  - +.ghostrc.game.idtech.services.com
   - +.gtagarage.com
   - +.haydaygame.com
   - +.humblebundle.com
-  - +.piratenation.game
+  - +.piratenation.game.com
   - +.pcgamesn.com
   - +.photonengine.com
   - +.riotpixels.com
@@ -200,28 +200,28 @@ payload:
   - +.xsts.auth.xboxlive.com
   - +.disneyplus.com
   - +.hbomax.com
-  - +.infinitenovel.eu
-  - +.lidarr.audio
-  - +.m3u.in
+  - +.infinitenovel.eu.com
+  - +.lidarr.audio.com
+  - +.m3u.in.com
   - +.max.com
   - +.netflix.com
-  - +.nflxvideo.net
+  - +.nflxvideo.net.com
   - +.primevideo.com
-  - +.radarr.video
+  - +.radarr.video.com
   - +.servarr.com
   - +.spotify.com
   - +.theaudiodb.com
-  - +.themoviedb.org
+  - +.themoviedb.org.com
   - +.thetvdb.com
-  - +.tmdb.org
-  - +.akamaized.net
+  - +.tmdb.org.com
+  - +.akamaized.net.com
   - +.crunchbase.com
   - +.crunchyroll.com
-  - +.v.vrv.co
+  - +.v.vrv.co.com
   - +.vod-fy.crunchyrollcdn.com
-  - +.2407.pl
+  - +.2407.pl.com
   - +.6pm.com
-  - +.8chan.moe
+  - +.8chan.moe.com
   - +.abercrombie.com
   - +.acurapartswarehouse.com
   - +.adafruit.com
@@ -233,31 +233,31 @@ payload:
   - +.aftermarket.schaeffler.com
   - +.aftermarket.zf.com
   - +.ahrefs.com
-  - +.airbrake.io
+  - +.airbrake.io.com
   - +.aircanada.com
-  - +.akc.org
-  - +.alberta.ca
+  - +.akc.org.com
+  - +.alberta.ca.com
   - +.algolia.com
   - +.alltrails.com
   - +.alphacoders.com
   - +.altaro.com
-  - +.alza.hu
+  - +.alza.hu.com
   - +.amazfitwatchfaces.com
   - +.amplitude.com
   - +.amx.com
   - +.analog.com
-  - +.andrevi.ch
+  - +.andrevi.ch.com
   - +.angryemailtranslator.com
   - +.ansys.com
   - +.anythingllm.com
   - +.api.fast.com
-  - +.apiary.io
+  - +.apiary.io.com
   - +.aplawrence.com
   - +.app.langdock.com
-  - +.app.n8n.cloud
-  - +.arc.net
-  - +.archive.org
-  - +.arduino.cc
+  - +.app.n8n.cloud.com
+  - +.arc.net.com
+  - +.archive.org.com
+  - +.arduino.cc.com
   - +.arinet.com
   - +.arm.com
   - +.att.com
@@ -274,56 +274,56 @@ payload:
   - +.blackfriday.com
   - +.bleepingcomputer.com
   - +.blocklayer.com
-  - +.blur.io
+  - +.blur.io.com
   - +.bmc.com
   - +.bmc.okta.com
   - +.bradyid.com
   - +.bricklink.com
-  - +.broccolionline.jp
+  - +.broccolionline.jp.com
   - +.broncosportforum.com
   - +.btod.com
-  - +.buf.build
-  - +.builds.parsec.app
-  - +.capcut
+  - +.buf.build.com
+  - +.builds.parsec.app.com
+  - +.capcut.com
   - +.cambiumnetworks.com
-  - +.canva.dev
+  - +.canva.dev.com
   - +.canva.com
   - +.canva-apps.com
   - +.capacitorjs.com
   - +.cats.com
-  - +.cdromance.org
+  - +.cdromance.org.com
   - +.cdw.com
-  - +.census.gov
+  - +.census.gov.com
   - +.cesium.com
   - +.chainreactioncycles.com
   - +.chaos.com
   - +.chatfuel.com
   - +.chevrolet.com
-  - +.cisecurity.org
+  - +.cisecurity.org.com
   - +.citrix.com
-  - +.clevelandclinic.org
-  - +.clickocean.io
+  - +.clevelandclinic.org.com
+  - +.clickocean.io.com
   - +.clickup.com
   - +.cocalc.com
-  - +.coder.aniland.org
-  - +.codebrowser.dev
+  - +.coder.aniland.org.com
+  - +.codebrowser.dev.com
   - +.cohere.com
   - +.coingate.com
-  - +.coinpayments.net
+  - +.coinpayments.net.com
   - +.colamco.com
   - +.comfyui-wiki.com
   - +.contabo.com
-  - +.cookielaw.org
-  - +.copernicus.eu
+  - +.cookielaw.org.com
+  - +.copernicus.eu.com
   - +.corsair.com
-  - +.coursera.org
+  - +.coursera.org.com
   - +.cpu-monkey.com
   - +.credly.com
   - +.crowdstrike.com
-  - +.cucumber.io
+  - +.cucumber.io.com
   - +.cvedetails.com
-  - +.cxstudio.clarabridge.net
-  - +.darkproject.eu
+  - +.cxstudio.clarabridge.net.com
+  - +.darkproject.eu.com
   - +.data.mongodb-api.com
   - +.data-cdn.mbamupdates.com
   - +.databricks.com
@@ -331,43 +331,43 @@ payload:
   - +.datempire.com
   - +.dating.com
   - +.daz3d.com
-  - +.decrypt.day
+  - +.decrypt.day.com
   - +.deepl.com
-  - +.deepsource.
+  - +.deepsource..com
   - +.deezer.com
   - +.delinea.com
   - +.designify.com
   - +.devart.com
   - +.devexpress.com
   - +.devops.com
-  - +.dhub.dev
+  - +.dhub.dev.com
   - +.diabrowser.com
   - +.dice.com
   - +.diffblue.com
   - +.digikey.com
-  - +.digitalcontent.sky
+  - +.digitalcontent.sky.com
   - +.disctech.com
   - +.dnb.com
   - +.dochub.com
-  - +.document360.
-  - +.doma.xyz
-  - +.doom9.org
-  - +.download.screamingfrog.co.uk
-  - +.downloads.ndi.tv
+  - +.document360..com
+  - +.doma.xyz.com
+  - +.doom9.org.com
+  - +.download.screamingfrog.co.uk.com
+  - +.downloads.ndi.tv.com
   - +.downloads.ultraedit.com
   - +.ducati.com
-  - +.dyson.
+  - +.dyson..com
   - +.easydmarc.com
   - +.easyjet.com
   - +.editorx.com
-  - +.edu-cisco.org
-  - +.edx.org
-  - +.elastic.co
+  - +.edu-cisco.org.com
+  - +.edx.org.com
+  - +.elastic.co.com
   - +.elgato.com
-  - +.elgiganten.se
+  - +.elgiganten.se.com
   - +.element14.com
   - +.elevenforum.com
-  - +.elevenlabs.io
+  - +.elevenlabs.io.com
   - +.eneba.com
   - +.engagor.com
   - +.entrust.com
@@ -376,26 +376,26 @@ payload:
   - +.expandrive.com
   - +.extremetech.com
   - +.f1.com
-  - +.familysearch.org
+  - +.familysearch.org.com
   - +.fanatical.com
   - +.farnell.com
   - +.fastly.com
-  - +.fastly.net
-  - +.fex.net
+  - +.fastly.net.com
+  - +.fex.net.com
   - +.fextralife.com
-  - +.fiercepc.co.uk
+  - +.fiercepc.co.uk.com
   - +.findagrave.com
   - +.first-root.com
   - +.flir.com
-  - +.flir.eu
-  - +.flourish.studio
+  - +.flir.eu.com
+  - +.flourish.studio.com
   - +.fluke.com
   - +.flukenetworks.com
   - +.flyertalk.com
   - +.fncstatic.com
   - +.force-user-content.com
   - +.force.com
-  - +.fordfoundation.org
+  - +.fordfoundation.org.com
   - +.fordpartsgiant.com
   - +.footballapi.pulselive.com
   - +.fortiguard.com
@@ -409,47 +409,47 @@ payload:
   - +.freemyip.com
   - +.futurelearn.com
   - +.fxnetworks.com
-  - +.g711.org
+  - +.g711.org.com
   - +.gaggenau.com
   - +.galerieslafayette.com
-  - +.gallery.zetalliance.org
+  - +.gallery.zetalliance.org.com
   - +.gannett-cdn.com
   - +.garenanow.com
-  - +.gateway.pinata.cloud
+  - +.gateway.pinata.cloud.com
   - +.geekyfuroshiki.com
   - +.geforcenow.com
   - +.geolocation.onetrust.com
-  - +.getsafeonline.org
-  - +.gfn.am
-  - +.ghidra-sre.org
-  - +.glif.app
+  - +.getsafeonline.org.com
+  - +.gfn.am.com
+  - +.ghidra-sre.org.com
+  - +.glif.app.com
   - +.global.platform.seconddinnertech.com
   - +.glpals.com
   - +.gonitro.com
   - +.gpu-monkey.com
   - +.grafana.com
   - +.grammarly.com
-  - +.graylog.org
+  - +.graylog.org.com
   - +.groupon.com
   - +.grouponcdn.com
-  - +.guilded.gg
+  - +.guilded.gg.com
   - +.halooglasi.com
   - +.hashkey.com
   - +.healthline.com
   - +.hex-rays.com
   - +.hollisterco.com
-  - +.home.by.me
+  - +.home.by.me.com
   - +.honeywell.com
   - +.hotels.com
   - +.housebrand.com
-  - +.htmhell.dev
+  - +.htmhell.dev.com
   - +.hybrid-analysis.com
   - +.hyundainews.com
   - +.iaai.com
   - +.icd10data.com
   - +.idrive.com
-  - +.iedb.org
-  - +.ikea.
+  - +.iedb.org.com
+  - +.ikea..com
   - +.imagecache365.com
   - +.imgur.com
   - +.indeed.com
@@ -458,41 +458,41 @@ payload:
   - +.insanelymac.com
   - +.insideevs.com
   - +.intellipaat.com
-  - +.intelx.io
+  - +.intelx.io.com
   - +.intuit.com
   - +.intuitibits.com
   - +.ionicframework.com
   - +.ionos.com
-  - +.ipdata.co
-  - +.iperf3serverlist.net
-  - +.ipinfo.io
+  - +.ipdata.co.com
+  - +.iperf3serverlist.net.com
+  - +.ipinfo.io.com
   - +.iplocationtools.com
   - +.itninja.com
   - +.jabra.com
   - +.jamf.com
   - +.joesandbox.com
-  - +.jut.su
+  - +.jut.su.com
   - +.kamatera.com
-  - +.kaleido.ai
-  - +.keepgrowing.in
+  - +.kaleido.ai.com
+  - +.keepgrowing.in.com
   - +.keepsolid.com
   - +.keysight.com
   - +.kismia.com
   - +.klarna.com
   - +.klaviyo.com
   - +.kmail-lists.com
-  - +.kowalski7cc.xyz
+  - +.kowalski7cc.xyz.com
   - +.kroger.com
-  - +.ksd-images.lt
+  - +.ksd-images.lt.com
   - +.lakelandford.com
-  - +.landingpad.me
+  - +.landingpad.me.com
   - +.ldoceonline.com
   - +.leakpeek.com
   - +.lebonmarche.com
   - +.leica-geosystems.com
   - +.letyshops.com
   - +.lifehacker.com
-  - +.linear.app
+  - +.linear.app.com
   - +.linguee.com
   - +.linuxiac.com
   - +.lipstickalley.com
@@ -500,23 +500,23 @@ payload:
   - +.liquidsky.com
   - +.live.com
   - +.livejournal.com
-  - +.llama3-1.llamameta.net
+  - +.llama3-1.llamameta.net.com
   - +.localbitcoins.com
   - +.logo.com
-  - +.logrules.fr
+  - +.logrules.fr.com
   - +.lowes.com
   - +.lseg.com
-  - +.ltglink.lt
-  - +.lu.ma
-  - +.lucid.app
-  - +.lucid.co
-  - +.m3u.ch
-  - +.m3u.work
+  - +.ltglink.lt.com
+  - +.lu.ma.com
+  - +.lucid.app.com
+  - +.lucid.co.com
+  - +.m3u.ch.com
+  - +.m3u.work.com
   - +.macpaw.com
   - +.macvendors.com
   - +.mailerlite.com
   - +.mailinator.com
-  - +.manybooks.net
+  - +.manybooks.net.com
   - +.markandgraham.com
   - +.marketplace.atlassian.com
   - +.marvelsnap.com
@@ -528,11 +528,11 @@ payload:
   - +.meest-shop.com
   - +.menti.com
   - +.meraki.com
-  - +.metabrainz.org
+  - +.metabrainz.org.com
   - +.metacritic.com
-  - +.metopera.org
+  - +.metopera.org.com
   - +.mi.com
-  - +.michaelkors.global
+  - +.michaelkors.global.com
   - +.microcenter.com
   - +.microchip.com
   - +.microfocus.com
@@ -542,17 +542,17 @@ payload:
   - +.mintmobile.com
   - +.miui.com
   - +.mixcloud.com
-  - +.mongodb.
+  - +.mongodb..com
   - +.moneypuck.com
   - +.monoprice.com
   - +.monotypefonts.com
   - +.monotype.com
-  - +.monster.ie
-  - +.mouser.
-  - +.mssg.me
-  - +.musicbrainz.org
-  - +.myfonts.
-  - +.myheritage
+  - +.monster.ie.com
+  - +.mouser..com
+  - +.mssg.me.com
+  - +.musicbrainz.org.com
+  - +.myfonts..com
+  - +.myheritage.com
   - +.myprepaidcenter.com
   - +.myqrcode.com
   - +.nba.com
@@ -561,14 +561,14 @@ payload:
   - +.neo4j.com
   - +.nesinc.com
   - +.netapp.com
-  - +.neuesbad.de
+  - +.neuesbad.de.com
   - +.new.abb.com
   - +.newark.com
   - +.nexar.com
   - +.nexus-cdn.com
   - +.nexusmods.com
   - +.nfl.com
-  - +.nike.
+  - +.nike..com
   - +.nitropay.com
   - +.nitropdf.com
   - +.nordaccount.com
@@ -584,34 +584,34 @@ payload:
   - +.octopart.com
   - +.octopart-clicks.com
   - +.octostatic.com
-  - +.omv-extras.org
+  - +.omv-extras.org.com
   - +.on24.com
   - +.onshape.com
   - +.onetrust.com
   - +.onfastspring.com
-  - +.onlinesim.
+  - +.onlinesim..com
   - +.opencartforum.com
   - +.openculture.com
-  - +.openlibrary.org
-  - +.opensea.io
+  - +.openlibrary.org.com
+  - +.opensea.io.com
   - +.opentext.com
-  - +.opus.pro
+  - +.opus.pro.com
   - +.ott-play.com
-  - +.outflank.nl
-  - +.owlto.finance
+  - +.outflank.nl.com
+  - +.owlto.finance.com
   - +.paddle.com
   - +.padi.com
-  - +.pages.dev
-  - +.paraswap.io
-  - +.parallels
+  - +.pages.dev.com
+  - +.paraswap.io.com
+  - +.parallels.com
   - +.parts-express.com
-  - +.path3.xtracloud.net
+  - +.path3.xtracloud.net.com
   - +.patreon.com
   - +.patreonusercontent.com
   - +.paypal.com
   - +.paytr.com
   - +.pbteen.com
-  - +.pcbway.
+  - +.pcbway..com
   - +.pcmag.com
   - +.pdq.com
   - +.pearsonvue.com
@@ -631,30 +631,30 @@ payload:
   - +.pitch.com
   - +.pixabay.com
   - +.platform.activestate.com
-  - +.plati.io
+  - +.plati.io.com
   - +.plesk.com
   - +.plugin-alliance.com
   - +.plugshare.com
-  - +.plumbr.io
+  - +.plumbr.io.com
   - +.pluralsight.com
   - +.pny.com
-  - +.politico.eu
+  - +.politico.eu.com
   - +.polymarket.com
-  - +.posteo.de
+  - +.posteo.de.com
   - +.posthog.com
-  - +.potterybarn
+  - +.potterybarn.com
   - +.premierleague.com
   - +.principalrelocation.com
-  - +.privatekeys.pw
-  - +.prod.smassets.net
-  - +.promods.net
+  - +.privatekeys.pw.com
+  - +.prod.smassets.net.com
+  - +.promods.net.com
   - +.proxyscrape.com
   - +.ptc.com
   - +.pubnub.com
-  - +.pump.fun
-  - +.qcad.org
+  - +.pump.fun.com
+  - +.qcad.org.com
   - +.qobuz.com
-  - +.qt.io
+  - +.qt.io.com
   - +.qualcomm.com
   - +.quicknode.com
   - +.quietpc.com
@@ -664,39 +664,39 @@ payload:
   - +.raycast.com
   - +.raycast-releases.com
   - +.razer.com
-  - +.rcac.purdue.edu
+  - +.rcac.purdue.edu.com
   - +.readdle.com
-  - +.readybot.io
+  - +.readybot.io.com
   - +.readymag.com
   - +.redis.com
-  - +.redis.io
+  - +.redis.io.com
   - +.redislabs.com
-  - +.refactoring.guru
+  - +.refactoring.guru.com
   - +.refinitiv.com
   - +.releases.hashicorp.com
-  - +.remove.bg
+  - +.remove.bg.com
   - +.repo.bacch.com
-  - +.research.net
-  - +.resp.app
+  - +.research.net.com
+  - +.resp.app.com
   - +.reverb.com
   - +.ringostat.com
   - +.roborock.com
   - +.rockthejvm.com
   - +.ruckuswireless.com
   - +.samsclub.com
-  - +.salesforce
+  - +.salesforce.com
   - +.sap.com
-  - +.sbom.sh
+  - +.sbom.sh.com
   - +.scam-detector.com
-  - +.schenker-tech.de
+  - +.schenker-tech.de.com
   - +.scribd.com
   - +.sdxcentral.com
   - +.securitytrails.com
   - +.segger.com
-  - +.seekvectorlogo.net
+  - +.seekvectorlogo.net.com
   - +.semrush.com
-  - +.sentry.io
-  - +.senukai.lt
+  - +.sentry.io.com
+  - +.senukai.lt.com
   - +.sephora.com
   - +.serato.com
   - +.serialcart.com
@@ -706,30 +706,30 @@ payload:
   - +.setapp.com
   - +.sfdcopens.com
   - +.shiksha.com
-  - +.shiksha.ws
+  - +.shiksha.ws.com
   - +.siemens.com
-  - +.simkl.
+  - +.simkl..com
   - +.singlekey-id.com
   - +.site.com
-  - +.siteground.co
+  - +.siteground.co.com
   - +.sites.fastspring.com
   - +.sketchup.com
   - +.sky.com
   - +.skycdp.com
   - +.skyshowtime.com
-  - +.slideshare.net
-  - +.smartbear
+  - +.slideshare.net.com
+  - +.smartbear.com
   - +.smartdeploy.com
   - +.snapeda.com
   - +.snapgene.com
   - +.snapmagic.com
-  - +.snyk.io
-  - +.soapui.org
+  - +.snyk.io.com
+  - +.soapui.org.com
   - +.solarwinds.com
-  - +.sonara.ai
+  - +.sonara.ai.com
   - +.sophos.com
   - +.softpedia.com
-  - +.spiceworks
+  - +.spiceworks.com
   - +.spitfireaudio.com
   - +.splunk.com
   - +.splunkcloud.com
@@ -743,53 +743,53 @@ payload:
   - +.stereophile.com
   - +.stockx.com
   - +.strava.com
-  - +.statology.org
-  - +.studychat.app
-  - +.stuff.co.nz
-  - +.summer.fi
+  - +.statology.org.com
+  - +.studychat.app.com
+  - +.stuff.co.nz.com
+  - +.summer.fi.com
   - +.summerana.com
   - +.surveymonkey.com
   - +.syncfusion.com
-  - +.systemtek.co.uk
-  - +.swagger.io
-  - +.swapd.co
-  - +.swissinfo.ch
+  - +.systemtek.co.uk.com
+  - +.swagger.io.com
+  - +.swapd.co.com
+  - +.swissinfo.ch.com
   - +.sysdig.com
   - +.tableau.com
   - +.tailscale.com
   - +.talosintelligence.com
   - +.te.com
-  - +.teads.tv
+  - +.teads.tv.com
   - +.techbargains.com
   - +.technobezz.com
-  - +.techthoughts.info
+  - +.techthoughts.info.com
   - +.templatemonster.com
   - +.temu.com
   - +.tenable.com
-  - +.terraform.io
-  - +.teslasoft.org
-  - +.tf1.fr
-  - +.tf1info.fr
+  - +.terraform.io.com
+  - +.teslasoft.org.com
+  - +.tf1.fr.com
+  - +.tf1info.fr.com
   - +.thesassway.com
-  - +.thetvapp.to
+  - +.thetvapp.to.com
   - +.thinkpads.com
   - +.thomas-krenn.com
   - +.ti.com
   - +.tidal.com
-  - +.timberland
+  - +.timberland.com
   - +.time.com
   - +.tommy.com
   - +.tonymacx86.com
   - +.trellix.com
-  - +.tria.ge
-  - +.trailblazer.me
+  - +.tria.ge.com
+  - +.trailblazer.me.com
   - +.trailhead.com
   - +.transferwise.com
   - +.trustwave.com
   - +.tsheets.com
   - +.tsmc.com
   - +.tvdevinfo.com
-  - +.tvn24.pl
+  - +.tvn24.pl.com
   - +.typing.com
   - +.uaudio.com
   - +.ubi.com
@@ -797,18 +797,18 @@ payload:
   - +.ubisoft.com
   - +.udemy.com
   - +.ui.com
-  - +.uizard.io
+  - +.uizard.io.com
   - +.ultimaker.com
-  - +.undress.cc
+  - +.undress.cc.com
   - +.unix.com
   - +.unscreen.com
   - +.unsplash.com
   - +.upwork.com
   - +.usatoday.com
   - +.vagrantcloud.com
-  - +.vans.
+  - +.vans..com
   - +.varonis.com
-  - +.vectorworks.net
+  - +.vectorworks.net.com
   - +.veeam.com
   - +.vehiclelifetimesolutions.schaeffler.com
   - +.veritas.com
@@ -817,44 +817,44 @@ payload:
   - +.volet.com
   - +.volkswagen-classic-parts.com
   - +.vpnunlimited.com
-  - +.vyos.io
-  - +.w.atwiki.jp
+  - +.vyos.io.com
+  - +.w.atwiki.jp.com
   - +.walmart.com
   - +.watchguard.com
-  - +.we.tl
+  - +.we.tl.com
   - +.weather.com
-  - +.web.tecalliance.net
-  - +.webdock.io
+  - +.web.tecalliance.net.com
+  - +.webdock.io.com
   - +.webex.com
-  - +.webscraper.io
-  - +.webservice.tecalliance.services
+  - +.webscraper.io.com
+  - +.webservice.tecalliance.services.com
   - +.weebly.com
   - +.wellfound.com
-  - +.westelm.
+  - +.westelm..com
   - +.wetransfer.com
   - +.wialon.com
-  - +.wiki.malw.link
+  - +.wiki.malw.link.com
   - +.wikidot.com
   - +.williams-sonoma.com
-  - +.windguru.cz
+  - +.windguru.cz.com
   - +.windows10spotlight.com
   - +.windsurf.com
   - +.wise.com
-  - +.wk.cz
+  - +.wk.cz.com
   - +.wonderclub.com
   - +.wpengine.com
   - +.wunderground.com
   - +.xfantazy.com
-  - +.xiaomi.eu
-  - +.xmg.gg
+  - +.xiaomi.eu.com
+  - +.xmg.gg.com
   - +.xrite.com
-  - +.yandexwebcache.org
+  - +.yandexwebcache.org.com
   - +.yeggi.com
   - +.yithemes.com
   - +.yourdictionary.com
   - +.zapier.com
   - +.zbigz.com
-  - +.zedge.net
+  - +.zedge.net.com
   - +.zendesk.com
   - +.zoho.com
   - +.zoosk.com

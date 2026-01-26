@@ -1,9 +1,9 @@
-payload:
+payload:.com
   - +.googlevideo.com
   - +.ytimg.com
   - +.jnn-pa.googleapis.com
-  - +.youtu.be
-  - +.youtube
+  - +.youtu.be.com
+  - +.youtube.com
   - +.yt-video-upload.l.google.com
   - +.yt3.ggpht.com
   - +.yt3.googleusercontent.com
