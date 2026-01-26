@@ -1,4 +1,4 @@
-name: ZKEEN dat → mihomo YAML (protobuf-correct)
+name: ZKEEN dat → mihomo YAML (native geosite parser)
 
 on:
   workflow_dispatch:
@@ -13,23 +13,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: "1.21"
 
-      - name: Prepare directories
+      - name: Prepare dirs
         run: |
-          mkdir -p tmp rules/geosite rules/geoip proto
+          mkdir -p tmp rules/geosite rules/geoip
 
       - name: Install tools
         run: |
-          pip install protobuf grpcio-tools
           go install github.com/urlesistiana/v2dat@latest
           go install github.com/metacubex/mihomo@latest
 
@@ -41,7 +35,7 @@ jobs:
             https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
 
       # =========================
-      # GEOIP (как раньше, v2dat)
+      # GEOIP (v2dat)
       # =========================
       - name: Build geoip
         run: |
@@ -53,58 +47,73 @@ jobs:
             name=$(basename "$f" .txt)
             grep -v '^#' "$f" | grep -v '^$' > "rules/geoip/$name.txt"
             echo "payload:" > "rules/geoip/$name.yaml"
-            while read -r line; do
-              echo "  - $line" >> "rules/geoip/$name.yaml"
-            done < "rules/geoip/$name.txt"
+            sed 's/^/  - /' "rules/geoip/$name.txt" >> "rules/geoip/$name.yaml"
             mihomo convert-ruleset ipcidr text \
               "rules/geoip/$name.txt" \
               "rules/geoip/$name.mrs" || true
           done
 
       # =========================
-      # GEOSITE (protobuf, как viewer)
+      # GEOSITE (v2ray native)
       # =========================
-      - name: Prepare proto files
+      - name: Build geosite (native v2ray parser)
         run: |
-          curl -fsSL -o proto/geosite.proto \
-            https://raw.githubusercontent.com/v2fly/v2ray-core/master/app/router/config.proto
+          cat > geosite_dump.go << 'EOF'
+          package main
 
-      - name: Compile proto
-        run: |
-          python -m grpc_tools.protoc \
-            -I proto \
-            --python_out=. \
-            proto/geosite.proto
+          import (
+            "fmt"
+            "os"
+            "path/filepath"
+            "sort"
 
-      - name: Build geosite (protobuf correct)
-        run: |
-          cat > parse_geosite.py << 'EOF'
-          from collections import defaultdict
-          import os
-          from app.router import config_pb2
+            "github.com/v2fly/v2ray-core/v5/app/router"
+            "github.com/v2fly/v2ray-core/v5/common/platform/filesystem"
+          )
 
-          data = open("tmp/geosite.dat", "rb").read()
-          geo = config_pb2.GeoSiteList()
-          geo.ParseFromString(data)
+          func main() {
+            data, err := os.ReadFile("tmp/geosite.dat")
+            if err != nil {
+              panic(err)
+            }
 
-          os.makedirs("rules/geosite", exist_ok=True)
+            geo := &router.GeoSiteList{}
+            if err := geo.Unmarshal(data); err != nil {
+              panic(err)
+            }
 
-          for site in geo.entry:
-              name = site.country_code.lower()
-              domains = set()
+            os.MkdirAll("rules/geosite", 0755)
 
-              for d in site.domain:
-                  domains.add(d.value)
+            for _, entry := range geo.Entry {
+              name := entry.CountryCode
+              set := map[string]bool{}
 
-              with open(f"rules/geosite/{name}.yaml", "w") as f:
-                  f.write("payload:\n")
-                  for dom in sorted(domains):
-                      f.write(f"  - +.{dom}\n")
+              for _, d := range entry.Domain {
+                set[d.Value] = true
+              }
+
+              var domains []string
+              for d := range set {
+                domains = append(domains, d)
+              }
+              sort.Strings(domains)
+
+              path := filepath.Join("rules/geosite", name+".yaml")
+              f, _ := os.Create(path)
+              defer f.Close()
+
+              fmt.Fprintln(f, "payload:")
+              for _, d := range domains {
+                fmt.Fprintf(f, "  - +.%s\n", d)
+              }
+            }
+          }
           EOF
 
-          python3 parse_geosite.py
+          go mod init geosite_dump
+          go get github.com/v2fly/v2ray-core/v5@latest
+          go run geosite_dump.go
 
-          # build mrs
           for f in rules/geosite/*.yaml; do
             name=$(basename "$f" .yaml)
             sed 's/^  - +\.//' "$f" > "rules/geosite/$name.txt"
@@ -119,5 +128,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add rules/
-          git diff --staged --quiet || git commit -m "chore: rebuild rules via protobuf geosite"
+          git diff --staged --quiet || git commit -m "chore: rebuild rules via native v2ray geosite parser"
           git push
