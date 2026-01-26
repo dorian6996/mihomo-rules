@@ -1,12 +1,0 @@
-youtu.be
-	ytimg.com
-yt3.ggpht.com
-yt4.ggpht.com
-googlevideo.com
-ytimg.l.google.com
-jnn-pa.googleapis.com
-ytstatic.l.google.com
-yt3.googleusercontent.com
-yt4.googleusercontent.com
-yt-video-upload.l.google.com
-youtube
