@@ -1,9 +1,7 @@
-name: ZKEEN dat → mihomo YAML (viewer logic, fixed)
+name: ZKEEN dat → mihomo YAML (protobuf-correct)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *"
 
 permissions:
   contents: write
@@ -13,8 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -28,11 +25,11 @@ jobs:
 
       - name: Prepare directories
         run: |
-          mkdir -p tmp rules/geosite rules/geoip
+          mkdir -p tmp rules/geosite rules/geoip proto
 
       - name: Install tools
         run: |
-          pip install protobuf
+          pip install protobuf grpcio-tools
           go install github.com/urlesistiana/v2dat@latest
           go install github.com/metacubex/mihomo@latest
 
@@ -44,7 +41,7 @@ jobs:
             https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
 
       # =========================
-      # GEOIP (v2dat, FIXED)
+      # GEOIP (как раньше, v2dat)
       # =========================
       - name: Build geoip
         run: |
@@ -55,94 +52,59 @@ jobs:
           for f in tmp/geoip/*.txt; do
             name=$(basename "$f" .txt)
             grep -v '^#' "$f" | grep -v '^$' > "rules/geoip/$name.txt"
-
             echo "payload:" > "rules/geoip/$name.yaml"
             while read -r line; do
               echo "  - $line" >> "rules/geoip/$name.yaml"
             done < "rules/geoip/$name.txt"
-
             mihomo convert-ruleset ipcidr text \
               "rules/geoip/$name.txt" \
               "rules/geoip/$name.mrs" || true
           done
 
       # =========================
-      # GEOSITE (viewer logic)
+      # GEOSITE (protobuf, как viewer)
       # =========================
-      - name: Build geosite (protobuf, +.)
+      - name: Prepare proto files
+        run: |
+          curl -fsSL -o proto/geosite.proto \
+            https://raw.githubusercontent.com/v2fly/v2ray-core/master/app/router/config.proto
+
+      - name: Compile proto
+        run: |
+          python -m grpc_tools.protoc \
+            -I proto \
+            --python_out=. \
+            proto/geosite.proto
+
+      - name: Build geosite (protobuf correct)
         run: |
           cat > parse_geosite.py << 'EOF'
-          import os
           from collections import defaultdict
-          from google.protobuf.internal.decoder import _DecodeVarint32
+          import os
+          from app.router import config_pb2
 
-          def read_varint(buf, pos):
-              result, shift = 0, 0
-              while True:
-                  b = buf[pos]
-                  pos += 1
-                  result |= (b & 0x7f) << shift
-                  if not (b & 0x80):
-                      return result, pos
-                  shift += 7
+          data = open("tmp/geosite.dat", "rb").read()
+          geo = config_pb2.GeoSiteList()
+          geo.ParseFromString(data)
 
-          def parse_geosite(path):
-              with open(path, "rb") as f:
-                  data = f.read()
-
-              pos = 0
-              out = defaultdict(set)
-
-              while pos < len(data):
-                  try:
-                      size, pos = _DecodeVarint32(data, pos)
-                  except Exception:
-                      break
-
-                  block = data[pos:pos + size]
-                  pos += size
-
-                  name = None
-                  domains = []
-
-                  i = 0
-                  while i < len(block):
-                      tag = block[i]
-                      i += 1
-                      field = tag >> 3
-                      wire = tag & 7
-
-                      if wire == 2:
-                          l, i = read_varint(block, i)
-                          val = block[i:i + l]
-                          i += l
-
-                          if field == 1:
-                              name = val.decode()
-                          elif field == 2:
-                              domains.append(val.decode())
-                      else:
-                          i += 1
-
-                  if name:
-                      for d in domains:
-                          out[name].add(d)
-
-              return out
-
-          geosites = parse_geosite("tmp/geosite.dat")
           os.makedirs("rules/geosite", exist_ok=True)
 
-          for name, domains in geosites.items():
+          for site in geo.entry:
+              name = site.country_code.lower()
+              domains = set()
+
+              for d in site.domain:
+                  domains.add(d.value)
+
               with open(f"rules/geosite/{name}.yaml", "w") as f:
                   f.write("payload:\n")
-                  for d in sorted(domains):
-                      f.write(f"  - +.{d}\n")
+                  for dom in sorted(domains):
+                      f.write(f"  - +.{dom}\n")
           EOF
 
           python3 parse_geosite.py
 
-          # MRS generation
+          # build mrs
           for f in rules/geosite/*.yaml; do
             name=$(basename "$f" .yaml)
             sed 's/^  - +\.//' "$f" > "rules/geosite/$name.txt"
@@ -157,9 +119,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add rules/
-          if git diff --staged --quiet; then
-            echo "No changes"
-          else
-            git commit -m "chore: rebuild rules using geofileviewer logic"
-            git push
-          fi
+          git diff --staged --quiet || git commit -m "chore: rebuild rules via protobuf geosite"
+          git push
