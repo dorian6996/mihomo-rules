@@ -1,4 +1,4 @@
-name: ZKEEN dat → MRS (pure geosite, no keyword)
+name: ZKEEN dat → mihomo YAML (viewer-logic)
 
 on:
   workflow_dispatch:
@@ -12,113 +12,142 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      GOPATH: ${{ github.workspace }}/.gopath
-      GOBIN: ${{ github.workspace }}/.gopath/bin
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          fetch-depth: 0
-          persist-credentials: true
+          python-version: "3.11"
 
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: "1.21"
 
-      - name: Prepare directories
+      - name: Prepare dirs
         run: |
-          mkdir -p "${GOPATH}/bin"
-          mkdir -p tmp/geoip tmp/geosite
-          mkdir -p rules/geoip rules/geosite
-          echo "${GOPATH}/bin" >> $GITHUB_PATH
+          mkdir -p tmp rules/geosite rules/geoip
 
       - name: Install tools
         run: |
-          set -e
+          pip install protobuf
           go install github.com/urlesistiana/v2dat@latest
           go install github.com/metacubex/mihomo@latest
 
-      - name: Download ZKEEN dat files
+      - name: Download dat files
         run: |
-          set -e
-          curl -fsSL -o tmp/zkeenip.dat \
-            https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
-          curl -fsSL -o tmp/zkeen.dat \
+          curl -fsSL -o tmp/geosite.dat \
             https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
+          curl -fsSL -o tmp/geoip.dat \
+            https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
 
-      - name: Unpack dat files
+      # =========================
+      # GEOIP — как раньше
+      # =========================
+      - name: Build geoip
         run: |
-          set -e
-          v2dat unpack geoip -o tmp/geoip tmp/zkeenip.dat
-          v2dat unpack geosite -o tmp/geosite tmp/zkeen.dat
-
-      - name: Process rules (NO keyword, EXACT like geofileviewer)
-        run: |
-          set -e
-          rm -rf rules/geoip/* rules/geosite/* || true
-
-          ####################
-          # GEOIP
-          ####################
-          for f in tmp/geoip/zkeenip_*.txt; do
-            [ -f "$f" ] || continue
-            name=$(basename "$f" .txt | sed 's/^zkeenip_//')
-
+          v2dat unpack geoip -o tmp/geoip tmp/geoip.dat
+          rm -rf rules/geoip/*
+          for f in tmp/geoip/*.txt; do
+            name=$(basename "$f" .txt)
             grep -v '^#' "$f" | grep -v '^$' > "rules/geoip/$name.txt"
-            [ -s "rules/geoip/$name.txt" ] || continue
-
             echo "payload:" > "rules/geoip/$name.yaml"
             while read -r line; do
               echo "  - $line" >> "rules/geoip/$name.yaml"
             done < "rules/geoip/$name.txt"
-
             mihomo convert-ruleset ipcidr text \
               "rules/geoip/$name.txt" \
-              "rules/geoip/$name.mrs" || rm -f "rules/geoip/$name.mrs"
+              "rules/geoip/$name.mrs" || true
           done
 
-          ####################
-          # GEOSITE (PURE DOMAIN, keyword STRIPPED)
-          ####################
-          for f in tmp/geosite/zkeen_*.txt; do
-            [ -f "$f" ] || continue
-            name=$(basename "$f" .txt | sed 's/^zkeen_//')
+      # =========================
+      # GEOSITE — viewer logic
+      # =========================
+      - name: Build geosite (viewer logic, +.)
+        run: |
+          cat > parse_geosite.py << 'EOF'
+          import sys, os
+          from collections import defaultdict
+          from google.protobuf.internal.decoder import _DecodeVarint32
 
-            # ❗ ВАЖНО:
-            # если v2dat внезапно вставил "keyword:" — просто убираем его
-            grep -v '^#' "$f" | grep -v '^$' \
-              | sed -E 's/^[[:space:]]*([+*.|@-]*)keyword:[[:space:]]*/\1/' \
-              > "rules/geosite/$name.txt"
+          def read_varint(buf, pos):
+              result, shift = 0, 0
+              while True:
+                  b = buf[pos]
+                  pos += 1
+                  result |= (b & 0x7f) << shift
+                  if not (b & 0x80):
+                      return result, pos
+                  shift += 7
 
-            [ -s "rules/geosite/$name.txt" ] || continue
+          def parse(dat):
+              with open(dat, "rb") as f:
+                  data = f.read()
+              pos = 0
+              out = defaultdict(set)
 
-            echo "payload:" > "rules/geosite/$name.yaml"
-            while read -r d; do
-              if [[ "$d" =~ ^(\||\@|\*\.|\+\.|\.) ]]; then
-                echo "  - $d" >> "rules/geosite/$name.yaml"
-              else
-                echo "  - +.$d" >> "rules/geosite/$name.yaml"
-              fi
-            done < "rules/geosite/$name.txt"
+              while pos < len(data):
+                  try:
+                      size, pos = _DecodeVarint32(data, pos)
+                  except:
+                      break
+                  block = data[pos:pos+size]
+                  pos += size
 
+                  name = None
+                  domains = []
+
+                  i = 0
+                  while i < len(block):
+                      tag = block[i]
+                      i += 1
+                      field = tag >> 3
+                      wire = tag & 7
+                      if wire == 2:
+                          l, i = read_varint(block, i)
+                          val = block[i:i+l]
+                          i += l
+                          if field == 1:
+                              name = val.decode()
+                          elif field == 2:
+                              domains.append(val.decode())
+                      else:
+                          i += 1
+
+                  if name:
+                      for d in domains:
+                          out[name].add(d)
+              return out
+
+          geosites = parse("tmp/geosite.dat")
+          os.makedirs("rules/geosite", exist_ok=True)
+
+          for name, domains in geosites.items():
+              path = f"rules/geosite/{name}.yaml"
+              with open(path, "w") as f:
+                  f.write("payload:\n")
+                  for d in sorted(domains):
+                      f.write(f"  - +.{d}\n")
+          EOF
+
+          python3 parse_geosite.py
+
+          for f in rules/geosite/*.yaml; do
+            name=$(basename "$f" .yaml)
+            sed 's/^  - +\.//' "$f" > "rules/geosite/$name.txt"
             mihomo convert-ruleset domain text \
               "rules/geosite/$name.txt" \
-              "rules/geosite/$name.mrs" || rm -f "rules/geosite/$name.mrs"
+              "rules/geosite/$name.mrs" || true
+            rm -f "rules/geosite/$name.txt"
           done
 
-          echo "Done. Keyword completely ignored. Output matches geofileviewer semantics."
-
-      - name: Commit and push
+      - name: Commit & push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add rules/
-          if git diff --staged --quiet; then
-            echo "No changes"
-          else
-            git commit -m "chore: pure geosite export without keyword artifacts [$(date +'%Y-%m-%d %H:%M')]"
-            git push
-          fi
+          git diff --staged --quiet || git commit -m "chore: rebuild rules via viewer logic"
+          git push
+        fi
