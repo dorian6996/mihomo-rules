@@ -1,4 +1,4 @@
-name: ZKEEN dat → mihomo rules (string-based, stable)
+name: ZKEEN dat → mihomo rules (geofileviewer logic)
 
 on:
   workflow_dispatch:
@@ -15,6 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -22,8 +27,7 @@ jobs:
 
       - name: Prepare directories
         run: |
-          mkdir -p tmp/geoip tmp/geosite
-          mkdir -p rules/geoip rules/geosite
+          mkdir -p tmp rules/geosite rules/geoip
 
       - name: Install tools
         run: |
@@ -38,7 +42,7 @@ jobs:
             https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
 
       # =========================
-      # GEOIP (БЕЗ ИЗМЕНЕНИЙ)
+      # GEOIP (как раньше, но без geoip_ в имени)
       # =========================
       - name: Build geoip rules
         run: |
@@ -47,7 +51,7 @@ jobs:
 
           rm -rf rules/geoip/*
           for f in tmp/geoip/*.txt; do
-            name=$(basename "$f" .txt)
+            name=$(basename "$f" .txt | sed 's/^geoip_//')
             grep -v '^#' "$f" | grep -v '^$' > "rules/geoip/$name.txt"
 
             echo "payload:" > "rules/geoip/$name.yaml"
@@ -59,37 +63,56 @@ jobs:
           done
 
       # =========================
-      # GEOSITE (STRING-BASED, КАК VIEWER)
+      # GEOSITE (через geofileviewer)
       # =========================
-      - name: Build geosite rules (string logic)
+      - name: Clone geofileviewer
         run: |
-          mkdir -p tmp/geosite
-          v2dat unpack geosite -o tmp/geosite tmp/geosite.dat
+          git clone --depth=1 https://github.com/jomertix/geofileviewer.git gv
 
+      - name: Install geofileviewer deps
+        run: |
+          cd gv
+          npm install
+
+      - name: Export geosite via geofileviewer
+        run: |
+          cd gv
+          node << 'EOF'
+          const fs = require('fs');
+          const { parseGeoSite } = require('./src/geosite');
+
+          const data = fs.readFileSync('../tmp/geosite.dat');
+          const result = parseGeoSite(data);
+
+          fs.writeFileSync('../tmp/geosite.json', JSON.stringify(result, null, 2));
+          EOF
+
+      - name: Build geosite rules (mihomo format)
+        run: |
           rm -rf rules/geosite/*
+          node << 'EOF'
+          const fs = require('fs');
 
-          for f in tmp/geosite/*.txt; do
+          const data = JSON.parse(fs.readFileSync('tmp/geosite.json', 'utf8'));
+
+          for (const [name, domains] of Object.entries(data)) {
+            const yamlPath = `rules/geosite/${name}.yaml`;
+            const txtPath  = `rules/geosite/${name}.txt`;
+
+            fs.writeFileSync(yamlPath, 'payload:\n');
+            fs.writeFileSync(txtPath, '');
+
+            for (const d of domains) {
+              fs.appendFileSync(yamlPath, `  - +.${d}\n`);
+              fs.appendFileSync(txtPath, `${d}\n`);
+            }
+          }
+          EOF
+
+          for f in rules/geosite/*.txt; do
             name=$(basename "$f" .txt)
-
-            # 1. берём ТОЛЬКО строки
-            # 2. убираем комментарии и пустые
-            # 3. вырезаем любые артефакты типа "keyword:"
-            # 4. НЕ угадываем типы
-            grep -v '^#' "$f" | grep -v '^$' \
-              | sed -E 's/^[[:space:]]*([+*.|@-]*)keyword:[[:space:]]*//I' \
-              > "rules/geosite/$name.txt"
-
-            [ -s "rules/geosite/$name.txt" ] || continue
-
-            # YAML для mihomo
-            echo "payload:" > "rules/geosite/$name.yaml"
-            while read -r line; do
-              echo "  - +.$line" >> "rules/geosite/$name.yaml"
-            done < "rules/geosite/$name.txt"
-
-            # MRS
             mihomo convert-ruleset domain text \
-              "rules/geosite/$name.txt" \
+              "$f" \
               "rules/geosite/$name.mrs" || true
           done
 
@@ -101,6 +124,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes"
           else
-            git commit -m "chore: rebuild geo rules (viewer-like string parsing)"
+            git commit -m "chore: rebuild rules using geofileviewer logic"
             git push
           fi
