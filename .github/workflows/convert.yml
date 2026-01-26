@@ -1,4 +1,4 @@
-name: ZKEEN dat → MRS
+name: ZKEEN dat → MRS (domain + keyword split)
 
 on:
   workflow_dispatch:
@@ -35,14 +35,10 @@ jobs:
           mkdir -p rules/geoip rules/geosite
           echo "${GOPATH}/bin" >> $GITHUB_PATH
 
-      - name: Install v2dat
+      - name: Install tools
         run: |
           set -e
           go install github.com/urlesistiana/v2dat@latest
-
-      - name: Install mihomo
-        run: |
-          set -e
           go install github.com/metacubex/mihomo@latest
 
       - name: Download ZKEEN dat files
@@ -59,13 +55,13 @@ jobs:
           v2dat unpack geoip -o tmp/geoip tmp/zkeenip.dat
           v2dat unpack geosite -o tmp/geosite tmp/zkeen.dat
 
-      - name: Process rules
+      - name: Process rules (split domain / keyword)
         run: |
           set -e
           rm -rf rules/geoip/* rules/geosite/* || true
 
           ####################
-          # GEOIP
+          # GEOIP (без изменений)
           ####################
           for f in tmp/geoip/zkeenip_*.txt; do
             [ -f "$f" ] || continue
@@ -85,43 +81,57 @@ jobs:
           done
 
           ####################
-          # GEOSITE (keyword → .com)
+          # GEOSITE (DOMAIN + KEYWORD)
           ####################
           for f in tmp/geosite/zkeen_*.txt; do
             [ -f "$f" ] || continue
             name=$(basename "$f" .txt | sed 's/^zkeen_//')
 
-            # 1. TXT: убираем keyword:, добавляем .com если надо
-            grep -v '^#' "$f" | grep -v '^$' \
-              | sed -E '
-                  s/\.keyword:[[:space:]]*/./g;
-                  s/keyword:[[:space:]]*//g;
-                  /\.com$/!s/$/.com/
-                ' > "rules/geosite/$name.txt"
+            domain_txt="rules/geosite/$name.txt"
+            keyword_txt="rules/geosite/${name}_keyword.txt"
 
-            [ -s "rules/geosite/$name.txt" ] || continue
-
-            # 2. YAML payload
-            echo "payload:" > "rules/geosite/$name.yaml"
-            while read -r line; do
-              if [[ "$line" =~ ^(\||\@|\*\.|\+\.|\.) ]]; then
-                echo "  - $line" >> "rules/geosite/$name.yaml"
+            # Разделяем
+            grep -v '^#' "$f" | grep -v '^$' | while read -r line; do
+              if [[ "$line" =~ keyword: ]]; then
+                echo "$line" \
+                  | sed -E 's/^[^a-zA-Z]*keyword:[[:space:]]*//g' \
+                  >> "$keyword_txt"
               else
-                echo "  - +.$line" >> "rules/geosite/$name.yaml"
+                echo "$line" >> "$domain_txt"
               fi
-            done < "rules/geosite/$name.txt"
+            done
 
-            # 3. Финальная зачистка YAML (страховка)
-            sed -i -E '
-              s/\.keyword:[[:space:]]*/./g;
-              s/keyword:[[:space:]]*//g;
-              /\.com$/!s/$/.com/
-            ' "rules/geosite/$name.yaml"
+            ################
+            # DOMAIN YAML
+            ################
+            if [ -s "$domain_txt" ]; then
+              echo "payload:" > "rules/geosite/$name.yaml"
+              while read -r d; do
+                if [[ "$d" =~ ^(\||\@|\*\.|\+\.|\.) ]]; then
+                  echo "  - $d" >> "rules/geosite/$name.yaml"
+                else
+                  echo "  - +.$d" >> "rules/geosite/$name.yaml"
+                fi
+              done < "$domain_txt"
 
-            # 4. MRS
-            mihomo convert-ruleset domain text \
-              "rules/geosite/$name.txt" \
-              "rules/geosite/$name.mrs" || rm -f "rules/geosite/$name.mrs"
+              mihomo convert-ruleset domain text \
+                "$domain_txt" \
+                "rules/geosite/$name.mrs" || rm -f "rules/geosite/$name.mrs"
+            fi
+
+            ################
+            # KEYWORD YAML
+            ################
+            if [ -s "$keyword_txt" ]; then
+              echo "payload:" > "rules/geosite/${name}_keyword.yaml"
+              sort -u "$keyword_txt" | while read -r k; do
+                echo "  - $k" >> "rules/geosite/${name}_keyword.yaml"
+              done
+
+              mihomo convert-ruleset keyword text \
+                "$keyword_txt" \
+                "rules/geosite/${name}_keyword.mrs" || rm -f "rules/geosite/${name}_keyword.mrs"
+            fi
           done
 
           echo "Done."
@@ -134,6 +144,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes"
           else
-            git commit -m "chore: convert keyword rules to .com domains [$(date +'%Y-%m-%d %H:%M')]"
+            git commit -m "chore: split geosite rules into domain and keyword [$(date +'%Y-%m-%d %H:%M')]"
             git push
           fi
