@@ -1,0 +1,11 @@
+googlevideo.com
+ytimg.com
+jnn-pa.googleapis.com
+youtu.be
+yt-video-upload.l.google.com
+yt3.ggpht.com
+yt3.googleusercontent.com
+yt4.ggpht.com
+yt4.googleusercontent.com
+ytimg.l.google.com
+ytstatic.l.google.com
