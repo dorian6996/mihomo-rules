@@ -1,4 +1,4 @@
-name: ZKEEN dat → mihomo rules (geofileviewer-correct)
+name: ZKEEN dat → mihomo rules (geofileviewer correct, FINAL)
 
 on:
   workflow_dispatch:
@@ -15,9 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # -------------------------
-      # ENV
-      # -------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -45,7 +42,7 @@ jobs:
             https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
 
       # =========================
-      # GEOIP (через v2dat, БЕЗ geoip_ в имени)
+      # GEOIP (корректно через v2dat)
       # =========================
       - name: Build geoip rules
         run: |
@@ -67,9 +64,9 @@ jobs:
           done
 
       # =========================
-      # GEOSITE (ЧИСТАЯ логика geofileviewer)
+      # GEOSITE (ПРАВИЛЬНЫЙ protobuf)
       # =========================
-      - name: Parse geosite.dat (viewer-accurate)
+      - name: Parse geosite.dat (protobuf-correct, viewer logic)
         run: |
           node << 'EOF'
           const fs = require('fs');
@@ -95,50 +92,58 @@ jobs:
           fs.mkdirSync('rules/geosite', { recursive: true });
 
           while (pos < data.length) {
-            let size;
-            try {
-              [size, pos] = readVarint(data, pos);
-            } catch {
-              break;
+            const tag = data[pos++];
+            const field = tag >> 3;
+            const wire = tag & 7;
+
+            // top-level must be: field 1, wire 2 (GeoSite)
+            if (field !== 1 || wire !== 2) {
+              // skip unknown
+              if (wire === 0) [, pos] = readVarint(data, pos);
+              else if (wire === 2) {
+                let len; [len, pos] = readVarint(data, pos);
+                pos += len;
+              }
+              continue;
             }
 
-            const block = data.slice(pos, pos + size);
-            pos += size;
+            let len;
+            [len, pos] = readVarint(data, pos);
+            const block = data.slice(pos, pos + len);
+            pos += len;
 
             let i = 0;
             let name = null;
             const domains = [];
 
             while (i < block.length) {
-              const tag = block[i++];
-              const field = tag >> 3;
-              const wire = tag & 7;
+              const t = block[i++];
+              const f = t >> 3;
+              const w = t & 7;
+              if (w !== 2) continue;
 
-              if (wire !== 2) continue;
+              let l;
+              [l, i] = readVarint(block, i);
+              const v = block.slice(i, i + l);
+              i += l;
 
-              let len;
-              [len, i] = readVarint(block, i);
-              const value = block.slice(i, i + len);
-              i += len;
-
-              // field 1 = country_code (group name)
-              if (field === 1) {
-                name = value.toString('utf8').toLowerCase();
+              // country_code
+              if (f === 1) {
+                name = v.toString('utf8').toLowerCase();
               }
 
-              // field 2 = domain (nested message)
-              if (field === 2) {
+              // domain
+              if (f === 2) {
                 let di = 0;
-                while (di < value.length) {
-                  const dtag = value[di++];
-                  const dfield = dtag >> 3;
-                  const dwire = dtag & 7;
-
-                  if (dfield === 1 && dwire === 2) {
-                    let dlen;
-                    [dlen, di] = readVarint(value, di);
-                    domains.push(value.slice(di, di + dlen).toString('utf8'));
-                    di += dlen;
+                while (di < v.length) {
+                  const dt = v[di++];
+                  const df = dt >> 3;
+                  const dw = dt & 7;
+                  if (df === 1 && dw === 2) {
+                    let dl;
+                    [dl, di] = readVarint(v, di);
+                    domains.push(v.slice(di, di + dl).toString('utf8'));
+                    di += dl;
                   } else {
                     di++;
                   }
@@ -149,7 +154,6 @@ jobs:
             if (!name || !safeName(name) || domains.length === 0) continue;
 
             const uniq = [...new Set(domains)].sort();
-
             const txt = [];
             const yaml = ['payload:'];
 
@@ -172,9 +176,6 @@ jobs:
               "rules/geosite/$name.mrs" || true
           done
 
-      # =========================
-      # COMMIT
-      # =========================
       - name: Commit & push
         run: |
           git config user.name "github-actions[bot]"
@@ -183,6 +184,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes"
           else
-            git commit -m "chore: rebuild rules (geofileviewer-correct parsing)"
+            git commit -m "chore: rebuild rules (protobuf-correct geosite)"
             git push
           fi
