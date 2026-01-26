@@ -1,4 +1,4 @@
-name: ZKEEN dat → mihomo YAML (native geosite parser)
+name: ZKEEN dat → mihomo YAML (viewer logic, STABLE)
 
 on:
   workflow_dispatch:
@@ -54,9 +54,9 @@ jobs:
           done
 
       # =========================
-      # GEOSITE (v2ray native)
+      # GEOSITE (native v2ray v4)
       # =========================
-      - name: Build geosite (native v2ray parser)
+      - name: Build geosite (native parser)
         run: |
           cat > geosite_dump.go << 'EOF'
           package main
@@ -67,8 +67,7 @@ jobs:
             "path/filepath"
             "sort"
 
-            "github.com/v2fly/v2ray-core/v5/app/router"
-            "github.com/v2fly/v2ray-core/v5/common/platform/filesystem"
+            "github.com/v2fly/v2ray-core/app/router"
           )
 
           func main() {
@@ -111,7 +110,8 @@ jobs:
           EOF
 
           go mod init geosite_dump
-          go get github.com/v2fly/v2ray-core/v5@latest
+          go get github.com/v2fly/v2ray-core@v4.15.0
+          go mod tidy
           go run geosite_dump.go
 
           for f in rules/geosite/*.yaml; do
@@ -128,5 +128,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add rules/
-          git diff --staged --quiet || git commit -m "chore: rebuild rules via native v2ray geosite parser"
+          git diff --staged --quiet || git commit -m "chore: rebuild rules via native v2ray geosite parser (stable)"
           git push
