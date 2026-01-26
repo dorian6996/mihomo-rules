@@ -1,4 +1,4 @@
-name: ZKEEN dat → mihomo rules (geofileviewer logic, final)
+name: ZKEEN dat → mihomo rules (geofileviewer-correct)
 
 on:
   workflow_dispatch:
@@ -15,6 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # -------------------------
+      # ENV
+      # -------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -42,7 +45,7 @@ jobs:
             https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
 
       # =========================
-      # GEOIP (как раньше, но без geoip_ в имени)
+      # GEOIP (через v2dat, БЕЗ geoip_ в имени)
       # =========================
       - name: Build geoip rules
         run: |
@@ -52,6 +55,7 @@ jobs:
           rm -rf rules/geoip/*
           for f in tmp/geoip/*.txt; do
             name=$(basename "$f" .txt | sed 's/^geoip_//')
+
             grep -v '^#' "$f" | grep -v '^$' > "rules/geoip/$name.txt"
 
             echo "payload:" > "rules/geoip/$name.yaml"
@@ -63,19 +67,15 @@ jobs:
           done
 
       # =========================
-      # GEOSITE (логика geofileviewer)
+      # GEOSITE (ЧИСТАЯ логика geofileviewer)
       # =========================
-      - name: Parse geosite.dat (geofileviewer logic)
+      - name: Parse geosite.dat (viewer-accurate)
         run: |
           node << 'EOF'
           const fs = require('fs');
-          const path = require('path');
 
-          // ---- helpers from geofileviewer logic ----
-          function readVarint(buf, offset) {
-            let result = 0;
-            let shift = 0;
-            let pos = offset;
+          function readVarint(buf, pos) {
+            let result = 0, shift = 0;
             while (true) {
               const b = buf[pos++];
               result |= (b & 0x7f) << shift;
@@ -85,62 +85,75 @@ jobs:
             return [result, pos];
           }
 
-          function parseGeoSite(buffer) {
-            let pos = 0;
-            const groups = {};
-
-            while (pos < buffer.length) {
-              let size;
-              try {
-                [size, pos] = readVarint(buffer, pos);
-              } catch {
-                break;
-              }
-              const block = buffer.slice(pos, pos + size);
-              pos += size;
-
-              let name = null;
-              const domains = [];
-
-              let i = 0;
-              while (i < block.length) {
-                const tag = block[i++];
-                const field = tag >> 3;
-                const wire = tag & 7;
-
-                if (wire === 2) {
-                  let len;
-                  [len, i] = readVarint(block, i);
-                  const value = block.slice(i, i + len);
-                  i += len;
-
-                  if (field === 1) {
-                    name = value.toString('utf8').toLowerCase();
-                  } else if (field === 2) {
-                    domains.push(value.toString('utf8'));
-                  }
-                } else {
-                  i++;
-                }
-              }
-
-              if (name && domains.length) {
-                groups[name] = Array.from(new Set(domains));
-              }
-            }
-            return groups;
+          function safeName(s) {
+            return /^[a-z0-9_-]+$/i.test(s);
           }
 
           const data = fs.readFileSync('tmp/geosite.dat');
-          const groups = parseGeoSite(data);
+          let pos = 0;
 
           fs.mkdirSync('rules/geosite', { recursive: true });
 
-          for (const [name, domains] of Object.entries(groups)) {
+          while (pos < data.length) {
+            let size;
+            try {
+              [size, pos] = readVarint(data, pos);
+            } catch {
+              break;
+            }
+
+            const block = data.slice(pos, pos + size);
+            pos += size;
+
+            let i = 0;
+            let name = null;
+            const domains = [];
+
+            while (i < block.length) {
+              const tag = block[i++];
+              const field = tag >> 3;
+              const wire = tag & 7;
+
+              if (wire !== 2) continue;
+
+              let len;
+              [len, i] = readVarint(block, i);
+              const value = block.slice(i, i + len);
+              i += len;
+
+              // field 1 = country_code (group name)
+              if (field === 1) {
+                name = value.toString('utf8').toLowerCase();
+              }
+
+              // field 2 = domain (nested message)
+              if (field === 2) {
+                let di = 0;
+                while (di < value.length) {
+                  const dtag = value[di++];
+                  const dfield = dtag >> 3;
+                  const dwire = dtag & 7;
+
+                  if (dfield === 1 && dwire === 2) {
+                    let dlen;
+                    [dlen, di] = readVarint(value, di);
+                    domains.push(value.slice(di, di + dlen).toString('utf8'));
+                    di += dlen;
+                  } else {
+                    di++;
+                  }
+                }
+              }
+            }
+
+            if (!name || !safeName(name) || domains.length === 0) continue;
+
+            const uniq = [...new Set(domains)].sort();
+
             const txt = [];
             const yaml = ['payload:'];
 
-            for (const d of domains.sort()) {
+            for (const d of uniq) {
               txt.push(d);
               yaml.push(`  - +.${d}`);
             }
@@ -159,6 +172,9 @@ jobs:
               "rules/geosite/$name.mrs" || true
           done
 
+      # =========================
+      # COMMIT
+      # =========================
       - name: Commit & push
         run: |
           git config user.name "github-actions[bot]"
@@ -167,6 +183,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes"
           else
-            git commit -m "chore: rebuild geo rules (geofileviewer logic)"
+            git commit -m "chore: rebuild rules (geofileviewer-correct parsing)"
             git push
           fi
