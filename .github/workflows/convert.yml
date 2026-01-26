@@ -31,16 +31,16 @@ jobs:
       - name: Prepare directories
         run: |
           mkdir -p "${GOPATH}/bin"
-          mkdir -p tmp/geoip tmp/geosite 
+          mkdir -p tmp/geoip tmp/geosite
           mkdir -p rules/geoip rules/geosite
           echo "${GOPATH}/bin" >> $GITHUB_PATH
 
-      - name: Install v2dat tool
+      - name: Install v2dat
         run: |
           set -e
           go install github.com/urlesistiana/v2dat@latest
 
-      - name: Install mihomo tool
+      - name: Install mihomo
         run: |
           set -e
           go install github.com/metacubex/mihomo@latest
@@ -49,34 +49,29 @@ jobs:
         run: |
           set -e
           curl -fsSL -o tmp/zkeenip.dat \
-            "https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat"
+            https://github.com/jameszeroX/zkeen-ip/releases/latest/download/zkeenip.dat
           curl -fsSL -o tmp/zkeen.dat \
-            "https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat"
+            https://github.com/jameszeroX/zkeen-domains/releases/latest/download/zkeen.dat
 
-      - name: Unpack GeoIP dat file
+      - name: Unpack dat files
         run: |
           set -e
           v2dat unpack geoip -o tmp/geoip tmp/zkeenip.dat
-
-      - name: Unpack GeoSite dat file
-        run: |
-          set -e
           v2dat unpack geosite -o tmp/geosite tmp/zkeen.dat
 
-      - name: Process files - save TXT, create YAML and MRS
+      - name: Process rules
         run: |
           set -e
           rm -rf rules/geoip/* rules/geosite/* || true
 
-          # =======================
+          ####################
           # GEOIP
-          # =======================
+          ####################
           for f in tmp/geoip/zkeenip_*.txt; do
             [ -f "$f" ] || continue
             name=$(basename "$f" .txt | sed 's/^zkeenip_//')
 
             grep -v '^#' "$f" | grep -v '^$' > "rules/geoip/$name.txt"
-
             [ -s "rules/geoip/$name.txt" ] || continue
 
             echo "payload:" > "rules/geoip/$name.yaml"
@@ -89,35 +84,39 @@ jobs:
               "rules/geoip/$name.mrs" || rm -f "rules/geoip/$name.mrs"
           done
 
-          # =======================
-          # GEOSITE (С ПРАВКАМИ)
-          # =======================
+          ####################
+          # GEOSITE (keyword → .com)
+          ####################
           for f in tmp/geosite/zkeen_*.txt; do
             [ -f "$f" ] || continue
             name=$(basename "$f" .txt | sed 's/^zkeen_//')
 
-            # 1. TXT — удаляем ВСЕ формы keyword:
+            # 1. TXT: убираем keyword:, добавляем .com если надо
             grep -v '^#' "$f" | grep -v '^$' \
-              | sed -E 's/\.keyword:[[:space:]]*/./g; s/keyword:[[:space:]]*//g' \
-              > "rules/geosite/$name.txt"
+              | sed -E '
+                  s/\.keyword:[[:space:]]*/./g;
+                  s/keyword:[[:space:]]*//g;
+                  /\.com$/!s/$/.com/
+                ' > "rules/geosite/$name.txt"
 
             [ -s "rules/geosite/$name.txt" ] || continue
 
             # 2. YAML payload
             echo "payload:" > "rules/geosite/$name.yaml"
             while read -r line; do
-              clean=$(printf '%s' "$line" | sed -E 's/\.keyword:[[:space:]]*/./g; s/keyword:[[:space:]]*//g')
-
-              if [[ "$clean" =~ ^(\||\@|\*\.|\+\.|\.) ]]; then
-                echo "  - $clean" >> "rules/geosite/$name.yaml"
+              if [[ "$line" =~ ^(\||\@|\*\.|\+\.|\.) ]]; then
+                echo "  - $line" >> "rules/geosite/$name.yaml"
               else
-                echo "  - +.$clean" >> "rules/geosite/$name.yaml"
+                echo "  - +.$line" >> "rules/geosite/$name.yaml"
               fi
             done < "rules/geosite/$name.txt"
 
             # 3. Финальная зачистка YAML (страховка)
-            sed -i -E 's/\.keyword:[[:space:]]*/./g; s/keyword:[[:space:]]*//g' \
-              "rules/geosite/$name.yaml"
+            sed -i -E '
+              s/\.keyword:[[:space:]]*/./g;
+              s/keyword:[[:space:]]*//g;
+              /\.com$/!s/$/.com/
+            ' "rules/geosite/$name.yaml"
 
             # 4. MRS
             mihomo convert-ruleset domain text \
@@ -125,16 +124,9 @@ jobs:
               "rules/geosite/$name.mrs" || rm -f "rules/geosite/$name.mrs"
           done
 
-          # =======================
-          # SUMMARY
-          # =======================
-          echo "GeoIP:"
-          ls rules/geoip || true
-          echo ""
-          echo "GeoSite:"
-          ls rules/geosite || true
+          echo "Done."
 
-      - name: Commit and push changes
+      - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -142,6 +134,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes"
           else
-            git commit -m "chore: strip keyword: from geosite rules and rebuild [$(date +'%Y-%m-%d %H:%M')]"
+            git commit -m "chore: convert keyword rules to .com domains [$(date +'%Y-%m-%d %H:%M')]"
             git push
           fi
