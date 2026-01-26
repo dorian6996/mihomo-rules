@@ -1,4 +1,4 @@
-name: ZKEEN dat → MRS (strict, no invent)
+name: ZKEEN dat → MRS (pure geosite, no keyword)
 
 on:
   workflow_dispatch:
@@ -55,21 +55,23 @@ jobs:
           v2dat unpack geoip -o tmp/geoip tmp/zkeenip.dat
           v2dat unpack geosite -o tmp/geosite tmp/zkeen.dat
 
-      - name: Process rules (strict, only explicit keyword:)
+      - name: Process rules (NO keyword, EXACT like geofileviewer)
         run: |
           set -e
           rm -rf rules/geoip/* rules/geosite/* || true
 
-          # --- GEOIP (как есть) ---
+          ####################
+          # GEOIP
+          ####################
           for f in tmp/geoip/zkeenip_*.txt; do
             [ -f "$f" ] || continue
             name=$(basename "$f" .txt | sed 's/^zkeenip_//')
-            # убрать комментарии/пустые строки — не менять содержимое правил
+
             grep -v '^#' "$f" | grep -v '^$' > "rules/geoip/$name.txt"
             [ -s "rules/geoip/$name.txt" ] || continue
 
             echo "payload:" > "rules/geoip/$name.yaml"
-            while IFS= read -r line; do
+            while read -r line; do
               echo "  - $line" >> "rules/geoip/$name.yaml"
             done < "rules/geoip/$name.txt"
 
@@ -78,66 +80,37 @@ jobs:
               "rules/geoip/$name.mrs" || rm -f "rules/geoip/$name.mrs"
           done
 
-          # --- GEOSITE: строгое разделение DOMAIN / KEYWORD ---
+          ####################
+          # GEOSITE (PURE DOMAIN, keyword STRIPPED)
+          ####################
           for f in tmp/geosite/zkeen_*.txt; do
             [ -f "$f" ] || continue
             name=$(basename "$f" .txt | sed 's/^zkeen_//')
 
-            domain_txt="rules/geosite/$name.txt"
-            keyword_txt="rules/geosite/${name}_keyword.txt"
+            # ❗ ВАЖНО:
+            # если v2dat внезапно вставил "keyword:" — просто убираем его
+            grep -v '^#' "$f" | grep -v '^$' \
+              | sed -E 's/^[[:space:]]*([+*.|@-]*)keyword:[[:space:]]*/\1/' \
+              > "rules/geosite/$name.txt"
 
-            # очищаем предыдущие файлы на случай старых артефактов
-            rm -f "$domain_txt" "$keyword_txt"
+            [ -s "rules/geosite/$name.txt" ] || continue
 
-            # Проход по исходному файлу: если строка явно содержит "keyword:" — в keyword, иначе — в domain.
-            # Ни в коем случае не менять строки, которые не содержат "keyword:".
-            grep -v '^#' "$f" | grep -v '^$' | while IFS= read -r line; do
-              # Ищем буквальное вхождение "keyword:" после возможных префиксов типа +. или *.
-              if printf '%s\n' "$line" | grep -q -E '(^|[[:space:]]|[+*.-])keyword:'; then
-                # извлекаем часть после keyword:, но не модифицируем дальнейшую строку (не добавляем .com и т.п.)
-                # удаляем только префикс до и включая keyword:
-                value=$(printf '%s' "$line" | sed -E 's/^[[:space:]]*([+*.-]*)([[:space:]]*)keyword:[[:space:]]*//I')
-                # сохраняем ровно то, что было в правиле после keyword:
-                printf '%s\n' "$value" >> "$keyword_txt"
+            echo "payload:" > "rules/geosite/$name.yaml"
+            while read -r d; do
+              if [[ "$d" =~ ^(\||\@|\*\.|\+\.|\.) ]]; then
+                echo "  - $d" >> "rules/geosite/$name.yaml"
               else
-                # domain — сохраняем оригинальную строку без изменений
-                printf '%s\n' "$line" >> "$domain_txt"
+                echo "  - +.$d" >> "rules/geosite/$name.yaml"
               fi
-            done
+            done < "rules/geosite/$name.txt"
 
-            # Создаём domain YAML только если есть domain строки
-            if [ -s "$domain_txt" ]; then
-              echo "payload:" > "rules/geosite/$name.yaml"
-              while IFS= read -r d; do
-                # если в d уже есть служебный символ (|, @, +., *., .) — не добавляем +.
-                if printf '%s\n' "$d" | grep -q -E '^(\||@|\*\.|\+\.|\.)'; then
-                  echo "  - $d" >> "rules/geosite/$name.yaml"
-                else
-                  echo "  - +.$d" >> "rules/geosite/$name.yaml"
-                fi
-              done < "$domain_txt"
-
-              mihomo convert-ruleset domain text \
-                "$domain_txt" \
-                "rules/geosite/$name.mrs" || rm -f "rules/geosite/$name.mrs"
-            fi
-
-            # Создаём keyword YAML ТОЛЬКО если есть явные keyword строки
-            if [ -s "$keyword_txt" ]; then
-              # сохраняем уникальные значения в том виде, как они были после keyword:
-              echo "payload:" > "rules/geosite/${name}_keyword.yaml"
-              sort -u "$keyword_txt" | while IFS= read -r k; do
-                # Не модифицируем k — это ключевое слово для keyword-behavior
-                echo "  - $k" >> "rules/geosite/${name}_keyword.yaml"
-              done
-
-              mihomo convert-ruleset keyword text \
-                "$keyword_txt" \
-                "rules/geosite/${name}_keyword.mrs" || rm -f "rules/geosite/${name}_keyword.mrs"
-            fi
+            mihomo convert-ruleset domain text \
+              "rules/geosite/$name.txt" \
+              "rules/geosite/$name.mrs" || rm -f "rules/geosite/$name.mrs"
           done
 
-          echo "Processing completed. No invented keywords or .com additions were performed."
+          echo "Done. Keyword completely ignored. Output matches geofileviewer semantics."
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
@@ -146,6 +119,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes"
           else
-            git commit -m "chore: strict lossless geosite -> domain/keyword split [$(date +'%Y-%m-%d %H:%M')]"
+            git commit -m "chore: pure geosite export without keyword artifacts [$(date +'%Y-%m-%d %H:%M')]"
             git push
           fi
