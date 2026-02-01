@@ -77,6 +77,7 @@ hume.ai
 inference.cerebras.ai
 intellij.net
 keyword:jetbrains
+klingai.com
 lenso.ai
 lightning.ai
 manus.im
@@ -95,6 +96,7 @@ sora.com
 t3.chat
 toolbox.app
 trae.ai
+uvfuns.com
 vscode-auth.github.com
 x.ai
 youtrack.cloud
@@ -181,11 +183,15 @@ ghostrc.game.idtech.services
 gtagarage.com
 haydaygame.com
 humblebundle.com
+marvelsnap.com
 piratenation.game
 pcgamesn.com
 photonengine.com
+polygon.com
 riotpixels.com
 saveeditonline.com
+seconddinnertech.com
+snapgametech.com
 squadbustersgame.com
 steamidfinder.com
 supercell.com
@@ -228,6 +234,7 @@ adam-audio.com
 adidas.com
 admitad.com
 adn.harmanpro.com
+affinity.studio
 afp.com
 aftermarket.schaeffler.com
 aftermarket.zf.com
@@ -237,6 +244,7 @@ aircanada.com
 akc.org
 alberta.ca
 algolia.com
+all3dp.com
 alltrails.com
 alphacoders.com
 altaro.com
@@ -422,7 +430,6 @@ getsafeonline.org
 gfn.am
 ghidra-sre.org
 glif.app
-global.platform.seconddinnertech.com
 glpals.com
 gonitro.com
 gpu-monkey.com
@@ -518,7 +525,6 @@ mailinator.com
 manybooks.net
 markandgraham.com
 marketplace.atlassian.com
-marvelsnap.com
 mashable.com
 mattermost.com
 maximintegrated.com
@@ -643,10 +649,12 @@ posteo.de
 posthog.com
 keyword:potterybarn
 premierleague.com
+primark.com
 principalrelocation.com
 privatekeys.pw
 prod.smassets.net
 promods.net
+pronouns.page
 proxyscrape.com
 ptc.com
 pubnub.com

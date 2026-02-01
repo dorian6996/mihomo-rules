@@ -78,6 +78,7 @@ payload:
   - +.inference.cerebras.ai
   - +.intellij.net
   - +.keyword:jetbrains
+  - +.klingai.com
   - +.lenso.ai
   - +.lightning.ai
   - +.manus.im
@@ -96,6 +97,7 @@ payload:
   - +.t3.chat
   - +.toolbox.app
   - +.trae.ai
+  - +.uvfuns.com
   - +.vscode-auth.github.com
   - +.x.ai
   - +.youtrack.cloud
@@ -182,11 +184,15 @@ payload:
   - +.gtagarage.com
   - +.haydaygame.com
   - +.humblebundle.com
+  - +.marvelsnap.com
   - +.piratenation.game
   - +.pcgamesn.com
   - +.photonengine.com
+  - +.polygon.com
   - +.riotpixels.com
   - +.saveeditonline.com
+  - +.seconddinnertech.com
+  - +.snapgametech.com
   - +.squadbustersgame.com
   - +.steamidfinder.com
   - +.supercell.com
@@ -229,6 +235,7 @@ payload:
   - +.adidas.com
   - +.admitad.com
   - +.adn.harmanpro.com
+  - +.affinity.studio
   - +.afp.com
   - +.aftermarket.schaeffler.com
   - +.aftermarket.zf.com
@@ -238,6 +245,7 @@ payload:
   - +.akc.org
   - +.alberta.ca
   - +.algolia.com
+  - +.all3dp.com
   - +.alltrails.com
   - +.alphacoders.com
   - +.altaro.com
@@ -423,7 +431,6 @@ payload:
   - +.gfn.am
   - +.ghidra-sre.org
   - +.glif.app
-  - +.global.platform.seconddinnertech.com
   - +.glpals.com
   - +.gonitro.com
   - +.gpu-monkey.com
@@ -519,7 +526,6 @@ payload:
   - +.manybooks.net
   - +.markandgraham.com
   - +.marketplace.atlassian.com
-  - +.marvelsnap.com
   - +.mashable.com
   - +.mattermost.com
   - +.maximintegrated.com
@@ -644,10 +650,12 @@ payload:
   - +.posthog.com
   - +.keyword:potterybarn
   - +.premierleague.com
+  - +.primark.com
   - +.principalrelocation.com
   - +.privatekeys.pw
   - +.prod.smassets.net
   - +.promods.net
+  - +.pronouns.page
   - +.proxyscrape.com
   - +.ptc.com
   - +.pubnub.com
