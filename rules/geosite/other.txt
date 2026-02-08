@@ -222,8 +222,9 @@ tmdb.org
 akamaized.net
 crunchbase.com
 crunchyroll.com
-v.vrv.co
-vod-fy.crunchyrollcdn.com
+vrv.co
+crunchyrollcdn.com
+fwmrm.net
 2407.pl
 6pm.com
 8chan.moe

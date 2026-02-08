@@ -54,7 +54,6 @@ payload:
   - +.linkedin.com
   - +.lnkd.in
   - +.ads-twitter.com
-  - +.cdn2site.com
   - +.cdnfacebook.com
   - +.cdninstagram.com
   - +.f.vision
@@ -102,13 +101,11 @@ payload:
   - +.iptv.online
   - +.iptvin.ru
   - +.kino-ussr.ru
-  - +.kino.pub
   - +.kinobase.org
   - +.keyword:kinogo
   - +.kinokopilka.pro
   - +.kinokrad.pics
   - +.kinopub.me
-  - +.kinopub.online
   - +.keyword:kinovibe
   - +.kinovod.net
   - +.kpapp.link
@@ -118,8 +115,6 @@ payload:
   - +.megogo.net
   - +.melord.net
   - +.metal-archives.com
-  - +.mos-gorsud.co
-  - +.mos-gorsud.site
   - +.multru.com
   - +.musixmatch.com
   - +.newstudio.tv
@@ -143,6 +138,17 @@ payload:
   - +.zerkalo.xyz
   - +.zet-flix.online
   - +.zombie-film.live
+  - +.cdn-service.space
+  - +.cdn2cdn.com
+  - +.cdn2site.com
+  - +.cdntogo.net
+  - +.gfw.ovh
+  - +.kino.pub
+  - +.kinopub.online
+  - +.kp-pro.cloud
+  - +.keyword:mos-gorsud
+  - +.pushbr.com
+  - +.smarttvcdn.online
   - +.1337x.to
   - +.audioboo.org
   - +.bitru.org
