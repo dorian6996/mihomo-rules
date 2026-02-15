@@ -306,6 +306,7 @@ payload:
   - +.raw.githubusercontent.com
   - +.release-assets.githubusercontent.com
   - +.10minutemail.com
+  - +.adblockplus.org
   - +.adguard.com
   - +.adtidy.org
   - +.amazonaws.com
@@ -313,6 +314,7 @@ payload:
   - +.amneziavpn.org
   - +.aws.amazon.com
   - +.aws.com
+  - +.awswaf.com
   - +.bitmask.net
   - +.b-cdn.net
   - +.keyword:blancvpn
