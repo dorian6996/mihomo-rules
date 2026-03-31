@@ -43,7 +43,7 @@ jobs:
           echo "v2dat installed at:"
           which v2dat
 
-      - name: Build mihomo tool (correct way)
+      - name: Build mihomo tool (FIXED)
         run: |
           set -e
 
@@ -51,7 +51,7 @@ jobs:
           git clone --depth 1 https://github.com/metacubex/mihomo.git
 
           echo "Building mihomo..."
-          cd mihomo
+          cd mihomo/cmd/mihomo
           go build -o mihomo .
           chmod +x mihomo
 
