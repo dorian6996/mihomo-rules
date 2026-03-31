@@ -4,21 +4,30 @@ payload:
   - +.aisandbox-pa.googleapis.com
   - +.aistudio.google.com
   - +.aitestkitchen.withgoogle.com
+  - +.apis.google.com
+  - +.appcatalyst.pa.googleapis.com
+  - +.assistant-s3-pa.googleapis.com
   - +.bard.google.com
   - +.clients6.google.com
-  - +.deepmind.com
-  - +.deepmind.google
+  - +.daily-cloudcode-pa.googleapis.com
+  - +.keyword:deepmind
+  - +.developerprofiles-pa.googleapis.com
   - +.geller-pa.googleapis.com
   - +.keyword:gemini.google
+  - +.generativeai.google
   - +.generativelanguage.googleapis.com
   - +.googletagservices.com
   - +.illuminate.google.com
   - +.keyword:jules.google
-  - +.labs.google
+  - +.keyword:labs.google
   - +.learning.google.com
   - +.lookerstudio.google.com
   - +.makersuite.google.com
-  - +.keyword:notebooklm.google
+  - +.keyword:notebooklm
+  - +.o.pki.goog
+  - +.opal.google
+  - +.opal.google.com
+  - +.opal.withgoogle.com
   - +.proactivebackend-pa.googleapis.com
   - +.robinfrontend-pa.googleapis.com
   - +.stitch.withgoogle.com
@@ -49,20 +58,35 @@ payload:
   - +.bsh-group.com
   - +.keyword:home-connect
   - +.keyword:homeconnectegw
+  - +.cdn.auth0.com
+  - +.chatgpt.com
+  - +.d.docs.live.net
+  - +.gpt3-openai.com
+  - +.oaistatic.com
+  - +.oaiusercontent.com
+  - +.openai.com
+  - +.openaiapi-site.azureedge.net
+  - +.openaipublic.blob.core.windows.net
+  - +.sora.com
+  - +.designer.microsoft.com
+  - +.download.microsoft.com
+  - +.ecs.office.com
+  - +.edge.microsoft.com
+  - +.login.microsoftonline.com
+  - +.msftauth.net
+  - +.teams.microsoft.com
   - +.a-msedge.net
   - +.adaptive.ai
-  - +.ai-chat.bsg.brave.com
   - +.altsociety.ai
   - +.anthropic.com
   - +.api.cohere.ai
   - +.api.github.com
-  - +.app.reve.com
   - +.augmentcode.com
   - +.bing.com
   - +.blinkshot.io
-  - +.chatgpt.com
   - +.cici.com
   - +.claude.ai
+  - +.claude.com
   - +.codegpt.co
   - +.codeium.com
   - +.composer.opera-api.com
@@ -83,9 +107,6 @@ payload:
   - +.lightning.ai
   - +.manus.im
   - +.mchost.guru
-  - +.oaistatic.com
-  - +.oaiusercontent.com
-  - +.openai.com
   - +.origin-tracker.githubusercontent.com
   - +.pephop.ai
   - +.play.ai
@@ -93,7 +114,6 @@ payload:
   - +.recraft.ai
   - +.reka.ai
   - +.reve.art
-  - +.sora.com
   - +.t3.chat
   - +.toolbox.app
   - +.trae.ai
@@ -123,13 +143,10 @@ payload:
   - +.dell.com
   - +.dellcdn.com
   - +.delltechnologies.com
-  - +.designer.microsoft.com
   - +.developer.nvidia.com
-  - +.download.microsoft.com
-  - +.ecs.office.com
-  - +.edge.microsoft.com
   - +.elby.ch
   - +.filerun.com
+  - +.fosshub.com
   - +.fortinet.com
   - +.forum.ansible.com
   - +.fujitsu.com
@@ -143,7 +160,6 @@ payload:
   - +.lenovo.com
   - +.liveupdate.symantec.com
   - +.liveupdate.symantecliveupdate.com
-  - +.login.amd.com
   - +.malwarebytes.com
   - +.mkssoftware.com
   - +.net.anydesk.com
@@ -168,13 +184,18 @@ payload:
   - +.xerox.co.uk
   - +.xerox.com
   - +.zerossl.com
+  - +.brawlstarsgame.com
+  - +.supercell.com
+  - +.clashofclans.com
+  - +.clashroyaleapp.com
+  - +.boombeachgame.com
+  - +.mocogame.com
+  - +.squadbustersgame.com
   - +.alienwarearena.com
   - +.azerioncircle.com
   - +.blizzardwatch.com
   - +.boosteroid.com
-  - +.brawlstarsgame.com
-  - +.clashofclans.com
-  - +.clashroyaleapp.com
+  - +.keyword:capcom
   - +.g2a.com
   - +.gambody.com
   - +.game.co.uk
@@ -183,6 +204,7 @@ payload:
   - +.gaming.amazon.com
   - +.ghostrc.game.idtech.services
   - +.gtagarage.com
+  - +.dragonsdogma.com
   - +.haydaygame.com
   - +.humblebundle.com
   - +.marvelsnap.com
@@ -194,9 +216,7 @@ payload:
   - +.saveeditonline.com
   - +.seconddinnertech.com
   - +.snapgametech.com
-  - +.squadbustersgame.com
   - +.steamidfinder.com
-  - +.supercell.com
   - +.triongames.com
   - +.trionworlds.com
   - +.trueachievements.com
@@ -204,10 +224,10 @@ payload:
   - +.wbgames.com
   - +.wbinsights.com
   - +.xboxdesignlab.xbox.com
-  - +.xsts.auth.xboxlive.com
   - +.disneyplus.com
   - +.hbomax.com
   - +.infinitenovel.eu
+  - +.last.fm
   - +.lidarr.audio
   - +.m3u.in
   - +.max.com
@@ -221,6 +241,7 @@ payload:
   - +.themoviedb.org
   - +.thetvdb.com
   - +.tmdb.org
+  - +.ws.audioscrobbler.com
   - +.akamaized.net
   - +.crunchbase.com
   - +.crunchyroll.com
@@ -363,7 +384,6 @@ payload:
   - +.doma.xyz
   - +.doom9.org
   - +.download.screamingfrog.co.uk
-  - +.downloads.ndi.tv
   - +.downloads.ultraedit.com
   - +.ducati.com
   - +.keyword:dyson.
@@ -460,7 +480,6 @@ payload:
   - +.iedb.org
   - +.keyword:ikea.
   - +.imagecache365.com
-  - +.imgur.com
   - +.indeed.com
   - +.infineon.com
   - +.informit.com
@@ -527,7 +546,6 @@ payload:
   - +.mailinator.com
   - +.manybooks.net
   - +.markandgraham.com
-  - +.marketplace.atlassian.com
   - +.mashable.com
   - +.mattermost.com
   - +.maximintegrated.com
@@ -780,6 +798,7 @@ payload:
   - +.teslasoft.org
   - +.tf1.fr
   - +.tf1info.fr
+  - +.keyword:thenorthface
   - +.thesassway.com
   - +.thetvapp.to
   - +.thinkpads.com
@@ -869,3 +888,81 @@ payload:
   - +.zendesk.com
   - +.zoho.com
   - +.zoosk.com
+  - +.37signals.com
+  - +.aave.com
+  - +.amd.com
+  - +.api.imgur.com
+  - +.api.workos.com
+  - +.arkoselabs.com
+  - +.atlassian.com
+  - +.auth.xboxlive.com
+  - +.badoo.app
+  - +.badoocdn.com
+  - +.basecamp.com
+  - +.basecampapi.com
+  - +.brave.com
+  - +.cdn.web-platform.io
+  - +.cgtrader.com
+  - +.cms-images.mmst.eu
+  - +.codeiumdata.com
+  - +.consent.trustarc.com
+  - +.console.neon.tech
+  - +.coreweave.com
+  - +.cummins.com
+  - +.deepl.app
+  - +.digikeyassets.com
+  - +.dnsspeedtest.online
+  - +.dola.com
+  - +.dr.miromind.ai
+  - +.dtm8.dinamicagenerale.com
+  - +.ecosia.org
+  - +.elevenreader.io
+  - +.euro.com.pl
+  - +.evike.com
+  - +.f00.esfr.pl
+  - +.fal.ai
+  - +.files-s2pb.pbsync.com
+  - +.files.manuscdn.com
+  - +.keyword:fitbit
+  - +.fmhy.lol
+  - +.fmhy.net
+  - +.gssv-play-prod.xboxlive.com
+  - +.guidedhacking.com
+  - +.hapi.hentaicdn.org
+  - +.images.contentstack.io
+  - +.lego.com
+  - +.madmapper.com
+  - +.make.com
+  - +.mediaexpert.pl
+  - +.mediamarkt.pl
+  - +.misterfpga.org
+  - +.monica.im
+  - +.naukri.com
+  - +.naukimg.com
+  - +.ndi.tv
+  - +.ndi.video
+  - +.octanorm.com
+  - +.octanorm.expo.shop
+  - +.openrouter.ai
+  - +.ppkas.com
+  - +.pr0gramm.com
+  - +.qualtrics.com
+  - +.res.cloudinary.com
+  - +.reve.com
+  - +.romsgames.net
+  - +.scribdassets.com
+  - +.scdn.co
+  - +.se.com
+  - +.sketchup.trimble.com
+  - +.slack.com
+  - +.slackb.com
+  - +.spotifycdn.com
+  - +.spotifycdn.net
+  - +.titlestorage.xboxlive.com
+  - +.trimble.com
+  - +.weborama.nl
+  - +.workos.com
+  - +.wund.com
+  - +.w-x.co
+  - +.wxug.com
+  - +.zapier-deployment.com

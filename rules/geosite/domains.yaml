@@ -301,6 +301,9 @@ payload:
   - +.keyword:sci-hub
   - +.searchfloor.org
   - +.smashwords.com
+  - +.dub.co
+  - +.dub.sh
+  - +.git.new
   - +.github.io
   - +.gitlab.io
   - +.raw.githubusercontent.com
@@ -397,6 +400,7 @@ payload:
   - +.allegro.pl
   - +.keyword:annas-archive
   - +.amdm.ru
+  - +.any.do
   - +.aol.com
   - +.apkmirror.com
   - +.aqicn.org
@@ -422,10 +426,12 @@ payload:
   - +.chordu.com
   - +.chub.ai
   - +.cock.li
+  - +.codelinaro.org
   - +.coinsbee.com
   - +.cryptpad.fr
   - +.cyberbits.eu
   - +.dafont.com
+  - +.decky.xyz
   - +.depositphotos.com
   - +.deviantart.com
   - +.ef.com
@@ -476,8 +482,11 @@ payload:
   - +.jw-russia.org
   - +.kasta.ru
   - +.kastingi.com
+  - +.kilo.ai
+  - +.kilocode.ai
   - +.knowyourmeme.com
   - +.kym-cdn.com
+  - +.lingq.com
   - +.linktr.ee
   - +.live.chat.eveonline.com
   - +.livetv.sx
@@ -489,8 +498,10 @@ payload:
   - +.manyvids.com
   - +.matrix-client.matrix.org
   - +.medium.com
+  - +.monolisa.dev
   - +.msn.com
   - +.mw2.wiki
+  - +.naps2.com
   - +.nippon.com
   - +.odysee.com
   - +.onlineradiobox.com
@@ -498,8 +509,11 @@ payload:
   - +.opensanctions.org
   - +.orbit-games.com
   - +.out.com
+  - +.paddlestatus.com
+  - +.paritydeals.com
   - +.pay.freekassa.ru
   - +.peaceplea.org
+  - +.primevue.org
   - +.prnt.sc
   - +.pvpessence.com
   - +.qaweb.dev
@@ -543,6 +557,7 @@ payload:
   - +.twirpx.com
   - +.ufile.io
   - +.keyword:urbanculture
+  - +.urlr.me
   - +.valhalla-age.org
   - +.valhalla-essence.org
   - +.viber.com
