@@ -43,30 +43,29 @@ jobs:
           echo "v2dat installed at:"
           which v2dat
 
-      - name: Build mihomo tool (FINAL FIX)
+      - name: Install mihomo tool
         run: |
           set -e
-
-          echo "Cloning mihomo..."
-          git clone --depth 1 https://github.com/metacubex/mihomo.git
-
-          echo "Building mihomo..."
-          cd mihomo
-
-          go build -o mihomo ./...
-
-          chmod +x mihomo
-
-          echo "Move to PATH..."
-          mv mihomo /usr/local/bin/
-
-          echo "Check binary:"
-          which mihomo
-
-          echo "Test mihomo..."
+          echo "Installing mihomo..."
+          
+          # Получаем последнюю версию
+          MIHOMO_VERSION=$(curl -fsSL "https://api.github.com/repos/metacubex/mihomo/releases/latest" | grep '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+          echo "Latest mihomo version: ${MIHOMO_VERSION}"
+          
+          # Скачиваем бинарник для linux amd64
+          curl -fsSL -o /tmp/mihomo.gz "https://github.com/metacubex/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-${MIHOMO_VERSION}.gz"
+          
+          # Распаковываем и устанавливаем
+          gunzip /tmp/mihomo.gz
+          mv /tmp/mihomo "${GOBIN}/mihomo"
+          chmod +x "${GOBIN}/mihomo"
+          
+          echo "mihomo installed at: $(which mihomo)"
+          mihomo -v
+          
+          echo "Testing mihomo convert-ruleset..."
           echo "example.com" > test.txt
-          mihomo convert-ruleset domain text test.txt test.mrs && echo "✓ mihomo works" || echo "❌ mihomo failed"
-
+          mihomo convert-ruleset domain text test.txt test.mrs 2>&1 && echo "✓ mihomo works" || echo "⚠ mihomo test failed"
           rm -f test.txt test.mrs
 
       - name: Download ZKEEN dat files
