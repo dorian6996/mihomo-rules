@@ -48,25 +48,24 @@ jobs:
           set -e
           echo "Installing mihomo..."
           
-          # Получаем последнюю версию
-          MIHOMO_VERSION=$(curl -fsSL "https://api.github.com/repos/metacubex/mihomo/releases/latest" | grep '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+          # Получаем последнюю версию через GitHub API с правильным парсингом
+          MIHOMO_VERSION=$(curl -fsSL \
+            -H "Authorization: token ${{ github.token }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/metacubex/mihomo/releases/latest" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['tag_name'])")
           echo "Latest mihomo version: ${MIHOMO_VERSION}"
           
-          # Скачиваем бинарник для linux amd64
-          curl -fsSL -o /tmp/mihomo.gz "https://github.com/metacubex/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-${MIHOMO_VERSION}.gz"
+          # Скачиваем бинарник (имя файла без версии в названии)
+          curl -fsSL -o /tmp/mihomo.gz \
+            "https://github.com/metacubex/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-compatible-${MIHOMO_VERSION}.gz"
           
-          # Распаковываем и устанавливаем
           gunzip /tmp/mihomo.gz
           mv /tmp/mihomo "${GOBIN}/mihomo"
           chmod +x "${GOBIN}/mihomo"
           
-          echo "mihomo installed at: $(which mihomo)"
+          echo "mihomo installed: $(which mihomo)"
           mihomo -v
-          
-          echo "Testing mihomo convert-ruleset..."
-          echo "example.com" > test.txt
-          mihomo convert-ruleset domain text test.txt test.mrs 2>&1 && echo "✓ mihomo works" || echo "⚠ mihomo test failed"
-          rm -f test.txt test.mrs
 
       - name: Download ZKEEN dat files
         run: |
