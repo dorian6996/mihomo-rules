@@ -43,7 +43,7 @@ jobs:
           echo "v2dat installed at:"
           which v2dat
 
-      - name: Build mihomo tool (FIXED)
+      - name: Build mihomo tool (FINAL FIX)
         run: |
           set -e
 
@@ -51,8 +51,10 @@ jobs:
           git clone --depth 1 https://github.com/metacubex/mihomo.git
 
           echo "Building mihomo..."
-          cd mihomo/cmd/mihomo
-          go build -o mihomo .
+          cd mihomo
+
+          go build -o mihomo ./...
+
           chmod +x mihomo
 
           echo "Move to PATH..."
@@ -61,7 +63,7 @@ jobs:
           echo "Check binary:"
           which mihomo
 
-          echo "Testing mihomo..."
+          echo "Test mihomo..."
           echo "example.com" > test.txt
           mihomo convert-ruleset domain text test.txt test.mrs && echo "✓ mihomo works" || echo "❌ mihomo failed"
 
