@@ -899,6 +899,8 @@ badoo.app
 badoocdn.com
 basecamp.com
 basecampapi.com
+bike-components.de
+bike24.com
 brave.com
 cdn.web-platform.io
 cgtrader.com
