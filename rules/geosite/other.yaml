@@ -111,6 +111,7 @@ payload:
   - +.pephop.ai
   - +.play.ai
   - +.play.ht
+  - +.qodana.cloud
   - +.recraft.ai
   - +.reka.ai
   - +.reve.art
@@ -248,6 +249,8 @@ payload:
   - +.vrv.co
   - +.crunchyrollcdn.com
   - +.fwmrm.net
+  - +.philiascans.org
+  - +.fapello.com
   - +.2407.pl
   - +.6pm.com
   - +.8chan.moe
@@ -295,6 +298,7 @@ payload:
   - +.av-connection.com
   - +.aws.tcljd.com
   - +.awswaf.com
+  - +.backend-v2.crixet.com
   - +.badoo.com
   - +.bandcamp.com
   - +.bcbits.com
@@ -310,6 +314,7 @@ payload:
   - +.bmc.okta.com
   - +.bradyid.com
   - +.bricklink.com
+  - +.brickset.com
   - +.broccolionline.jp
   - +.broncosportforum.com
   - +.btod.com
@@ -355,6 +360,7 @@ payload:
   - +.cvedetails.com
   - +.cxstudio.clarabridge.net
   - +.darkproject.eu
+  - +.dashboard.gitguardian.com
   - +.data.mongodb-api.com
   - +.data-cdn.mbamupdates.com
   - +.databricks.com
@@ -414,8 +420,10 @@ payload:
   - +.fex.net
   - +.fextralife.com
   - +.fiercepc.co.uk
+  - +.files.com
   - +.findagrave.com
   - +.first-root.com
+  - +.fivetran.com
   - +.flir.com
   - +.flir.eu
   - +.flourish.studio
@@ -454,6 +462,7 @@ payload:
   - +.ghidra-sre.org
   - +.glif.app
   - +.glpals.com
+  - +.gonift.com
   - +.gonitro.com
   - +.gpu-monkey.com
   - +.grafana.com
@@ -472,6 +481,7 @@ payload:
   - +.hotels.com
   - +.housebrand.com
   - +.htmhell.dev
+  - +.httptoolkit.com
   - +.hybrid-analysis.com
   - +.hyundainews.com
   - +.iaai.com
@@ -487,6 +497,7 @@ payload:
   - +.insideevs.com
   - +.intellipaat.com
   - +.intelx.io
+  - +.keyword:intercom
   - +.intuit.com
   - +.intuitibits.com
   - +.ionicframework.com
@@ -517,6 +528,7 @@ payload:
   - +.ldoceonline.com
   - +.leakpeek.com
   - +.lebonmarche.com
+  - +.lego.com
   - +.leica-geosystems.com
   - +.letyshops.com
   - +.lifehacker.com
@@ -552,6 +564,7 @@ payload:
   - +.mbed.com
   - +.medicalnewstoday.com
   - +.meest-shop.com
+  - +.keyword:meetup
   - +.menti.com
   - +.meraki.com
   - +.metabrainz.org
@@ -576,6 +589,7 @@ payload:
   - +.monster.ie
   - +.keyword:mouser.
   - +.mssg.me
+  - +.multisim.com
   - +.musicbrainz.org
   - +.keyword:myfonts.
   - +.keyword:myheritage
@@ -594,6 +608,7 @@ payload:
   - +.nexus-cdn.com
   - +.nexusmods.com
   - +.nfl.com
+  - +.ni.com
   - +.keyword:nike.
   - +.nitropay.com
   - +.nitropdf.com
@@ -610,6 +625,8 @@ payload:
   - +.octopart.com
   - +.octopart-clicks.com
   - +.octostatic.com
+  - +.odoo.com
+  - +.odoocdn.com
   - +.omv-extras.org
   - +.on24.com
   - +.onshape.com
@@ -682,6 +699,7 @@ payload:
   - +.pump.fun
   - +.qcad.org
   - +.qobuz.com
+  - +.qoder.com
   - +.qt.io
   - +.qualcomm.com
   - +.quicknode.com
@@ -717,6 +735,7 @@ payload:
   - +.sbom.sh
   - +.scam-detector.com
   - +.schenker-tech.de
+  - +.schneider-electric.com
   - +.scribd.com
   - +.sdxcentral.com
   - +.securitytrails.com
@@ -841,6 +860,7 @@ payload:
   - +.veeam.com
   - +.vehiclelifetimesolutions.schaeffler.com
   - +.veritas.com
+  - +.verificationacademy.com
   - +.visualcapitalist.com
   - +.voiso.com
   - +.volet.com
@@ -857,6 +877,7 @@ payload:
   - +.webex.com
   - +.webscraper.io
   - +.webservice.tecalliance.services
+  - +.website-files.com
   - +.weebly.com
   - +.wellfound.com
   - +.keyword:westelm.
@@ -932,7 +953,6 @@ payload:
   - +.guidedhacking.com
   - +.hapi.hentaicdn.org
   - +.images.contentstack.io
-  - +.lego.com
   - +.madmapper.com
   - +.make.com
   - +.mediaexpert.pl

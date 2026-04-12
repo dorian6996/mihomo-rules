@@ -110,6 +110,7 @@ origin-tracker.githubusercontent.com
 pephop.ai
 play.ai
 play.ht
+qodana.cloud
 recraft.ai
 reka.ai
 reve.art
@@ -247,6 +248,8 @@ crunchyroll.com
 vrv.co
 crunchyrollcdn.com
 fwmrm.net
+philiascans.org
+fapello.com
 2407.pl
 6pm.com
 8chan.moe
@@ -294,6 +297,7 @@ att.com
 av-connection.com
 aws.tcljd.com
 awswaf.com
+backend-v2.crixet.com
 badoo.com
 bandcamp.com
 bcbits.com
@@ -309,6 +313,7 @@ bmc.com
 bmc.okta.com
 bradyid.com
 bricklink.com
+brickset.com
 broccolionline.jp
 broncosportforum.com
 btod.com
@@ -354,6 +359,7 @@ cucumber.io
 cvedetails.com
 cxstudio.clarabridge.net
 darkproject.eu
+dashboard.gitguardian.com
 data.mongodb-api.com
 data-cdn.mbamupdates.com
 databricks.com
@@ -413,8 +419,10 @@ fastly.net
 fex.net
 fextralife.com
 fiercepc.co.uk
+files.com
 findagrave.com
 first-root.com
+fivetran.com
 flir.com
 flir.eu
 flourish.studio
@@ -453,6 +461,7 @@ gfn.am
 ghidra-sre.org
 glif.app
 glpals.com
+gonift.com
 gonitro.com
 gpu-monkey.com
 grafana.com
@@ -471,6 +480,7 @@ honeywell.com
 hotels.com
 housebrand.com
 htmhell.dev
+httptoolkit.com
 hybrid-analysis.com
 hyundainews.com
 iaai.com
@@ -486,6 +496,7 @@ insanelymac.com
 insideevs.com
 intellipaat.com
 intelx.io
+keyword:intercom
 intuit.com
 intuitibits.com
 ionicframework.com
@@ -516,6 +527,7 @@ landingpad.me
 ldoceonline.com
 leakpeek.com
 lebonmarche.com
+lego.com
 leica-geosystems.com
 letyshops.com
 lifehacker.com
@@ -551,6 +563,7 @@ maximintegrated.com
 mbed.com
 medicalnewstoday.com
 meest-shop.com
+keyword:meetup
 menti.com
 meraki.com
 metabrainz.org
@@ -575,6 +588,7 @@ monotype.com
 monster.ie
 keyword:mouser.
 mssg.me
+multisim.com
 musicbrainz.org
 keyword:myfonts.
 keyword:myheritage
@@ -593,6 +607,7 @@ nexar.com
 nexus-cdn.com
 nexusmods.com
 nfl.com
+ni.com
 keyword:nike.
 nitropay.com
 nitropdf.com
@@ -609,6 +624,8 @@ nxp.com
 octopart.com
 octopart-clicks.com
 octostatic.com
+odoo.com
+odoocdn.com
 omv-extras.org
 on24.com
 onshape.com
@@ -681,6 +698,7 @@ pubnub.com
 pump.fun
 qcad.org
 qobuz.com
+qoder.com
 qt.io
 qualcomm.com
 quicknode.com
@@ -716,6 +734,7 @@ sap.com
 sbom.sh
 scam-detector.com
 schenker-tech.de
+schneider-electric.com
 scribd.com
 sdxcentral.com
 securitytrails.com
@@ -840,6 +859,7 @@ vectorworks.net
 veeam.com
 vehiclelifetimesolutions.schaeffler.com
 veritas.com
+verificationacademy.com
 visualcapitalist.com
 voiso.com
 volet.com
@@ -856,6 +876,7 @@ webdock.io
 webex.com
 webscraper.io
 webservice.tecalliance.services
+website-files.com
 weebly.com
 wellfound.com
 keyword:westelm.
@@ -931,7 +952,6 @@ gssv-play-prod.xboxlive.com
 guidedhacking.com
 hapi.hentaicdn.org
 images.contentstack.io
-lego.com
 madmapper.com
 make.com
 mediaexpert.pl
