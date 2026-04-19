@@ -9,6 +9,7 @@ assistant-s3-pa.googleapis.com
 bard.google.com
 clients6.google.com
 daily-cloudcode-pa.googleapis.com
+datastudio.google.com
 keyword:deepmind
 developerprofiles-pa.googleapis.com
 geller-pa.googleapis.com
@@ -682,6 +683,7 @@ pluralsight.com
 pny.com
 politico.eu
 polymarket.com
+keyword:porsche
 posteo.de
 posthog.com
 keyword:potterybarn
