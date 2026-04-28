@@ -14,7 +14,7 @@ payload:
   - +.keyword:deepmind
   - +.developerprofiles-pa.googleapis.com
   - +.geller-pa.googleapis.com
-  - +.keyword:gemini.google
+  - +.keyword:gemini.
   - +.generativeai.google
   - +.generativelanguage.googleapis.com
   - +.googletagservices.com
@@ -926,8 +926,10 @@ payload:
   - +.bike-components.de
   - +.bike24.com
   - +.brave.com
+  - +.bumble.com
   - +.cdn.web-platform.io
   - +.cgtrader.com
+  - +.claudemcpclient.com
   - +.cms-images.mmst.eu
   - +.codeiumdata.com
   - +.consent.trustarc.com
@@ -955,11 +957,13 @@ payload:
   - +.guidedhacking.com
   - +.hapi.hentaicdn.org
   - +.images.contentstack.io
+  - +.img.modivo.cloud
   - +.madmapper.com
   - +.make.com
   - +.mediaexpert.pl
   - +.mediamarkt.pl
   - +.misterfpga.org
+  - +.modivo.pl
   - +.monica.im
   - +.naukri.com
   - +.naukimg.com
@@ -968,6 +972,7 @@ payload:
   - +.octanorm.com
   - +.octanorm.expo.shop
   - +.openrouter.ai
+  - +.pi.ai
   - +.ppkas.com
   - +.pr0gramm.com
   - +.qualtrics.com
