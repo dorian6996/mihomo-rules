@@ -69,13 +69,9 @@ payload:
   - +.openaiapi-site.azureedge.net
   - +.openaipublic.blob.core.windows.net
   - +.sora.com
-  - +.designer.microsoft.com
-  - +.download.microsoft.com
+  - +.keyword:microsoft
   - +.ecs.office.com
-  - +.edge.microsoft.com
-  - +.login.microsoftonline.com
   - +.msftauth.net
-  - +.teams.microsoft.com
   - +.a-msedge.net
   - +.adaptive.ai
   - +.altsociety.ai
@@ -104,6 +100,7 @@ payload:
   - +.intellij.net
   - +.keyword:jetbrains
   - +.klingai.com
+  - +.launchpad.io
   - +.lenso.ai
   - +.lightning.ai
   - +.manus.im
@@ -250,6 +247,13 @@ payload:
   - +.vrv.co
   - +.crunchyrollcdn.com
   - +.fwmrm.net
+  - +.e-hentai.org
+  - +.ehgt.org
+  - +.ehtracker.org
+  - +.ehwiki.org
+  - +.exhentai.org
+  - +.hentaiathome.net
+  - +.hentaiverse.org
   - +.philiascans.org
   - +.fapello.com
   - +.2407.pl
@@ -449,6 +453,7 @@ payload:
   - +.futurelearn.com
   - +.fxnetworks.com
   - +.g711.org
+  - +.gab.com
   - +.gaggenau.com
   - +.galerieslafayette.com
   - +.gallery.zetalliance.org
@@ -565,6 +570,7 @@ payload:
   - +.mbed.com
   - +.medicalnewstoday.com
   - +.meest-shop.com
+  - +.meetme.com
   - +.keyword:meetup
   - +.menti.com
   - +.meraki.com
