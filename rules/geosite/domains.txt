@@ -169,6 +169,7 @@ nnmclub.to
 opentrackr.org
 pb.wtf
 keyword:piratbit
+keyword:piratebay
 pornolab.net
 riperam.org
 rustorka.com
@@ -176,7 +177,6 @@ rutor.info
 rutor.is
 keyword:rutracker
 seedoff.zannn.top
-thepiratebay.org
 torrent.by
 torrent4me.com
 torrentgalaxy.to

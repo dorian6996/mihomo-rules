@@ -171,6 +171,7 @@ prowlarr.com
 romantelychko.com
 shop.paragon-software.com
 snort.org
+soft.rapoo.com
 support.anydesk.com
 synoforum.com
 syslog-ng.com
@@ -956,6 +957,7 @@ fal.ai
 files-s2pb.pbsync.com
 files.manuscdn.com
 keyword:fitbit
+flowmusic.app
 fmhy.lol
 fmhy.net
 gssv-play-prod.xboxlive.com
@@ -978,6 +980,7 @@ octanorm.com
 octanorm.expo.shop
 openrouter.ai
 pi.ai
+powertoolsuk.co.uk
 ppkas.com
 pr0gramm.com
 qualtrics.com
@@ -992,6 +995,7 @@ slack.com
 slackb.com
 spotifycdn.com
 spotifycdn.net
+keyword:superpharm
 titlestorage.xboxlive.com
 trimble.com
 weborama.nl
