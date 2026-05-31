@@ -337,6 +337,7 @@ cyberghostvpn.com
 digitalocean.com
 dpidetector.org
 dreamhost.com
+eff.org
 expressvpn.com
 finevpn.org
 forum.mikrotik.by
@@ -385,7 +386,6 @@ tempmail.plus
 the.hosting
 tiptop-vpn.com
 tools.tracemyip.org
-tor.eff.org
 torproject.org
 ubunlog.com
 vdsina.com
@@ -508,6 +508,7 @@ medium.com
 monolisa.dev
 msn.com
 mw2.wiki
+nadeko.net
 naps2.com
 nippon.com
 odysee.com

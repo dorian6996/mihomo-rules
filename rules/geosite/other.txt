@@ -496,6 +496,7 @@ idrive.com
 iedb.org
 keyword:ikea.
 imagecache365.com
+imgur.com
 indeed.com
 infineon.com
 informit.com
@@ -536,6 +537,7 @@ leakpeek.com
 lebonmarche.com
 lego.com
 leica-geosystems.com
+lemmy.ml
 letyshops.com
 lifehacker.com
 linear.app
@@ -920,7 +922,6 @@ zoosk.com
 37signals.com
 aave.com
 amd.com
-api.imgur.com
 api.workos.com
 arkoselabs.com
 atlassian.com

@@ -497,6 +497,7 @@ payload:
   - +.iedb.org
   - +.keyword:ikea.
   - +.imagecache365.com
+  - +.imgur.com
   - +.indeed.com
   - +.infineon.com
   - +.informit.com
@@ -537,6 +538,7 @@ payload:
   - +.lebonmarche.com
   - +.lego.com
   - +.leica-geosystems.com
+  - +.lemmy.ml
   - +.letyshops.com
   - +.lifehacker.com
   - +.linear.app
@@ -921,7 +923,6 @@ payload:
   - +.37signals.com
   - +.aave.com
   - +.amd.com
-  - +.api.imgur.com
   - +.api.workos.com
   - +.arkoselabs.com
   - +.atlassian.com
