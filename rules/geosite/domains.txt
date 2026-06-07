@@ -127,6 +127,7 @@ keyword:selezen
 sndcdn.com
 soundcloud.com
 spirit-of-metal.com
+sponsor.ajay.app
 stream.voidboost.cc
 tidal.com
 keyword:ultradox
@@ -347,6 +348,7 @@ gcore.com
 getoutline.com
 getoutline.org
 godaddy.com
+happy-decoder.cc
 hetzner.com
 hola.org
 hostgator.com
@@ -402,6 +404,7 @@ zerolab.net
 4pna.com
 5sim.net
 7tv.app
+accounts.ely.by
 allegro.pl
 keyword:annas-archive
 amdm.ru
@@ -500,6 +503,7 @@ livetv.sx
 lis-skins.com
 keyword:lolz.
 lu4.org
+m3.ppy.sh
 magaz.global
 mailchi.mp
 manyvids.com
