@@ -72,6 +72,13 @@ payload:
   - +.keyword:microsoft
   - +.ecs.office.com
   - +.msftauth.net
+  - +.keyword:samsung
+  - +.galaxyappstore.com
+  - +.galaxymobile.jp
+  - +.game-platform.net
+  - +.knoxemm.com
+  - +.ospserver.net
+  - +.smartthings.com
   - +.a-msedge.net
   - +.adaptive.ai
   - +.altsociety.ai

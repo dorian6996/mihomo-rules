@@ -126,7 +126,7 @@ payload:
   - +.keyword:seasonvar
   - +.keyword:selezen
   - +.sndcdn.com
-  - +.soundcloud.com
+  - +.keyword:soundcloud
   - +.spirit-of-metal.com
   - +.sponsor.ajay.app
   - +.stream.voidboost.cc
@@ -139,17 +139,31 @@ payload:
   - +.zerkalo.xyz
   - +.zet-flix.online
   - +.zombie-film.live
+  - +.api.alador.space
+  - +.api.ios-kp.store
+  - +.api.srvkp.com
   - +.cdn-service.space
   - +.cdn2cdn.com
   - +.cdn2site.com
+  - +.cdn32.lol
+  - +.cdn4t.xyz
   - +.cdntogo.net
-  - +.gfw.ovh
+  - +.digital-cdn.net
+  - +.flexcdn.cloud
+  - +.i0.wp.com
   - +.kino.pub
   - +.kinopub.online
+  - +.m.pushbr.com
+  - +.media.service-kp.com
+  - +.mycdn.video
+  - +.proxykp.xyz
+  - +.pushbr.com
+  - +.smarttv.zeasn.tv
+  - +.smarttvcdn.online
+  - +.teleos.club
+  - +.gfw.ovh
   - +.kp-pro.cloud
   - +.keyword:mos-gorsud
-  - +.pushbr.com
-  - +.smarttvcdn.online
   - +.1337x.to
   - +.audioboo.org
   - +.bitru.org
@@ -405,6 +419,7 @@ payload:
   - +.4pna.com
   - +.5sim.net
   - +.7tv.app
+  - +.9cache.com
   - +.accounts.ely.by
   - +.allegro.pl
   - +.keyword:annas-archive
@@ -589,3 +604,4 @@ payload:
   - +.zello.com
   - +.zellowork.com
   - +.znanija.com
+  - +.ua
