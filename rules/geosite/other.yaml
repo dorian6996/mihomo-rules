@@ -155,6 +155,7 @@ payload:
   - +.fosshub.com
   - +.fortinet.com
   - +.forum.ansible.com
+  - +.freakhosting.com
   - +.fujitsu.com
   - +.gitlab.com
   - +.habr.com
@@ -370,6 +371,7 @@ payload:
   - +.credly.com
   - +.crowdstrike.com
   - +.cucumber.io
+  - +.keyword:cursor
   - +.cvedetails.com
   - +.cxstudio.clarabridge.net
   - +.darkproject.eu
@@ -455,7 +457,7 @@ payload:
   - +.fotoforensics.com
   - +.foundrydigital.com
   - +.foxnews.com
-  - +.framer.com
+  - +.keyword:framer
   - +.freeimages.com
   - +.freemyip.com
   - +.futurelearn.com
@@ -932,6 +934,7 @@ payload:
   - +.amd.com
   - +.api.workos.com
   - +.arkoselabs.com
+  - +.arrow.com
   - +.atlassian.com
   - +.auth.xboxlive.com
   - +.badoo.app
@@ -969,6 +972,7 @@ payload:
   - +.flowmusic.app
   - +.fmhy.lol
   - +.fmhy.net
+  - +.game8.co
   - +.gssv-play-prod.xboxlive.com
   - +.guidedhacking.com
   - +.hapi.hentaicdn.org
@@ -978,6 +982,7 @@ payload:
   - +.make.com
   - +.mediaexpert.pl
   - +.mediamarkt.pl
+  - +.minicircuits.com
   - +.misterfpga.org
   - +.modivo.pl
   - +.monica.im
@@ -989,6 +994,7 @@ payload:
   - +.octanorm.expo.shop
   - +.openrouter.ai
   - +.pi.ai
+  - +.platform.parallel.ai
   - +.powertoolsuk.co.uk
   - +.ppkas.com
   - +.pr0gramm.com
