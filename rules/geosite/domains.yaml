@@ -278,7 +278,6 @@ payload:
   - +.imx.to
   - +.island-of-pleasure.site
   - +.motherless.com
-  - +.mmcdn.com
   - +.multporn.net
   - +.nastyasiansluts.com
   - +.keyword:nhentai
@@ -399,6 +398,7 @@ payload:
   - +.racevpn.com
   - +.radiojar.com
   - +.redshieldvpn.com
+  - +.remnashop.mintlify.app
   - +.keyword:rockblack
   - +.surfshark.com
   - +.tech.ru
@@ -439,6 +439,7 @@ payload:
   - +.betterttv.net
   - +.bigstockphoto.com
   - +.bitcoin.org
+  - +.blackhatworld.com
   - +.boominfo.org
   - +.booth.pm
   - +.booth.pximg.net
@@ -510,6 +511,7 @@ payload:
   - +.jw-russia.org
   - +.kasta.ru
   - +.kastingi.com
+  - +.kill-kenny.com
   - +.kilo.ai
   - +.kilocode.ai
   - +.knowyourmeme.com
@@ -521,6 +523,7 @@ payload:
   - +.livetv.sx
   - +.lis-skins.com
   - +.keyword:lolz.
+  - +.lowendtalk.com
   - +.lu4.org
   - +.m3.ppy.sh
   - +.magaz.global
@@ -544,6 +547,7 @@ payload:
   - +.paritydeals.com
   - +.pay.freekassa.ru
   - +.peaceplea.org
+  - +.pdfcoffee.com
   - +.pinme.ru
   - +.primevue.org
   - +.prnt.sc
@@ -560,6 +564,8 @@ payload:
   - +.satsat.info
   - +.saverudata.net
   - +.keyword:scryde
+  - +.seriesgraph.com
+  - +.keyword:sharefile
   - +.simplex.im
   - +.simplexonflux.com
   - +.skiff.com
@@ -573,6 +579,7 @@ payload:
   - +.static.playoverwatch.com
   - +.streamable.com
   - +.supersliv.biz
+  - +.support.arctic.de
   - +.taboola.com
   - +.target.com
   - +.telemetr.io
@@ -598,6 +605,7 @@ payload:
   - +.vice.com
   - +.vlady.pro
   - +.voynaplemyon.com
+  - +.walletbot.me
   - +.wallpapercave.com
   - +.wixmp.com
   - +.write.as

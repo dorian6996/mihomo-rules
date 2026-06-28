@@ -435,6 +435,7 @@ payload:
   - +.fex.net
   - +.fextralife.com
   - +.fiercepc.co.uk
+  - +.figshare.com
   - +.files.com
   - +.findagrave.com
   - +.first-root.com
@@ -657,6 +658,7 @@ payload:
   - +.openlibrary.org
   - +.opensea.io
   - +.opentext.com
+  - +.opintopolku.fi
   - +.opus.pro
   - +.ott-play.com
   - +.outflank.nl
@@ -672,6 +674,7 @@ payload:
   - +.patreonusercontent.com
   - +.paypal.com
   - +.paytr.com
+  - +.paywithmoon.com
   - +.pbteen.com
   - +.keyword:pcbway.
   - +.pcmag.com
@@ -717,6 +720,7 @@ payload:
   - +.ptc.com
   - +.pubnub.com
   - +.pump.fun
+  - +.pxl.to
   - +.qcad.org
   - +.qobuz.com
   - +.qoder.com
@@ -753,6 +757,7 @@ payload:
   - +.keyword:salesforce
   - +.sap.com
   - +.sbom.sh
+  - +.sbox.game
   - +.scam-detector.com
   - +.schenker-tech.de
   - +.schneider-electric.com
@@ -774,6 +779,7 @@ payload:
   - +.sfdcopens.com
   - +.shiksha.com
   - +.shiksha.ws
+  - +.sigsauer.com
   - +.siemens.com
   - +.keyword:simkl.
   - +.singlekey-id.com
@@ -806,12 +812,14 @@ payload:
   - +.st.com
   - +.stagescycling.com
   - +.startpage.com
+  - +.static.app
   - +.steganos.com
   - +.stereophile.com
   - +.stockx.com
   - +.strava.com
   - +.statology.org
   - +.studychat.app
+  - +.studyinfinland.fi
   - +.stuff.co.nz
   - +.summer.fi
   - +.summerana.com
@@ -882,6 +890,7 @@ payload:
   - +.veritas.com
   - +.verificationacademy.com
   - +.visualcapitalist.com
+  - +.vivo.com.cn
   - +.voiso.com
   - +.volet.com
   - +.volkswagen-classic-parts.com

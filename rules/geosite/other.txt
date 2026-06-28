@@ -434,6 +434,7 @@ fastly.net
 fex.net
 fextralife.com
 fiercepc.co.uk
+figshare.com
 files.com
 findagrave.com
 first-root.com
@@ -656,6 +657,7 @@ openculture.com
 openlibrary.org
 opensea.io
 opentext.com
+opintopolku.fi
 opus.pro
 ott-play.com
 outflank.nl
@@ -671,6 +673,7 @@ patreon.com
 patreonusercontent.com
 paypal.com
 paytr.com
+paywithmoon.com
 pbteen.com
 keyword:pcbway.
 pcmag.com
@@ -716,6 +719,7 @@ proxyscrape.com
 ptc.com
 pubnub.com
 pump.fun
+pxl.to
 qcad.org
 qobuz.com
 qoder.com
@@ -752,6 +756,7 @@ samsclub.com
 keyword:salesforce
 sap.com
 sbom.sh
+sbox.game
 scam-detector.com
 schenker-tech.de
 schneider-electric.com
@@ -773,6 +778,7 @@ setapp.com
 sfdcopens.com
 shiksha.com
 shiksha.ws
+sigsauer.com
 siemens.com
 keyword:simkl.
 singlekey-id.com
@@ -805,12 +811,14 @@ squareup.com
 st.com
 stagescycling.com
 startpage.com
+static.app
 steganos.com
 stereophile.com
 stockx.com
 strava.com
 statology.org
 studychat.app
+studyinfinland.fi
 stuff.co.nz
 summer.fi
 summerana.com
@@ -881,6 +889,7 @@ vehiclelifetimesolutions.schaeffler.com
 veritas.com
 verificationacademy.com
 visualcapitalist.com
+vivo.com.cn
 voiso.com
 volet.com
 volkswagen-classic-parts.com
