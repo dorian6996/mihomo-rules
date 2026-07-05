@@ -97,6 +97,7 @@ payload:
   - +.keyword:copilot
   - +.d.docs.live.net
   - +.fastflux.ai
+  - +.fireworks.ai
   - +.genspark.ai
   - +.geospy.ai
   - +.grazie.ai
@@ -112,6 +113,7 @@ payload:
   - +.lightning.ai
   - +.manus.im
   - +.mchost.guru
+  - +.mistral.ai
   - +.origin-tracker.githubusercontent.com
   - +.pephop.ai
   - +.play.ai
@@ -119,8 +121,10 @@ payload:
   - +.qodana.cloud
   - +.recraft.ai
   - +.reka.ai
+  - +.replicate.com
   - +.reve.art
   - +.t3.chat
+  - +.together.ai
   - +.toolbox.app
   - +.trae.ai
   - +.uvfuns.com
@@ -299,6 +303,7 @@ payload:
   - +.ansys.com
   - +.anythingllm.com
   - +.api.fast.com
+  - +.api-docs.deepseek.com
   - +.apiary.io
   - +.aplawrence.com
   - +.app.langdock.com
@@ -362,11 +367,12 @@ payload:
   - +.coinpayments.net
   - +.colamco.com
   - +.comfyui-wiki.com
+  - +.camunda.io
   - +.contabo.com
   - +.cookielaw.org
   - +.copernicus.eu
   - +.corsair.com
-  - +.coursera.org
+  - +.keyword:coursera
   - +.cpu-monkey.com
   - +.credly.com
   - +.crowdstrike.com
@@ -410,6 +416,7 @@ payload:
   - +.keyword:dyson.
   - +.easydmarc.com
   - +.easyjet.com
+  - +.editmysite.com
   - +.editorx.com
   - +.edu-cisco.org
   - +.edx.org
@@ -432,6 +439,7 @@ payload:
   - +.farnell.com
   - +.fastly.com
   - +.fastly.net
+  - +.fedex.com
   - +.fex.net
   - +.fextralife.com
   - +.fiercepc.co.uk
@@ -479,6 +487,7 @@ payload:
   - +.ghidra-sre.org
   - +.glif.app
   - +.glpals.com
+  - +.gmplib.org
   - +.gonift.com
   - +.gonitro.com
   - +.gpu-monkey.com
@@ -511,6 +520,7 @@ payload:
   - +.indeed.com
   - +.infineon.com
   - +.informit.com
+  - +.infosecinstitute.com
   - +.insanelymac.com
   - +.insideevs.com
   - +.intellipaat.com
@@ -528,6 +538,7 @@ payload:
   - +.jabra.com
   - +.jamf.com
   - +.joesandbox.com
+  - +.justanswer.co.uk
   - +.jut.su
   - +.kamatera.com
   - +.kaleido.ai
@@ -682,6 +693,7 @@ payload:
   - +.pearsonvue.com
   - +.penguin.com
   - +.penguinrandomhouse.com
+  - +.pencil.dev
   - +.pepephone.com
   - +.pepperl-fuchs.com
   - +.perforce.com
@@ -798,7 +810,9 @@ payload:
   - +.snapmagic.com
   - +.snyk.io
   - +.soapui.org
+  - +.socradar.io
   - +.solarwinds.com
+  - +.solidstatelogic.com
   - +.sonara.ai
   - +.sophos.com
   - +.softpedia.com
@@ -924,6 +938,7 @@ payload:
   - +.wpengine.com
   - +.wunderground.com
   - +.xda-developers.com
+  - +.xdaforums.com
   - +.xfantazy.com
   - +.xiaomi.eu
   - +.xmg.gg
