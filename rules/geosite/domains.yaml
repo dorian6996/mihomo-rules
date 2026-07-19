@@ -53,6 +53,9 @@ payload:
   - +.licdn.com
   - +.linkedin.com
   - +.lnkd.in
+  - +.mzimg.com
+  - +.keyword:e-catalog
+  - +.keyword:e-katalog
   - +.ads-twitter.com
   - +.cdnfacebook.com
   - +.cdninstagram.com
@@ -271,6 +274,7 @@ payload:
   - +.fikfap.com
   - +.freeones.com
   - +.fuckingfreemovies.com
+  - +.hanime.tv
   - +.hentai-foundry.com
   - +.hentaichan.live
   - +.hitomi.la
