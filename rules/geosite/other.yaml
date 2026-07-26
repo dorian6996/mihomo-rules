@@ -4,6 +4,7 @@ payload:
   - +.aisandbox-pa.googleapis.com
   - +.aistudio.google.com
   - +.aitestkitchen.withgoogle.com
+  - +.antigravity.google
   - +.apis.google.com
   - +.appcatalyst.pa.googleapis.com
   - +.assistant-s3-pa.googleapis.com
@@ -12,6 +13,7 @@ payload:
   - +.daily-cloudcode-pa.googleapis.com
   - +.datastudio.google.com
   - +.keyword:deepmind
+  - +.flow.google
   - +.developerprofiles-pa.googleapis.com
   - +.geller-pa.googleapis.com
   - +.keyword:gemini.
@@ -24,6 +26,9 @@ payload:
   - +.learning.google.com
   - +.lookerstudio.google.com
   - +.makersuite.google.com
+  - +.notebook-pa.googleapis.com
+  - +.notebook.google
+  - +.notebook.google.com
   - +.keyword:notebooklm
   - +.o.pki.goog
   - +.opal.google
@@ -1039,6 +1044,7 @@ payload:
   - +.titlestorage.xboxlive.com
   - +.trimble.com
   - +.weborama.nl
+  - +.whimsical.com
   - +.workos.com
   - +.wund.com
   - +.w-x.co

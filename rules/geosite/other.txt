@@ -3,6 +3,7 @@ ai.google.dev
 aisandbox-pa.googleapis.com
 aistudio.google.com
 aitestkitchen.withgoogle.com
+antigravity.google
 apis.google.com
 appcatalyst.pa.googleapis.com
 assistant-s3-pa.googleapis.com
@@ -11,6 +12,7 @@ clients6.google.com
 daily-cloudcode-pa.googleapis.com
 datastudio.google.com
 keyword:deepmind
+flow.google
 developerprofiles-pa.googleapis.com
 geller-pa.googleapis.com
 keyword:gemini.
@@ -23,6 +25,9 @@ keyword:labs.google
 learning.google.com
 lookerstudio.google.com
 makersuite.google.com
+notebook-pa.googleapis.com
+notebook.google
+notebook.google.com
 keyword:notebooklm
 o.pki.goog
 opal.google
@@ -1038,6 +1043,7 @@ keyword:superpharm
 titlestorage.xboxlive.com
 trimble.com
 weborama.nl
+whimsical.com
 workos.com
 wund.com
 w-x.co
