@@ -65,7 +65,6 @@ keyword:home-connect
 keyword:homeconnectegw
 cdn.auth0.com
 chatgpt.com
-d.docs.live.net
 gpt3-openai.com
 oaistatic.com
 oaiusercontent.com
