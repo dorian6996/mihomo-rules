@@ -1,5 +1,6 @@
 payload:
   - +.keyword:browserleaks
+  - +.dnsleaktest.com
   - +.ip.me
   - +.keyword:nperf.
   - +.ooklaserver.net
@@ -292,7 +293,7 @@ payload:
   - +.onlyfans.com
   - +.phncdn.com
   - +.playboy.com
-  - +.pornhub.com
+  - +.keyword:pornhub
   - +.porno666.link
   - +.realbooru.com
   - +.reddxxx.com
