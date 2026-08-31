@@ -333,8 +333,7 @@ dub.sh
 git.new
 github.io
 gitlab.io
-raw.githubusercontent.com
-release-assets.githubusercontent.com
+keyword:github
 10minutemail.com
 adblockplus.org
 adguard.com
