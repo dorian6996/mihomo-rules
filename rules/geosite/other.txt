@@ -151,6 +151,7 @@ cdn77.org
 cisco.com
 ciscobinary.openh264.org
 clamav.net
+cmecloud.cn
 csdlcdn.vaio.com
 daemon-tools.cc
 dell.com
@@ -205,6 +206,7 @@ clashofclans.com
 clashroyaleapp.com
 boombeachgame.com
 mocogame.com
+stumbleguys.com
 squadbustersgame.com
 alienwarearena.com
 azerioncircle.com
@@ -991,6 +993,7 @@ dola.com
 dr.miromind.ai
 dtm8.dinamicagenerale.com
 ecosia.org
+elevenmusic.io
 elevenreader.io
 euro.com.pl
 evike.com

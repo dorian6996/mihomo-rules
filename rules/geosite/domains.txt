@@ -413,8 +413,9 @@ tiptop-vpn.com
 tools.tracemyip.org
 torproject.org
 ubunlog.com
-vdsina.com
 unfiltered.adguard-dns.com
+vdsina.com
+virustotal.com
 vpngate.net
 vpngen.org
 vpnguild.org
