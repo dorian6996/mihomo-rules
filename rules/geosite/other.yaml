@@ -13,7 +13,7 @@ payload:
   - +.daily-cloudcode-pa.googleapis.com
   - +.datastudio.google.com
   - +.keyword:deepmind
-  - +.flow.google
+  - +.keyword:flow.google
   - +.developerprofiles-pa.googleapis.com
   - +.geller-pa.googleapis.com
   - +.keyword:gemini.
@@ -27,8 +27,7 @@ payload:
   - +.lookerstudio.google.com
   - +.makersuite.google.com
   - +.notebook-pa.googleapis.com
-  - +.notebook.google
-  - +.notebook.google.com
+  - +.keyword:notebook.google
   - +.keyword:notebooklm
   - +.o.pki.goog
   - +.opal.google
@@ -996,6 +995,7 @@ payload:
   - +.ecosia.org
   - +.elevenmusic.io
   - +.elevenreader.io
+  - +.enscape3d.com
   - +.euro.com.pl
   - +.evike.com
   - +.f00.esfr.pl
@@ -1013,6 +1013,7 @@ payload:
   - +.images.contentstack.io
   - +.img.modivo.cloud
   - +.madmapper.com
+  - +.keyword:makita
   - +.make.com
   - +.mediaexpert.pl
   - +.mediamarkt.pl
