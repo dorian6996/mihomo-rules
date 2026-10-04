@@ -19,6 +19,7 @@ payload:
   - +.keyword:gemini.
   - +.generativeai.google
   - +.generativelanguage.googleapis.com
+  - +.geminiweb-pa.clients.google.com
   - +.googletagservices.com
   - +.illuminate.google.com
   - +.keyword:jules.google
@@ -94,6 +95,8 @@ payload:
   - +.cici.com
   - +.claude.ai
   - +.claude.com
+  - +.claudemcpclient.com
+  - +.claudeusercontent.com
   - +.codegpt.co
   - +.codeium.com
   - +.composer.opera-api.com
@@ -979,7 +982,6 @@ payload:
   - +.bumble.com
   - +.cdn.web-platform.io
   - +.cgtrader.com
-  - +.claudemcpclient.com
   - +.cms-images.mmst.eu
   - +.codeiumdata.com
   - +.consent.trustarc.com
