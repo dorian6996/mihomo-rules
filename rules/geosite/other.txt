@@ -1,5 +1,6 @@
 keyword:notion
 ai.google.dev
+aicode.googleapis.com
 aisandbox-pa.googleapis.com
 aistudio.google.com
 aitestkitchen.withgoogle.com
@@ -149,6 +150,7 @@ bitdefender.com
 bluesky-soft.com
 broadcom.com
 buanzo.org
+build.nvidia.com
 cdn77.org
 cisco.com
 ciscobinary.openh264.org
@@ -179,6 +181,7 @@ liveupdate.symantec.com
 liveupdate.symantecliveupdate.com
 malwarebytes.com
 mkssoftware.com
+ngc.nvidia.com
 net.anydesk.com
 netacad.com
 okta.com
@@ -255,7 +258,6 @@ nflxvideo.net
 primevideo.com
 radarr.video
 servarr.com
-spotify.com
 theaudiodb.com
 themoviedb.org
 thetvdb.com
@@ -970,6 +972,7 @@ api.workos.com
 arkoselabs.com
 arrow.com
 atlassian.com
+audacy.com
 auth.xboxlive.com
 badoo.app
 badoocdn.com
@@ -1045,6 +1048,8 @@ se.com
 sketchup.trimble.com
 slack.com
 slackb.com
+spotify.com
+spotify.dev
 spotifycdn.com
 spotifycdn.net
 keyword:superpharm

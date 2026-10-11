@@ -1,6 +1,7 @@
 payload:
   - +.keyword:notion
   - +.ai.google.dev
+  - +.aicode.googleapis.com
   - +.aisandbox-pa.googleapis.com
   - +.aistudio.google.com
   - +.aitestkitchen.withgoogle.com
@@ -150,6 +151,7 @@ payload:
   - +.bluesky-soft.com
   - +.broadcom.com
   - +.buanzo.org
+  - +.build.nvidia.com
   - +.cdn77.org
   - +.cisco.com
   - +.ciscobinary.openh264.org
@@ -180,6 +182,7 @@ payload:
   - +.liveupdate.symantecliveupdate.com
   - +.malwarebytes.com
   - +.mkssoftware.com
+  - +.ngc.nvidia.com
   - +.net.anydesk.com
   - +.netacad.com
   - +.okta.com
@@ -256,7 +259,6 @@ payload:
   - +.primevideo.com
   - +.radarr.video
   - +.servarr.com
-  - +.spotify.com
   - +.theaudiodb.com
   - +.themoviedb.org
   - +.thetvdb.com
@@ -971,6 +973,7 @@ payload:
   - +.arkoselabs.com
   - +.arrow.com
   - +.atlassian.com
+  - +.audacy.com
   - +.auth.xboxlive.com
   - +.badoo.app
   - +.badoocdn.com
@@ -1046,6 +1049,8 @@ payload:
   - +.sketchup.trimble.com
   - +.slack.com
   - +.slackb.com
+  - +.spotify.com
+  - +.spotify.dev
   - +.spotifycdn.com
   - +.spotifycdn.net
   - +.keyword:superpharm
