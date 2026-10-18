@@ -24,6 +24,7 @@ googletagservices.com
 illuminate.google.com
 keyword:jules.google
 keyword:labs.google
+labstailwind.pa.googleapis.com
 learning.google.com
 lookerstudio.google.com
 makersuite.google.com
@@ -34,6 +35,7 @@ o.pki.goog
 opal.google
 opal.google.com
 opal.withgoogle.com
+playground.google
 proactivebackend-pa.googleapis.com
 robinfrontend-pa.googleapis.com
 stitch.withgoogle.com
