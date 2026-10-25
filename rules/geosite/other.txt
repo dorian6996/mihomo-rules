@@ -1,10 +1,11 @@
 keyword:notion
 ai.google.dev
 aicode.googleapis.com
+aida.googleapis.com
 aisandbox-pa.googleapis.com
 aistudio.google.com
 aitestkitchen.withgoogle.com
-antigravity.google
+keyword:antigravity
 apis.google.com
 appcatalyst.pa.googleapis.com
 assistant-s3-pa.googleapis.com
@@ -87,6 +88,7 @@ ospserver.net
 smartthings.com
 a-msedge.net
 adaptive.ai
+advantech.com
 altsociety.ai
 anthropic.com
 api.cohere.ai
@@ -95,9 +97,11 @@ augmentcode.com
 bing.com
 blinkshot.io
 cici.com
+clau.de
 claude.ai
 claude.com
 claudemcpclient.com
+claudemcpcontent.com
 claudeusercontent.com
 codegpt.co
 codeium.com
@@ -1025,6 +1029,7 @@ make.com
 mediaexpert.pl
 mediamarkt.pl
 minicircuits.com
+miro.com
 misterfpga.org
 modivo.pl
 monica.im
@@ -1049,6 +1054,10 @@ scdn.co
 se.com
 sketchup.trimble.com
 slack.com
+slack-core.com
+slack-edge.com
+slack-files.com
+slack-imgs.com
 slackb.com
 spotify.com
 spotify.dev
