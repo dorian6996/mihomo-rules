@@ -185,7 +185,7 @@ it-actual.ru
 lenovo.com
 liveupdate.symantec.com
 liveupdate.symantecliveupdate.com
-malwarebytes.com
+keyword:malwarebytes
 mkssoftware.com
 ngc.nvidia.com
 net.anydesk.com
@@ -224,6 +224,7 @@ azerioncircle.com
 blizzardwatch.com
 boosteroid.com
 keyword:capcom
+epicgames.com
 g2a.com
 gambody.com
 game.co.uk
@@ -243,6 +244,7 @@ polygon.com
 riotpixels.com
 saveeditonline.com
 seconddinnertech.com
+shop.battle.net
 snapgametech.com
 steamidfinder.com
 triongames.com
@@ -338,7 +340,7 @@ bandcamp.com
 bcbits.com
 beacon3d.com
 bell-sw.com
-bestbuy.com
+keyword:bestbuy
 bitnami.com
 blackfriday.com
 bleepingcomputer.com
@@ -417,7 +419,7 @@ dhub.dev
 diabrowser.com
 dice.com
 diffblue.com
-digikey.com
+keyword:digikey
 digitalcontent.sky
 disctech.com
 dnb.com
@@ -1049,7 +1051,6 @@ qualtrics.com
 res.cloudinary.com
 reve.com
 romsgames.net
-scribdassets.com
 scdn.co
 se.com
 sketchup.trimble.com

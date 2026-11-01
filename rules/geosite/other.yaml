@@ -186,7 +186,7 @@ payload:
   - +.lenovo.com
   - +.liveupdate.symantec.com
   - +.liveupdate.symantecliveupdate.com
-  - +.malwarebytes.com
+  - +.keyword:malwarebytes
   - +.mkssoftware.com
   - +.ngc.nvidia.com
   - +.net.anydesk.com
@@ -225,6 +225,7 @@ payload:
   - +.blizzardwatch.com
   - +.boosteroid.com
   - +.keyword:capcom
+  - +.epicgames.com
   - +.g2a.com
   - +.gambody.com
   - +.game.co.uk
@@ -244,6 +245,7 @@ payload:
   - +.riotpixels.com
   - +.saveeditonline.com
   - +.seconddinnertech.com
+  - +.shop.battle.net
   - +.snapgametech.com
   - +.steamidfinder.com
   - +.triongames.com
@@ -339,7 +341,7 @@ payload:
   - +.bcbits.com
   - +.beacon3d.com
   - +.bell-sw.com
-  - +.bestbuy.com
+  - +.keyword:bestbuy
   - +.bitnami.com
   - +.blackfriday.com
   - +.bleepingcomputer.com
@@ -418,7 +420,7 @@ payload:
   - +.diabrowser.com
   - +.dice.com
   - +.diffblue.com
-  - +.digikey.com
+  - +.keyword:digikey
   - +.digitalcontent.sky
   - +.disctech.com
   - +.dnb.com
@@ -1050,7 +1052,6 @@ payload:
   - +.res.cloudinary.com
   - +.reve.com
   - +.romsgames.net
-  - +.scribdassets.com
   - +.scdn.co
   - +.se.com
   - +.sketchup.trimble.com
