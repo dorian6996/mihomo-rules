@@ -77,6 +77,8 @@ payload:
   - +.openaiapi-site.azureedge.net
   - +.openaipublic.blob.core.windows.net
   - +.sora.com
+  - +.lgemembers.com
+  - +.lgthinq.com
   - +.keyword:microsoft
   - +.ecs.office.com
   - +.msftauth.net
@@ -191,6 +193,7 @@ payload:
   - +.ngc.nvidia.com
   - +.net.anydesk.com
   - +.netacad.com
+  - +.nvidianews.nvidia.com
   - +.okta.com
   - +.omnissa.com
   - +.oracle.com
@@ -742,6 +745,7 @@ payload:
   - +.posthog.com
   - +.keyword:potterybarn
   - +.premierleague.com
+  - +.prh.com
   - +.primark.com
   - +.principalrelocation.com
   - +.privatekeys.pw
@@ -835,6 +839,7 @@ payload:
   - +.solarwinds.com
   - +.solidstatelogic.com
   - +.sonara.ai
+  - +.sonatype.com
   - +.sophos.com
   - +.softpedia.com
   - +.keyword:spiceworks
@@ -915,6 +920,7 @@ payload:
   - +.unscreen.com
   - +.unsplash.com
   - +.upwork.com
+  - +.usa.canon.com
   - +.usatoday.com
   - +.vagrantcloud.com
   - +.keyword:vans.

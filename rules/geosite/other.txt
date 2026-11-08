@@ -76,6 +76,8 @@ openai.com
 openaiapi-site.azureedge.net
 openaipublic.blob.core.windows.net
 sora.com
+lgemembers.com
+lgthinq.com
 keyword:microsoft
 ecs.office.com
 msftauth.net
@@ -190,6 +192,7 @@ mkssoftware.com
 ngc.nvidia.com
 net.anydesk.com
 netacad.com
+nvidianews.nvidia.com
 okta.com
 omnissa.com
 oracle.com
@@ -741,6 +744,7 @@ posteo.de
 posthog.com
 keyword:potterybarn
 premierleague.com
+prh.com
 primark.com
 principalrelocation.com
 privatekeys.pw
@@ -834,6 +838,7 @@ socradar.io
 solarwinds.com
 solidstatelogic.com
 sonara.ai
+sonatype.com
 sophos.com
 softpedia.com
 keyword:spiceworks
@@ -914,6 +919,7 @@ unix.com
 unscreen.com
 unsplash.com
 upwork.com
+usa.canon.com
 usatoday.com
 vagrantcloud.com
 keyword:vans.
